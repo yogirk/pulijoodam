@@ -9,10 +9,10 @@ Requirements for initial web release. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: WASM/FFI scaffold — flutter_rust_bridge codegen generates Dart bindings from Rust, compiles to WASM, and runs in Flutter web
+- [x] **INFRA-01**: WASM/FFI scaffold — flutter_rust_bridge codegen generates Dart bindings from Rust, compiles to WASM, and runs in Flutter web
 - [ ] **INFRA-02**: GitHub Pages deployment — CI/CD pipeline builds and deploys Flutter web app with WASM engine to GitHub Pages on push to main
 - [ ] **INFRA-03**: Cross-origin isolation — coi-serviceworker injects COOP/COEP headers for WASM support on GitHub Pages
-- [ ] **INFRA-04**: Rust panic safety — console_error_panic_hook installed, zero-unwrap policy at FFI boundary, all FFI functions return Result
+- [x] **INFRA-04**: Rust panic safety — console_error_panic_hook installed, zero-unwrap policy at FFI boundary, all FFI functions return Result
 
 ### Game Engine
 
@@ -161,10 +161,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 1 | Pending |
 | INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Complete |
 | ENGINE-01 | Phase 2 | Pending |
 | ENGINE-02 | Phase 2 | Pending |
 | ENGINE-03 | Phase 2 | Pending |
