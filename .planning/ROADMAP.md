@@ -29,11 +29,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Pushing to main triggers a GitHub Actions workflow that builds and deploys the app without manual intervention
   3. The deployed app loads successfully in Chrome and Firefox (cross-origin isolation via coi-serviceworker is working)
   4. A Rust panic in the WASM module logs a readable stack trace to the browser console instead of an opaque "unreachable" error
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md -- Scaffold FRB project, implement Rust API with panic safety, wire Flutter UI, verify WASM pipeline locally
+- [ ] 01-02-PLAN.md -- Add coi-serviceworker for cross-origin isolation, create GitHub Actions CI/CD, deploy to GitHub Pages
 
 ### Phase 2: Rust Engine & AI
 **Goal**: The complete Pulijoodam rule engine and AI system exist as tested Rust crates -- every rule, capture mechanic, win condition, and AI difficulty level works, validated by cargo test suites
@@ -108,7 +108,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffold & Pipeline | 0/? | Not started | - |
+| 1. Scaffold & Pipeline | 0/2 | Planning complete | - |
 | 2. Rust Engine & AI | 0/? | Not started | - |
 | 3. Playable Game | 0/? | Not started | - |
 | 4. Game Polish | 0/? | Not started | - |
