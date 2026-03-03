@@ -27,7 +27,7 @@ jobs:
         uses: dtolnay/rust-toolchain@nightly
         with:
           targets: wasm32-unknown-unknown
-          components: rust-src
+          components: rust-src, rustfmt
 
       # Cache Rust dependencies
       - name: Cache Rust dependencies
@@ -72,7 +72,7 @@ jobs:
 
       # Build WASM (must run before flutter build web)
       - name: Build WASM
-        run: dart run flutter_rust_bridge build-web --release
+        run: dart run flutter_rust_bridge build-web --release --output rust/target/wasm
 
       # Build Flutter web with WASM
       - name: Build Flutter web
