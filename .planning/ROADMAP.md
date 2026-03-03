@@ -12,7 +12,7 @@ Pulijoodam goes from zero to deployed web app in 5 phases. Phase 1 validates the
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Scaffold & Pipeline** - WASM/FFI hello-world deployed to GitHub Pages with CI/CD
+- [x] **Phase 1: Scaffold & Pipeline** - WASM/FFI hello-world deployed to GitHub Pages with CI/CD
 - [ ] **Phase 2: Rust Engine & AI** - Complete game rules and AI opponents, tested in isolation
 - [ ] **Phase 3: Playable Game** - FFI bridge + Flutter UI delivers a working game on screen
 - [ ] **Phase 4: Game Polish** - Themes, audio, persistence, capture animations, drag interaction
@@ -32,8 +32,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Scaffold FRB project, implement Rust API with panic safety, wire Flutter UI, verify WASM pipeline locally
-- [ ] 01-02-PLAN.md -- Add coi-serviceworker for cross-origin isolation, create GitHub Actions CI/CD, deploy to GitHub Pages
+- [x] 01-01-PLAN.md -- Scaffold FRB project, implement Rust API with panic safety, wire Flutter UI, verify WASM pipeline locally
+- [x] 01-02-PLAN.md -- Add coi-serviceworker for cross-origin isolation, create GitHub Actions CI/CD, deploy to GitHub Pages
 
 ### Phase 2: Rust Engine & AI
 **Goal**: The complete Pulijoodam rule engine and AI system exist as tested Rust crates -- every rule, capture mechanic, win condition, and AI difficulty level works, validated by cargo test suites
@@ -108,7 +108,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffold & Pipeline | 0/2 | Planning complete | - |
+| 1. Scaffold & Pipeline | 2/2 | Complete | 2026-03-03 |
 | 2. Rust Engine & AI | 0/? | Not started | - |
 | 3. Playable Game | 0/? | Not started | - |
 | 4. Game Polish | 0/? | Not started | - |
