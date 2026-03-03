@@ -161,13 +161,79 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| ENGINE-01 | Phase 2 | Pending |
+| ENGINE-02 | Phase 2 | Pending |
+| ENGINE-03 | Phase 2 | Pending |
+| ENGINE-04 | Phase 2 | Pending |
+| ENGINE-05 | Phase 2 | Pending |
+| ENGINE-06 | Phase 2 | Pending |
+| ENGINE-07 | Phase 2 | Pending |
+| ENGINE-08 | Phase 2 | Pending |
+| ENGINE-09 | Phase 2 | Pending |
+| ENGINE-10 | Phase 2 | Pending |
+| ENGINE-11 | Phase 2 | Pending |
+| ENGINE-12 | Phase 2 | Pending |
+| ENGINE-13 | Phase 2 | Pending |
+| ENGINE-14 | Phase 2 | Pending |
+| AI-01 | Phase 2 | Pending |
+| AI-02 | Phase 2 | Pending |
+| AI-03 | Phase 2 | Pending |
+| AI-04 | Phase 2 | Pending |
+| AI-05 | Phase 2 | Pending |
+| AI-06 | Phase 2 | Pending |
+| AI-07 | Phase 2 | Pending |
+| AI-08 | Phase 2 | Pending |
+| AI-09 | Phase 2 | Pending |
+| FFI-01 | Phase 3 | Pending |
+| FFI-02 | Phase 3 | Pending |
+| FFI-03 | Phase 3 | Pending |
+| FFI-04 | Phase 3 | Pending |
+| BOARD-01 | Phase 3 | Pending |
+| BOARD-02 | Phase 3 | Pending |
+| BOARD-03 | Phase 3 | Pending |
+| BOARD-05 | Phase 3 | Pending |
+| BOARD-06 | Phase 3 | Pending |
+| BOARD-07 | Phase 3 | Pending |
+| BOARD-10 | Phase 3 | Pending |
+| BOARD-11 | Phase 3 | Pending |
+| BOARD-13 | Phase 3 | Pending |
+| APP-01 | Phase 3 | Pending |
+| APP-02 | Phase 3 | Pending |
+| APP-03 | Phase 3 | Pending |
+| BOARD-04 | Phase 4 | Pending |
+| BOARD-08 | Phase 4 | Pending |
+| BOARD-09 | Phase 4 | Pending |
+| THEME-01 | Phase 4 | Pending |
+| THEME-02 | Phase 4 | Pending |
+| THEME-03 | Phase 4 | Pending |
+| THEME-04 | Phase 4 | Pending |
+| AUDIO-01 | Phase 4 | Pending |
+| AUDIO-02 | Phase 4 | Pending |
+| AUDIO-03 | Phase 4 | Pending |
+| AUDIO-04 | Phase 4 | Pending |
+| AUDIO-05 | Phase 4 | Pending |
+| AUDIO-06 | Phase 4 | Pending |
+| AUDIO-07 | Phase 4 | Pending |
+| PERSIST-01 | Phase 4 | Pending |
+| PERSIST-02 | Phase 4 | Pending |
+| PERSIST-03 | Phase 4 | Pending |
+| APP-04 | Phase 4 | Pending |
+| TUTOR-01 | Phase 5 | Pending |
+| TUTOR-02 | Phase 5 | Pending |
+| TUTOR-03 | Phase 5 | Pending |
+| TUTOR-04 | Phase 5 | Pending |
+| TUTOR-05 | Phase 5 | Pending |
+| BOARD-12 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 52 total
-- Mapped to phases: 0
-- Unmapped: 52
+- v1 requirements: 67 total
+- Mapped to phases: 67
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after initial definition*
+*Last updated: 2026-03-03 after roadmap creation*
