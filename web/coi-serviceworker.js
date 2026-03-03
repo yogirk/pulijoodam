@@ -99,12 +99,27 @@ if (typeof window === 'undefined') {
                     !coi.quiet && console.log("COOP/COEP Service Worker registered", registration.scope);
 
                     registration.addEventListener("updatefound", () => {
+                        // Guard against infinite reload loops on hosts like GitHub Pages
+                        const reloadCount = parseInt(sessionStorage.getItem("coi-reload") || "0");
+                        if (reloadCount > 2) {
+                            !coi.quiet && console.log("COOP/COEP Service Worker: max reloads reached, skipping.");
+                            sessionStorage.removeItem("coi-reload");
+                            return;
+                        }
+                        sessionStorage.setItem("coi-reload", String(reloadCount + 1));
                         !coi.quiet && console.log("Reloading page to make use of updated COOP/COEP Service Worker.");
                         coi.doReload();
                     });
 
                     // If the registration is active, but it's not controlling the page
                     if (registration.active && !n.serviceWorker.controller) {
+                        const reloadCount = parseInt(sessionStorage.getItem("coi-reload") || "0");
+                        if (reloadCount > 2) {
+                            !coi.quiet && console.log("COOP/COEP Service Worker: max reloads reached, skipping.");
+                            sessionStorage.removeItem("coi-reload");
+                            return;
+                        }
+                        sessionStorage.setItem("coi-reload", String(reloadCount + 1));
                         !coi.quiet && console.log("Reloading page to make use of COOP/COEP Service Worker.");
                         coi.doReload();
                     }
