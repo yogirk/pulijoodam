@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-04T08:05:08.835Z"
-last_activity: 2026-03-04 — Roadmap created, ready to begin Phase 1 planning
+status: in-progress
+stopped_at: Phase 1 Plan 1 complete — scaffold + Wave 0 test stubs
+last_updated: "2026-03-04T08:48:02Z"
+last_activity: 2026-03-04 — Scaffolded Vite+React+TS project with Tailwind v4, Vitest 3, ESLint v9, 82 Wave 0 test stubs
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 9
+  completed_plans: 1
+  percent: 11
 ---
 
 # Project State
@@ -26,27 +26,27 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 1 of 4 (Engine + Board)
-Plan: 0 of 3 in current phase
-Status: Ready to plan
-Last activity: 2026-03-04 — Roadmap created, ready to begin Phase 1 planning
+Plan: 1 of 3 in current phase (01-01 complete)
+Status: In progress
+Last activity: 2026-03-04 — 01-01 complete: Vite+React+TS scaffold, Tailwind v4, Vitest 3, ESLint v9 engine-purity, 82 Wave 0 stubs
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 11%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 1
+- Average duration: 6 min
+- Total execution time: 6 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-engine-board | 1/3 | 6 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: —
+- Last 5 plans: 6 min
 - Trend: —
 
 *Updated after each plan completion*
@@ -64,10 +64,13 @@ Recent decisions affecting current work:
 - AI: MCTS for placement phase, Minimax+alpha-beta for movement phase
 - Andhra preset only for v1: chain-hops allowed, 10-capture tiger win
 - Hosting: GitHub Pages static SPA — no backend, no database
+- ESLint v9 flat config (eslint.config.js) required — .eslintrc.cjs unsupported in ESLint 9
+- Split tsconfig: tsconfig.app.json excludes tests; tsconfig.test.json adds vitest/globals types
+- Engine purity ESLint rule excludes *.test.ts files (test files legitimately import testing utilities)
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
@@ -78,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-04T08:05:08.832Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-engine-board/01-CONTEXT.md
+Last session: 2026-03-04T08:48:02Z
+Stopped at: Phase 1 Plan 1 complete — scaffold + Wave 0 test stubs
+Resume file: .planning/phases/01-engine-board/01-02-PLAN.md

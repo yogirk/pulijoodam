@@ -20,8 +20,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **ENG-09**: Draw detection via threefold repetition (same board state + turn 3 times)
 - [ ] **ENG-10**: Draw detection via 50 consecutive captureless moves
 - [ ] **ENG-11**: Undo/redo support via move history stack
-- [ ] **ENG-12**: Engine has zero UI dependencies — pure TypeScript, functional API, immutable state
-- [ ] **ENG-13**: Engine unit tests cover topology, moves, captures, chain-hops, win/draw, and phase transitions
+- [x] **ENG-12**: Engine has zero UI dependencies — pure TypeScript, functional API, immutable state
+- [x] **ENG-13**: Engine unit tests cover topology, moves, captures, chain-hops, win/draw, and phase transitions
 
 ### Board
 
@@ -159,8 +159,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ENG-09 | Phase 1 | Pending |
 | ENG-10 | Phase 1 | Pending |
 | ENG-11 | Phase 1 | Pending |
-| ENG-12 | Phase 1 | Pending |
-| ENG-13 | Phase 1 | Pending |
+| ENG-12 | Phase 1 | Complete |
+| ENG-13 | Phase 1 | Complete |
 | BRD-01 | Phase 1 | Pending |
 | BRD-02 | Phase 1 | Pending |
 | BRD-03 | Phase 1 | Pending |

@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project scaffold, Tailwind v4, Vitest config, Wave 0 test stubs
+- [x] 01-01-PLAN.md — Project scaffold, Tailwind v4, Vitest config, Wave 0 test stubs
 - [ ] 01-02-PLAN.md — Engine core: types, board topology, state, moves, captures, chain-hop, win/draw, undo/redo
 - [ ] 01-03-PLAN.md — Board UI: SVG board, useGame hook, HUD, game-over overlay, App wiring
 - [ ] 01-04-PLAN.md — Engine tests: comprehensive unit tests for all ENG-* requirements
