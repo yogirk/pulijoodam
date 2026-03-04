@@ -25,16 +25,16 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Board
 
-- [ ] **BRD-01**: SVG board renders 23 nodes at correct positions with connecting edges
-- [ ] **BRD-02**: Tiger and goat pieces render distinctly on the board
-- [ ] **BRD-03**: Tap-tap interaction: tap piece/node to select, tap destination to move/place
-- [ ] **BRD-04**: Legal move highlighting shows valid destinations on piece/node selection
-- [ ] **BRD-05**: Turn indicator clearly shows whose turn it is
-- [ ] **BRD-06**: Goat pool counter shows remaining goats to place
-- [ ] **BRD-07**: Captured goat counter shows number of goats captured
-- [ ] **BRD-08**: Game over screen displays result (Tiger wins / Goat wins / Draw) with replay option
-- [ ] **BRD-09**: Responsive layout scales correctly on mobile, tablet, and desktop
-- [ ] **BRD-10**: Touch targets meet minimum 44x44px on mobile devices
+- [x] **BRD-01**: SVG board renders 23 nodes at correct positions with connecting edges
+- [x] **BRD-02**: Tiger and goat pieces render distinctly on the board
+- [x] **BRD-03**: Tap-tap interaction: tap piece/node to select, tap destination to move/place
+- [x] **BRD-04**: Legal move highlighting shows valid destinations on piece/node selection
+- [x] **BRD-05**: Turn indicator clearly shows whose turn it is
+- [x] **BRD-06**: Goat pool counter shows remaining goats to place
+- [x] **BRD-07**: Captured goat counter shows number of goats captured
+- [x] **BRD-08**: Game over screen displays result (Tiger wins / Goat wins / Draw) with replay option
+- [x] **BRD-09**: Responsive layout scales correctly on mobile, tablet, and desktop
+- [x] **BRD-10**: Touch targets meet minimum 44x44px on mobile devices
 
 ### AI
 
@@ -161,16 +161,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ENG-11 | Phase 1 | Complete |
 | ENG-12 | Phase 1 | Complete |
 | ENG-13 | Phase 1 | Complete |
-| BRD-01 | Phase 1 | Pending |
-| BRD-02 | Phase 1 | Pending |
-| BRD-03 | Phase 1 | Pending |
-| BRD-04 | Phase 1 | Pending |
-| BRD-05 | Phase 1 | Pending |
-| BRD-06 | Phase 1 | Pending |
-| BRD-07 | Phase 1 | Pending |
-| BRD-08 | Phase 1 | Pending |
-| BRD-09 | Phase 1 | Pending |
-| BRD-10 | Phase 1 | Pending |
+| BRD-01 | Phase 1 | Complete |
+| BRD-02 | Phase 1 | Complete |
+| BRD-03 | Phase 1 | Complete |
+| BRD-04 | Phase 1 | Complete |
+| BRD-05 | Phase 1 | Complete |
+| BRD-06 | Phase 1 | Complete |
+| BRD-07 | Phase 1 | Complete |
+| BRD-08 | Phase 1 | Complete |
+| BRD-09 | Phase 1 | Complete |
+| BRD-10 | Phase 1 | Complete |
 | AI-01 | Phase 2 | Pending |
 | AI-02 | Phase 2 | Pending |
 | AI-03 | Phase 2 | Pending |

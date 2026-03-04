@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-engine-board-04-PLAN.md
-last_updated: "2026-03-04T09:12:00Z"
+stopped_at: Completed 01-engine-board-03-PLAN.md
+last_updated: "2026-03-04T09:13:33.043Z"
 last_activity: "2026-03-04 — 01-04 complete: 61 engine tests certified green, 93.78% coverage, all ENG-* requirements proven"
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 33
 ---
 
@@ -50,6 +50,7 @@ Progress: [███░░░░░░░] 33%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01-engine-board P03 | 8 | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,8 @@ Recent decisions affecting current work:
 - [Phase 01-engine-board]: JUMP_MAP uses coordinate extrapolation + adjacency guard (not adjacency alone) — pure adjacency produces false positives on triangle section
 - [Phase 01-engine-board]: History stack (GameState[]) lives in UI layer (useGame hook) — engine undo/redo are pure utilities, not stateful
 - [Phase 01-engine-board]: getGameStatus inlines hasTigerMoves to avoid circular import with moves.ts
+- [Phase 01-engine-board]: Goat placement auto-highlights all valid nodes (no tap-to-select needed) — goats have exactly one action type per turn; selection adds friction
+- [Phase 01-engine-board]: GameScreen owns useGame() internally — AI phase will swap in a worker-aware hook variant without prop-drilling changes
 
 ### Pending Todos
 
@@ -84,6 +87,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T09:12:00Z
-Stopped at: Completed 01-engine-board-04-PLAN.md
+Last session: 2026-03-04T09:13:27.904Z
+Stopped at: Completed 01-engine-board-03-PLAN.md
 Resume file: None

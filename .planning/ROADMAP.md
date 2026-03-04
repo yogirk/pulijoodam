@@ -12,7 +12,7 @@ Four phases deliver a complete, production-quality Pulijoodam game. The foundati
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Engine + Board** - Rules-correct engine and playable local hot-seat game
+- [x] **Phase 1: Engine + Board** - Rules-correct engine and playable local hot-seat game (completed 2026-03-04)
 - [ ] **Phase 2: AI Opponent** - Solo play against 4-difficulty AI in a Web Worker
 - [ ] **Phase 3: Experience** - Animations, sound, tutorial, and game history/replay
 - [ ] **Phase 4: Multiplayer + PWA** - P2P online play and production hardening
@@ -96,7 +96,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Engine + Board | 3/4 | In Progress|  |
+| 1. Engine + Board | 4/4 | Complete   | 2026-03-04 |
 | 2. AI Opponent | 0/3 | Not started | - |
 | 3. Experience | 0/4 | Not started | - |
 | 4. Multiplayer + PWA | 0/3 | Not started | - |
