@@ -9,3 +9,5 @@ coverage/
 *.tsbuildinfo
 .vscode/
 .idea/
+.claude/
+specs/
