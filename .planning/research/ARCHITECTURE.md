@@ -1,646 +1,484 @@
-# Architecture Patterns
+# Architecture Research
 
-**Domain:** Rust game engine + Flutter web app (traditional board game)
-**Researched:** 2026-03-03
+**Domain:** Web-based asymmetric strategy board game with AI and P2P multiplayer
+**Researched:** 2026-03-04
+**Confidence:** HIGH (stack is decided; patterns are well-established for this class of app)
 
-## Recommended Architecture
+## Standard Architecture
 
-### High-Level Overview
-
-```
-+-----------------------------------------------------------+
-|                    Flutter Web App (Dart)                  |
-|                                                           |
-|  +------------------+  +--------------------+             |
-|  | UI Layer         |  | State Management   |             |
-|  | - CustomPainter  |  | - Riverpod         |             |
-|  | - Animations     |  | - GameNotifier     |             |
-|  | - Touch/Drag     |  | - SettingsNotifier  |             |
-|  +--------+---------+  +--------+-----------+             |
-|           |                      |                        |
-|           v                      v                        |
-|  +------------------------------------------------+      |
-|  |          Bridge Service Layer (Dart)            |      |
-|  |  - Command serialization                       |      |
-|  |  - Event deserialization                        |      |
-|  |  - Async dispatch (Isolate/WebWorker for AI)    |      |
-|  +------------------------+-----------------------+      |
-+---------------------------|---------------------------+
-                            | FFI / WASM boundary
-+---------------------------|---------------------------+
-|                           v                           |
-|  +------------------------------------------------+  |
-|  |       pulijoodam-ffi (Rust FFI crate)          |  |
-|  |  - flutter_rust_bridge annotated API           |  |
-|  |  - Command dispatch                            |  |
-|  |  - Event emission                              |  |
-|  |  - Serialization boundary                      |  |
-|  +------------------------+-----------------------+  |
-|                           |                          |
-|           +---------------+---------------+          |
-|           v                               v          |
-|  +------------------+          +------------------+  |
-|  | pulijoodam-core  |          | pulijoodam-ai    |  |
-|  | - Board topology |          | - MCTS (place)   |  |
-|  | - Game state     |          | - Minimax (move)  |  |
-|  | - Move valid.    |          | - Evaluation fn   |  |
-|  | - Rules/Variants |          | - Difficulty      |  |
-|  | - Undo/Redo      |          |   tuning          |  |
-|  +------------------+          +------------------+  |
-|                                                      |
-|                  Rust Engine Workspace                |
-+------------------------------------------------------+
-```
-
-### Component Boundaries
-
-| Component | Responsibility | Communicates With | Language |
-|-----------|---------------|-------------------|----------|
-| `pulijoodam-core` | Board topology, game state, move validation, rules, capture logic, win/draw detection, undo/redo history | `pulijoodam-ai`, `pulijoodam-ffi` | Rust |
-| `pulijoodam-ai` | MCTS placement engine, Minimax+AB movement engine, evaluation function, difficulty presets | `pulijoodam-core` (depends on core types) | Rust |
-| `pulijoodam-ffi` | flutter_rust_bridge annotated API surface, command dispatch, event emission, serialization | `pulijoodam-core`, `pulijoodam-ai` | Rust |
-| `pulijoodam-cli` | Debug/test CLI for engine (optional dev tool) | `pulijoodam-core`, `pulijoodam-ai` | Rust |
-| Bridge Service | Dart-side FFI wrapper, command serialization, AI call orchestration | `pulijoodam-ffi` (via FFI/WASM) | Dart |
-| State Management | Riverpod providers/notifiers, game state, UI state, settings | Bridge Service, UI Layer | Dart |
-| UI Layer | CustomPainter board, animations, input handling, theming | State Management | Dart |
-
-### Data Flow
-
-#### Player Makes a Move
+### System Overview
 
 ```
-1. UI Layer: User taps node B (after selecting piece on A)
-   |
-2. State Management: GameNotifier receives tap event
-   |
-3. Bridge Service: Constructs MoveCommand { from: A, to: B }
-   |
-4. FFI boundary: Serialized command crosses to Rust
-   |
-5. pulijoodam-ffi: Dispatches command to core
-   |
-6. pulijoodam-core: Validates move, applies to state, returns events:
-   [PieceMoved { from: A, to: B },
-    PieceCaptured { position: C, piece: Goat },
-    PhaseChanged { to: Movement }]
-   |
-7. pulijoodam-ffi: Serializes events back across FFI
-   |
-8. Bridge Service: Deserializes events, forwards to state
-   |
-9. State Management: GameNotifier applies events, updates state
-   |
-10. UI Layer: Rebuilds board, triggers animations for each event
+┌─────────────────────────────────────────────────────────────────────┐
+│                        PRESENTATION LAYER                            │
+│                                                                      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
+│  │  SVG Board   │  │  UI Panels   │  │   Screens    │              │
+│  │  (React +    │  │ (status, HUD,│  │ (Home, Setup,│              │
+│  │   SVG comps) │  │  pool, score)│  │  History...) │              │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘              │
+│         └─────────────────┼─────────────────┘                       │
+│                           ↓                                          │
+├───────────────────────────────────────────────────────────────────  │
+│                        APPLICATION LAYER                             │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │                   useGame Hook / Game Context                 │   │
+│  │   (owns: GameState, dispatch, animation queue, AI status)     │   │
+│  └──────────┬──────────────────────────────────────┬────────────┘   │
+│             ↓                                        ↓               │
+│  ┌──────────────────┐                  ┌───────────────────────┐    │
+│  │  useAI Hook      │                  │  useP2P Hook          │    │
+│  │  (Worker proxy)  │                  │  (WebRTC controller)  │    │
+│  └──────────┬───────┘                  └───────────┬───────────┘    │
+│             │                                       │               │
+├─────────────│───────────────────────────────────────│───────────────┤
+│             │     ENGINE LAYER (zero UI deps)        │               │
+│             │                                        │               │
+│  ┌──────────▼───────────────────────────────────┐   │               │
+│  │              src/engine/                      │   │               │
+│  │  board.ts  state.ts  moves.ts  rules.ts       │   │               │
+│  │  history.ts   ai/(minimax, mcts, eval)        │   │               │
+│  └──────────────────────────────────────────────┘   │               │
+│                                                      │               │
+├──────────────────────────────────────────────────────────────────── │
+│                   BOUNDARY PROCESSES                                  │
+│                                                                      │
+│  ┌────────────────────┐          ┌──────────────────────────────┐   │
+│  │   AI Web Worker    │          │   WebRTC Data Channel        │   │
+│  │  (engine copy,     │          │  (command relay, SDP offer/  │   │
+│  │   runs search)     │          │   answer exchange)           │   │
+│  └────────────────────┘          └──────────────────────────────┘   │
+│                                                                      │
+├──────────────────────────────────────────────────────────────────── │
+│                   PERSISTENCE LAYER                                   │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────┐      │
+│  │  localStorage  (game saves, settings, history, auto-save)  │      │
+│  └────────────────────────────────────────────────────────────┘      │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-#### AI Computes a Move
+### Component Responsibilities
+
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| Engine (`src/engine/`) | Pure game logic: move gen, validation, state transitions, win detection | Nothing — pure functions, called by hooks |
+| `useGame` hook | Owns live `GameState`, dispatches moves, sequences animations, routes to AI or P2P | Engine functions, `useAI`, `useP2P`, localStorage |
+| SVG Board components | Render board lines, nodes, pieces; fire tap events | `useGame` (reads state, calls dispatchMove) |
+| UI Panels / Screens | Status display, menus, setup, history | `useGame` (reads state), React Router |
+| `useAI` hook | Wraps Web Worker; sends state, receives move | AI Web Worker via `postMessage` |
+| AI Web Worker | Imports engine, runs MCTS/Minimax; stateless per call | `useAI` hook via `postMessage` |
+| `useP2P` hook | Owns RTCPeerConnection + data channel; sends/receives move commands | `useGame` (injects remote moves), WebRTC API |
+| localStorage adapter | Serializes/deserializes GameState; auto-save and history list | `useGame` (writes), History screen (reads) |
+
+---
+
+## Recommended Project Structure
 
 ```
-1. State Management: After player move events applied, triggers AI turn
-   |
-2. Bridge Service: Calls computeAiMove(gameState, difficulty) — ASYNC
-   |  (On native: Rust spawns thread internally)
-   |  (On WASM: Dispatched to Dart Isolate/WebWorker wrapping WASM)
-   |
-3. pulijoodam-ffi -> pulijoodam-ai: Runs MCTS or Minimax
-   |
-4. Returns: AiMoveComputed { command: MoveCommand { from: X, to: Y } }
-   |
-5. Bridge Service: Receives result, dispatches as command (same as player)
-   |
-6. pulijoodam-core: Validates and applies, returns events
-   |
-7. (Same flow as player move from step 7 onward)
+src/
+├── engine/                   # Pure TS game engine — zero UI/framework deps
+│   ├── types.ts              # All shared types (GameState, Move, Phase, Role...)
+│   ├── board.ts              # 23-node topology, coordinates, adjacency map
+│   ├── state.ts              # createGame(), state constructors
+│   ├── moves.ts              # getLegalMoves(), applyMove(), MoveResult
+│   ├── rules.ts              # getGameStatus(), win/draw detection, rule presets
+│   ├── history.ts            # undo(), redo(), state hash for repetition detection
+│   ├── ai/
+│   │   ├── index.ts          # AI entry: chooseMove(state, config) → Move
+│   │   ├── mcts.ts           # MCTS for placement phase
+│   │   ├── minimax.ts        # Minimax + alpha-beta for movement phase
+│   │   └── eval.ts           # Heuristic evaluation function
+│   └── index.ts              # Public API surface (re-exports)
+│
+├── workers/
+│   └── ai.worker.ts          # Web Worker entry: receives state, calls engine AI, posts move
+│
+├── hooks/
+│   ├── useGame.ts            # Central game controller (state, dispatch, animation queue)
+│   ├── useAI.ts              # Worker proxy: send state → receive Move
+│   ├── useP2P.ts             # WebRTC lifecycle, offer/answer, data channel
+│   └── useLocalStorage.ts    # Typed localStorage read/write with versioning
+│
+├── components/
+│   ├── Board/
+│   │   ├── Board.tsx         # SVG root: viewBox, edges, nodes
+│   │   ├── Edge.tsx          # <line> for each board edge
+│   │   ├── Node.tsx          # <circle> intersection with tap handler
+│   │   ├── TigerPiece.tsx    # Animated SVG tiger
+│   │   ├── GoatPiece.tsx     # Animated SVG goat
+│   │   └── MoveHighlight.tsx # Legal move indicator ring
+│   ├── GameScreen/
+│   │   ├── GameScreen.tsx    # Layout: board + HUD
+│   │   ├── StatusBar.tsx     # Turn, phase, captured count
+│   │   └── GoatPool.tsx      # Visual goats-in-pool display
+│   ├── HomeScreen/
+│   ├── SetupScreen/
+│   ├── TutorialScreen/
+│   ├── HistoryScreen/
+│   ├── ReplayScreen/
+│   └── P2PScreen/            # Invite code exchange UI
+│
+├── store/                    # If Zustand is adopted (start with hooks, upgrade if needed)
+│   └── gameStore.ts
+│
+├── App.tsx                   # Router, screen switching
+└── main.tsx                  # Vite entry point
 ```
 
-## Rust Workspace Layout
+### Structure Rationale
 
-**Confidence: HIGH** (standard Rust workspace patterns, well-documented)
+- **`engine/` isolation:** Zero imports from React, Vite, or any UI lib. This enables: (1) unit testing with plain Node, (2) running inside Web Worker without pulling in UI bundle, (3) clean interface for future Rust port.
+- **`workers/` separation:** Worker entry points live outside `engine/` because they import from engine but also handle the postMessage protocol — mixing concerns if placed in engine/.
+- **`hooks/` as application layer:** Hooks own all the stateful coordination: which mode (AI/local/P2P), animation sequencing, persistence timing. Components stay purely presentational.
+- **`components/Board/` decomposed:** SVG board broken into Edge, Node, Piece subcomponents so each animates independently via CSS transitions on `transform`/`opacity`.
 
-```
-engine/
-  Cargo.toml              # Workspace root
-  crates/
-    pulijoodam-core/
-      Cargo.toml
-      src/
-        lib.rs
-        board.rs           # Board topology, 23-node graph, coordinate system
-        game.rs            # GameState, phase transitions, turn management
-        rules.rs           # RuleSet trait, Andhra/Tamil variants
-        moves.rs           # Move validation, capture detection, chain-hops
-        command.rs         # Command enum (PlacePiece, MovePiece, Undo, Redo, NewGame)
-        event.rs           # Event enum (PiecePlaced, PieceMoved, PieceCaptured, ...)
-        history.rs         # Move history stack for undo/redo/replay
-        types.rs           # Node, Position, Piece, Player, Phase enums
-    pulijoodam-ai/
-      Cargo.toml
-      src/
-        lib.rs
-        mcts.rs            # Monte Carlo Tree Search for placement phase
-        minimax.rs         # Minimax + alpha-beta pruning for movement phase
-        eval.rs            # Board evaluation / heuristic function
-        difficulty.rs      # Difficulty presets (depth limits, time limits, randomness)
-    pulijoodam-ffi/
-      Cargo.toml
-      src/
-        lib.rs
-        api/
-          game_api.rs      # flutter_rust_bridge annotated public API
-          types_api.rs     # FFI-friendly type wrappers
-    pulijoodam-cli/        # Optional: dev/debug tool
-      Cargo.toml
-      src/
-        main.rs
-```
+---
 
-**Workspace Cargo.toml:**
+## Architectural Patterns
 
-```toml
-[workspace]
-resolver = "2"
-members = ["crates/*"]
+### Pattern 1: Functional Engine with Immutable State
 
-[workspace.package]
-version = "0.1.0"
-edition = "2024"
+**What:** Every engine function takes `GameState` and returns a new `GameState` (plus events). Nothing mutates in place. `applyMove` returns `{ nextState: GameState, events: GameEvent[] }`.
 
-[workspace.dependencies]
-serde = { version = "1", features = ["derive"] }
-rand = "0.8"
-```
+**When to use:** Always for game logic — not just board games, any state machine where you want undo/redo, replay, or deterministic testing.
 
-**Rationale for core/ai/ffi split:**
-- `core` is pure game logic with zero FFI dependencies -- testable in isolation, usable from CLI
-- `ai` depends on `core` types but is a separate compilation unit -- AI algorithm changes do not recompile core
-- `ffi` depends on both and is the only crate with `flutter_rust_bridge` dependency -- keeps the bridge boundary thin
-- This split means `core` and `ai` can be tested with standard `cargo test` with no FFI toolchain needed
+**Trade-offs:** Slightly more GC pressure than mutation (negligible for a 23-node board). Gains: trivial undo (pop state stack), deterministic AI simulation (no side effects), safe parallel use in Web Worker.
 
-## Command/Event Pattern
-
-**Confidence: HIGH** (well-established game programming pattern, documented extensively)
-
-The Command/Event pattern is the central architectural decision. It provides:
-
-1. **Clean FFI boundary**: Commands and Events are simple enums that serialize naturally
-2. **Undo/Redo for free**: History is a stack of (Command, Vec<Event>) pairs; undo replays inverse events
-3. **Replay support**: Stored command sequence recreates any game state
-4. **Future network layer**: Commands serialize identically over WebRTC as over FFI
-
-### Command Enum (Dart sends to Rust)
-
-```rust
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum GameCommand {
-    NewGame { rule_set: RuleVariant, player_side: PlayerSide },
-    PlacePiece { node: NodeId },
-    MovePiece { from: NodeId, to: NodeId },
-    Undo,
-    Redo,
-    RequestAiMove { difficulty: Difficulty },
-    Resign,
-}
-```
-
-### Event Enum (Rust sends to Dart)
-
-```rust
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum GameEvent {
-    GameStarted { rule_set: RuleVariant, board: BoardState },
-    PiecePlaced { node: NodeId, piece: Piece },
-    PieceMoved { from: NodeId, to: NodeId, piece: Piece },
-    PieceCaptured { node: NodeId, piece: Piece },
-    ChainHopContinued { from: NodeId, to: NodeId },
-    PhaseChanged { phase: GamePhase },
-    TurnChanged { player: Player },
-    AiMoveComputed { command: Box<GameCommand>, thinking_time_ms: u32 },
-    GameOver { result: GameResult },
-    IllegalMove { reason: String },
-    StateRestored { board: BoardState, move_number: u32 },
-    Error { message: String },
-}
-```
-
-### Dispatch Pattern in FFI Layer
-
-```rust
-// In pulijoodam-ffi/src/api/game_api.rs
-use flutter_rust_bridge::frb;
-
-/// Process a game command and return resulting events.
-/// On WASM: runs synchronously on main thread (fast commands).
-#[frb(sync)]
-pub fn execute_command(state: &mut GameState, command: GameCommand) -> Vec<GameEvent> {
-    state.dispatch(command)
+**Example:**
+```typescript
+// Engine API — all pure functions
+function applyMove(state: GameState, move: Move): MoveResult {
+  const nextState: GameState = {
+    ...state,
+    board: applyBoardChange(state.board, move),
+    moveHistory: [...state.moveHistory, move],
+    // ...
+  };
+  const events = deriveEvents(state, nextState, move);
+  return { nextState, events };
 }
 
-/// Compute AI move asynchronously.
-/// On native: runs on Rust thread pool.
-/// On WASM: caller (Dart) should invoke from Isolate/WebWorker.
-pub fn compute_ai_move(
-    state: &GameState,
-    difficulty: Difficulty,
-) -> GameCommand {
-    let ai = AiEngine::new(difficulty);
-    ai.compute_move(state)
-}
+// Caller (useGame hook)
+const { nextState, events } = applyMove(currentState, move);
+setHistory(prev => [...prev, currentState]); // trivial undo
+setState(nextState);
+animationQueue.enqueue(events);
 ```
 
-## flutter_rust_bridge Integration
+### Pattern 2: Web Worker as Stateless AI Subprocess
 
-**Confidence: MEDIUM** (v2 API is stable but WASM edge cases evolving; verified with official docs and GitHub issues)
+**What:** The AI Worker receives a complete serialized `GameState` and `AIConfig`, runs the search algorithm, and posts back a single `Move`. The worker is stateless between calls — no caching of search trees across moves (simplest correct design; transposition tables are internal to the search, not persisted across worker messages).
 
-### FFI Crate Setup
+**When to use:** Any computation that risks blocking the UI thread beyond ~16ms. For board game AI at Hard/Expert difficulty (2-5 seconds), this is mandatory.
 
-The `pulijoodam-ffi` crate is the sole bridge surface. flutter_rust_bridge v2 codegen scans `src/api/*.rs` files for public functions and generates Dart bindings.
+**Trade-offs:** Serialization cost for large states (negligible for 23 nodes). Cannot share memory directly with main thread — use `postMessage` with structured clone. `SharedArrayBuffer` is overkill here.
 
-**Key Configuration (flutter_rust_bridge.yaml):**
+**Example:**
+```typescript
+// ai.worker.ts
+import { chooseMove } from '../engine/ai';
+import type { AIWorkerRequest, AIWorkerResponse } from '../engine/types';
 
-```yaml
-rust_input: crate::api
-rust_root: engine/crates/pulijoodam-ffi
-dart_output: lib/src/bridge
-```
+self.onmessage = (e: MessageEvent<AIWorkerRequest>) => {
+  const { state, config } = e.data;
+  const move = chooseMove(state, config);
+  const response: AIWorkerResponse = { move };
+  self.postMessage(response);
+};
 
-### Sync vs Async Strategy
+// useAI.ts (main thread)
+function useAI() {
+  const workerRef = useRef<Worker>();
 
-For WASM compatibility, use a dual strategy:
-
-| Function Type | Native Behavior | WASM Behavior | Annotation |
-|---------------|----------------|---------------|------------|
-| Game commands (fast) | Async (thread pool) | Sync (main thread) | `#[frb(sync)]` |
-| AI computation (slow) | Async (Rust thread) | Dart-side WebWorker | Regular `pub fn` |
-| State queries | Sync | Sync | `#[frb(sync)]` |
-
-**Critical WASM insight:** On WASM, `std::thread::spawn` is unavailable. Game commands (move validation, state updates) are fast enough (<1ms) to run synchronously on the main thread. AI computation (potentially seconds) must be offloaded on the Dart side using Isolate/WebWorker patterns, not Rust-side threading.
-
-### Type Marshalling
-
-flutter_rust_bridge v2 handles enum translation well. Use simple enums and structs at the FFI boundary:
-
-```rust
-// FFI-friendly types (pulijoodam-ffi)
-#[frb(dart_metadata=("freezed"))]
-pub struct BoardState {
-    pub nodes: Vec<NodeState>,
-    pub phase: GamePhase,
-    pub current_player: Player,
-    pub goats_placed: u8,
-    pub goats_captured: u8,
-    pub move_number: u32,
-}
-
-#[derive(Clone)]
-pub struct NodeState {
-    pub id: u8,
-    pub x: f64,
-    pub y: f64,
-    pub piece: Option<Piece>,
-}
-```
-
-## WASM-Specific Architecture Concerns
-
-**Confidence: MEDIUM** (Flutter WASM support maturing rapidly; GitHub Pages constraints verified)
-
-### Threading Model on WASM
-
-This is the single most important architectural constraint. On web:
-
-1. **No Rust-side threading.** `std::thread::spawn` panics on `wasm32-unknown-unknown`. Libraries like `wasm-bindgen-spawn` exist but add complexity and require nightly Rust.
-
-2. **AI computation must be offloaded on the Dart side.** Two approaches:
-   - **Dart Isolate (preferred):** Use `isolate_manager` or `compute()` which maps to WebWorkers on web. The WebWorker instantiates its own WASM module and runs AI computation there.
-   - **Direct WebWorker:** Manual WebWorker setup that loads the WASM module independently.
-
-3. **Game commands run on main thread.** Move validation, state updates, and queries are sub-millisecond and safe to run synchronously.
-
-### Recommended WASM Threading Architecture
-
-```
-Main Thread (Flutter UI)                Worker Thread (Dart Isolate/WebWorker)
-+---------------------------+           +---------------------------+
-| Flutter UI                |           | WASM module (copy)        |
-| Riverpod State            |           | pulijoodam-ai             |
-| WASM module (primary)     |           |                           |
-| - execute_command (sync)  |           | compute_ai_move(state,    |
-| - query functions (sync)  |  ------>  |   difficulty) -> command   |
-|                           |  message  |                           |
-|                           |  <------  |                           |
-+---------------------------+  result   +---------------------------+
-```
-
-**Key detail:** The WASM module is instantiated in BOTH the main thread and the worker thread. The main thread instance handles fast synchronous operations. The worker instance handles slow AI computation. Game state is serialized and sent to the worker (message passing, not shared memory).
-
-### GitHub Pages Deployment
-
-GitHub Pages does not support custom HTTP headers natively. This affects:
-
-- **SharedArrayBuffer:** Requires `Cross-Origin-Embedder-Policy: require-corp` and `Cross-Origin-Opener-Policy: same-origin`. Not available on GitHub Pages without a service worker shim.
-- **Multi-threaded Flutter rendering (Skwasm):** Requires SharedArrayBuffer. Will fall back to single-threaded WASM rendering on GitHub Pages.
-- **Single-threaded WASM mode:** Flutter 3.29+ supports WASM without cross-origin headers in single-threaded mode. This is the practical path for GitHub Pages.
-
-**Recommendation:** Deploy in single-threaded WASM mode. Flutter's CanvasKit/Skwasm renderer in single-threaded mode is performant enough for a board game (not a 3D shooter). If performance is insufficient, add a service worker that injects COOP/COEP headers to enable multi-threaded rendering.
-
-### Build Pipeline
-
-```bash
-# Rust WASM build (handled by flutter_rust_bridge)
-# In CI (GitHub Actions):
-flutter_rust_bridge_codegen generate
-flutter build web --wasm
-# Deploy to GitHub Pages
-```
-
-## Flutter App Architecture
-
-**Confidence: HIGH** (standard Flutter patterns, well-documented)
-
-### State Management: Riverpod
-
-Use Riverpod (v3+) with Notifier pattern. Riverpod over Bloc because:
-- Less boilerplate for a solo developer learning project
-- Compile-time safety catches provider errors
-- No separate Event classes needed (the Command/Event pattern lives in Rust, not Dart)
-- `@riverpod` codegen reduces setup
-
-### Provider Structure
-
-```dart
-// Game state provider -- the central source of truth on the Dart side
-@riverpod
-class GameNotifier extends _$GameNotifier {
-  @override
-  GameUiState build() => GameUiState.initial();
-
-  Future<void> executeCommand(GameCommand command) async {
-    // Call Rust engine
-    final events = bridge.executeCommand(state.engineState, command);
-    // Apply each event to UI state
-    for (final event in events) {
-      state = _applyEvent(state, event);
-    }
-    // If it's now AI's turn, trigger AI
-    if (state.isAiTurn) {
-      await _requestAiMove();
-    }
-  }
-
-  Future<void> _requestAiMove() async {
-    state = state.copyWith(isThinking: true);
-    // Offload to isolate/worker for WASM safety
-    final aiCommand = await compute(
-      (params) => bridge.computeAiMove(params.state, params.difficulty),
-      AiParams(state.engineState, state.difficulty),
+  useEffect(() => {
+    workerRef.current = new Worker(
+      new URL('../workers/ai.worker.ts', import.meta.url),
+      { type: 'module' }
     );
-    // Execute the AI's command through the same pipeline
-    await executeCommand(aiCommand);
-    state = state.copyWith(isThinking: false);
+    return () => workerRef.current?.terminate();
+  }, []);
+
+  const requestMove = useCallback((state: GameState, config: AIConfig): Promise<Move> => {
+    return new Promise(resolve => {
+      workerRef.current!.onmessage = (e) => resolve(e.data.move);
+      workerRef.current!.postMessage({ state, config });
+    });
+  }, []);
+
+  return { requestMove };
+}
+```
+
+### Pattern 3: Command Relay for P2P Synchronization
+
+**What:** In P2P mode, each peer runs the full engine locally. Peers send *moves* (commands), not *state*. Receiving peer validates and applies the move independently. State never travels over the wire — only the command that caused the state change.
+
+**When to use:** Deterministic turn-based games where both clients have the same starting state. Vastly reduces bandwidth vs state sync. Works because the engine is pure and deterministic.
+
+**Trade-offs:** Both clients must start from identical state (enforced by host-sends-initial-config at connection time). Any engine non-determinism breaks sync silently — this is why the engine must be purely functional.
+
+**Example:**
+```typescript
+// P2P message types
+type P2PMessage =
+  | { type: 'MOVE'; move: Move }
+  | { type: 'GAME_CONFIG'; config: GameConfig }  // host sends at start
+  | { type: 'RESIGN' }
+  | { type: 'DRAW_OFFER' };
+
+// useP2P.ts
+dataChannel.onmessage = (e) => {
+  const msg: P2PMessage = JSON.parse(e.data);
+  if (msg.type === 'MOVE') {
+    // Apply opponent's move on our local engine
+    dispatchMove(msg.move);
   }
-}
+};
 
-// Settings provider
-@riverpod
-class SettingsNotifier extends _$SettingsNotifier {
-  @override
-  Settings build() => Settings.defaults();
-
-  void setDifficulty(Difficulty d) => state = state.copyWith(difficulty: d);
-  void setRuleVariant(RuleVariant v) => state = state.copyWith(ruleVariant: v);
-  void setTheme(AppTheme t) => state = state.copyWith(theme: t);
-  void toggleSound() => state = state.copyWith(soundEnabled: !state.soundEnabled);
-}
-
-// Animation provider -- derived from game events
-@riverpod
-class AnimationNotifier extends _$AnimationNotifier {
-  @override
-  AnimationQueue build() => AnimationQueue.empty();
-
-  void enqueue(GameEvent event) {
-    // Convert game events to animation commands
-    // PieceMoved -> slide animation
-    // PieceCaptured -> bounce + particle burst
-    // etc.
-  }
+function sendMove(move: Move) {
+  const msg: P2PMessage = { type: 'MOVE', move };
+  dataChannel.send(JSON.stringify(msg));
 }
 ```
-
-### CustomPainter Board Rendering
-
-```
-Widget Tree:
-  GameScreen
-    +-- RepaintBoundary          // Isolate board repaints
-    |     +-- CustomPaint
-    |           painter: BoardPainter(boardState, theme)
-    |           - Draws: grid lines, triangle lines, nodes
-    |           - Draws: pieces at node positions
-    |           - shouldRepaint: compare board state identity
-    |
-    +-- AnimationOverlay          // Separate layer for animations
-    |     +-- CustomPaint
-    |           painter: AnimationPainter(animationQueue)
-    |           - Draws: sliding pieces, capture particles
-    |           - Repaints every frame during animation
-    |
-    +-- InteractionOverlay        // Touch targets, highlights
-          +-- GestureDetector
-                - Tap detection on nodes
-                - Drag detection for piece movement
-                - Hit testing against node positions
-```
-
-**Key optimization:** Separate the static board (lines, empty nodes) from dynamic elements (pieces, animations) using RepaintBoundary. The board grid only repaints when the theme changes. Pieces repaint on state change. Animations repaint at 60fps only during active animations.
-
-### Flutter Project Structure
-
-```
-app/
-  lib/
-    main.dart
-    src/
-      bridge/
-        generated/           # flutter_rust_bridge codegen output
-        bridge_service.dart  # Wrapper over generated bindings
-      state/
-        game_notifier.dart
-        settings_notifier.dart
-        animation_notifier.dart
-        providers.dart       # All provider exports
-      models/
-        game_ui_state.dart   # Dart-side UI state (freezed)
-        animation_queue.dart
-      ui/
-        screens/
-          home_screen.dart
-          game_screen.dart
-          settings_screen.dart
-          tutorial_screen.dart
-          history_screen.dart
-        widgets/
-          board_painter.dart      # CustomPainter for board
-          animation_painter.dart  # CustomPainter for animations
-          piece_widget.dart
-          game_controls.dart
-          difficulty_selector.dart
-        theme/
-          traditional_theme.dart
-          modern_theme.dart
-          app_theme.dart
-      audio/
-        sound_manager.dart
-  test/
-  web/
-    index.html
-  pubspec.yaml
-```
-
-## Patterns to Follow
-
-### Pattern 1: Command/Event Separation at FFI Boundary
-
-**What:** All Dart-to-Rust communication is via Commands (input). All Rust-to-Dart communication is via Events (output). No direct state mutation across the boundary.
-
-**When:** Every interaction between Flutter and Rust.
-
-**Why:** This makes the FFI boundary a clean serialization point. Commands and Events are simple data -- enums of structs with primitive fields. They serialize identically whether going over FFI, WASM, or a future WebRTC network layer. This also means the Rust engine is entirely deterministic and testable without any Flutter/FFI dependency.
-
-### Pattern 2: Thin FFI Crate
-
-**What:** The `pulijoodam-ffi` crate contains only API surface definitions and type conversions. No game logic, no AI algorithms. It is a translation layer.
-
-**When:** Designing the Rust workspace.
-
-**Why:** Keeps `flutter_rust_bridge` dependency isolated. Core and AI crates remain pure Rust with no FFI concerns. This means `cargo test` on core and AI works without any Flutter toolchain. It also means switching away from flutter_rust_bridge (unlikely but possible) only affects one crate.
-
-### Pattern 3: Dual WASM Module Instantiation for AI
-
-**What:** On web, instantiate the WASM module in both the main thread (for fast sync operations) and a separate WebWorker (for slow AI computation).
-
-**When:** Running AI computation on WASM target.
-
-**Why:** WASM cannot spawn threads. The main thread must stay responsive for 60fps rendering. AI computation (MCTS/Minimax) can take seconds. By running AI in a separate WebWorker with its own WASM instance, the main thread remains unblocked.
 
 ### Pattern 4: Event-Driven Animation Queue
 
-**What:** Game events from Rust drive an animation queue on the Dart side. Each event type maps to an animation type. Animations play sequentially from the queue.
+**What:** `applyMove` returns `GameEvent[]` describing what changed. The UI layer consumes these sequentially to animate: piece slides, captures, phase transitions. State is updated immediately; animations play from the queue independently.
 
-**When:** Rendering move results, captures, game-over effects.
+**When to use:** Any UI that needs sequential animations after a state change. Especially important for chain-hops (multiple captures that must animate in order).
 
-**Why:** Decouples game logic timing from animation timing. A capture event (instantaneous in the engine) becomes a multi-frame animation on screen. The animation queue ensures events play in order with appropriate timing. The game state is already updated; animations are purely visual.
+**Trade-offs:** Animation queue adds a thin coordination layer to the hook. Worth it: prevents "update state and hope CSS catches up" race conditions.
 
-### Pattern 5: Immutable State with Riverpod Notifier
+**Example:**
+```typescript
+type GameEvent =
+  | { type: 'PIECE_MOVED'; from: NodeId; to: NodeId; role: Role }
+  | { type: 'GOAT_CAPTURED'; nodeId: NodeId }
+  | { type: 'PHASE_CHANGED'; newPhase: Phase }
+  | { type: 'GAME_OVER'; result: GameResult };
 
-**What:** Game UI state is an immutable (freezed) data class. State transitions produce new instances via `copyWith`. Riverpod Notifier is the sole mutation point.
-
-**When:** All Flutter state management.
-
-**Why:** Immutable state makes `shouldRepaint` comparisons trivial (identity check). It prevents accidental mutation bugs. Riverpod's rebuild system efficiently propagates only changed portions.
-
-## Anti-Patterns to Avoid
-
-### Anti-Pattern 1: Exposing Mutable Rust State Directly to Dart
-
-**What:** Letting Dart hold a mutable reference to Rust game state and call methods on it directly.
-
-**Why bad:** Creates lifecycle management nightmares across FFI. Rust ownership semantics clash with Dart GC. On WASM, mutable shared state across threads is impossible.
-
-**Instead:** Use Command/Event pattern. Dart sends commands, receives events. State lives entirely in Rust. Dart maintains a lightweight UI mirror of the state.
-
-### Anti-Pattern 2: Rust-Side Threading on WASM
-
-**What:** Using `std::thread::spawn`, `rayon`, or `tokio::spawn` in Rust code that targets WASM.
-
-**Why bad:** These panic or fail to compile on `wasm32-unknown-unknown`. Even with nightly features, WASM threading requires SharedArrayBuffer and COOP/COEP headers that GitHub Pages does not provide.
-
-**Instead:** Keep Rust code single-threaded. Offload concurrency to the Dart/JavaScript layer (Isolates/WebWorkers). Use `#[cfg(not(target_arch = "wasm32"))]` guards for any native-only threading code.
-
-### Anti-Pattern 3: Fat FFI Layer
-
-**What:** Putting game logic, AI, or complex state management in the FFI crate.
-
-**Why bad:** The FFI crate depends on `flutter_rust_bridge` which has its own build requirements and codegen. Mixing game logic into it makes testing harder, increases codegen time, and couples game logic to FFI tooling.
-
-**Instead:** FFI crate is a thin translation layer. Game logic in `core`, AI in `ai`. FFI just wires them together with bridge-annotated functions.
-
-### Anti-Pattern 4: Synchronous AI on Main Thread (WASM)
-
-**What:** Calling AI computation synchronously from the Flutter main thread when running on WASM.
-
-**Why bad:** Browsers throw exceptions or show "page unresponsive" warnings when the main thread blocks for more than ~50ms. AI computation at Hard/Expert difficulty can take 2-5 seconds.
-
-**Instead:** Always dispatch AI computation to a WebWorker/Isolate on web. On native, Rust's thread pool handles this, but on WASM, the Dart side must manage concurrency.
-
-## Scalability Considerations
-
-| Concern | At MVP (solo AI) | At v1.5 (P2P multiplayer) | At v2+ (online) |
-|---------|-------------------|---------------------------|-------------------|
-| State sync | Local only, Command/Event in memory | Commands sent over WebRTC, Events applied locally | Commands sent to server, authoritative state |
-| AI compute | Single WebWorker | Same (AI only for solo games) | Server-side Rust (no WASM constraints) |
-| Game storage | Local storage / IndexedDB | Same + shared game ID | Server database |
-| Undo/Redo | Full history stack | Limited (only in solo) | Spectator replay from server events |
-
-The Command/Event architecture scales naturally from solo play to multiplayer because commands are the same unit of communication regardless of transport (FFI, WebRTC, HTTP).
-
-## Suggested Build Order (Dependencies)
-
-Build order is driven by dependency direction. Lower layers must exist before higher layers.
-
-```
-Phase 1: pulijoodam-core (board, rules, state, commands, events)
-    |     No dependencies on other project crates.
-    |     Testable with cargo test immediately.
-    |
-Phase 2: pulijoodam-ai (depends on core)
-    |     Requires core types (GameState, Board, Move).
-    |     Testable with cargo test against known board states.
-    |
-Phase 3: pulijoodam-ffi + flutter_rust_bridge setup
-    |     Depends on core + ai.
-    |     Requires Flutter toolchain + codegen working.
-    |     First time WASM build is validated.
-    |
-Phase 4: Flutter app shell + Riverpod state + Bridge Service
-    |     Depends on FFI bindings being generated.
-    |     Can stub Rust side initially for UI development.
-    |
-Phase 5: Board rendering (CustomPainter) + input handling
-    |     Depends on state management and bridge working.
-    |
-Phase 6: AI integration + WebWorker offloading
-    |     Depends on FFI working + AI crate complete.
-    |     WASM threading strategy validated here.
-    |
-Phase 7: Polish (animations, sound, themes, tutorial)
-    |     Depends on core game loop working end-to-end.
-    |
-Phase 8: Deployment (GitHub Pages CI/CD)
-         Depends on WASM build + single-threaded mode validated.
+// useGame.ts — process event queue sequentially
+async function processEvents(events: GameEvent[]) {
+  for (const event of events) {
+    await animateEvent(event);   // returns Promise that resolves after CSS transition
+  }
+}
 ```
 
-**Critical path:** Phases 1-3 are the foundation. Phase 3 (FFI integration) is the highest-risk step -- if flutter_rust_bridge codegen or WASM compilation fails, everything above it is blocked. Validate the FFI + WASM pipeline with a minimal "hello world" before building the full engine.
+---
 
-**Parallel opportunity:** Core Rust engine development (Phases 1-2) and Flutter UI scaffolding (Phase 4 with stubs) can proceed in parallel once the FFI bridge shape is agreed upon.
+## Data Flow
+
+### Player Move Flow (Local / AI Game)
+
+```
+Player taps node
+    ↓
+Board component fires onNodeClick(nodeId)
+    ↓
+useGame.handleNodeClick(nodeId)
+    ├── if no selection: highlight legal sources → set selectedNode
+    └── if selection exists:
+        ├── validate move (engine.getLegalMoves)
+        ├── engine.applyMove(state, move) → { nextState, events }
+        ├── update state (React setState)
+        ├── persist to localStorage
+        ├── animate events (sequential queue)
+        └── if AI turn: useAI.requestMove(nextState) → Worker → Move
+                         └── loop back to applyMove with AI move
+```
+
+### AI Move Flow
+
+```
+useGame detects it's AI's turn
+    ↓
+useAI.requestMove(state, difficultyConfig)
+    ↓ postMessage
+AI Web Worker
+    ├── placement phase? → MCTS(state, config.simulations) → Move
+    └── movement phase? → Minimax+AB(state, config.depth)  → Move
+    ↓ postMessage(move)
+useGame receives Move
+    ↓
+applyMove → animate → check game over
+```
+
+### P2P Multiplayer Flow
+
+```
+HOST                                    GUEST
+  │                                       │
+  ├── createOffer() → SDP blob            │
+  ├── base64 encode → display code        │
+  │                                       │
+  │          [user copy-pastes]           │
+  │                                       │
+  │                        paste SDP offer│
+  │                   createAnswer() ─────┤
+  │                   base64 encode ──────┤
+  │                   display code        │
+  │                                       │
+  │   [user copy-pastes]                  │
+  paste answer                            │
+  setRemoteDescription() ────────────────►│
+  │                   ICE negotiation     │
+  ├── data channel OPEN ─────────────────►│
+  │                                       │
+  ├── send GAME_CONFIG ──────────────────►│
+  │                   both init same state│
+  │                                       │
+  ├── MOVE (host's turn) ────────────────►│
+  │                        apply locally  │
+  │◄─── MOVE (guest's turn) ─────────────┤
+  apply locally                           │
+```
+
+### State Management
+
+```
+GameState (immutable value)
+    │
+    ↓ (read)                       ↑ (write via setState)
+React components                useGame hook
+(Board, StatusBar, etc.)            │
+    │                               │
+    └── user events ────────────────┘
+                              │
+                    engine.applyMove()
+                    localStorage.save()
+                    animationQueue.enqueue()
+                    (if AI turn) useAI.requestMove()
+                    (if P2P turn) useP2P.sendMove()
+```
+
+---
+
+## Suggested Build Order
+
+The components have clear dependencies. Build bottom-up:
+
+| Order | Component | Depends On | Why First |
+|-------|-----------|-----------|-----------|
+| 1 | `engine/types.ts` | Nothing | All other modules depend on types |
+| 2 | `engine/board.ts` | types | Move generation needs topology |
+| 3 | `engine/state.ts` | board, types | Moves need state shape |
+| 4 | `engine/moves.ts` | board, state | Core mechanic; everything else needs it |
+| 5 | `engine/rules.ts` | moves, state | Win detection; needed for AI and UI |
+| 6 | `engine/history.ts` | state, moves | Undo/redo; used by useGame |
+| 7 | Engine unit tests | engine/* | Validate before building on top |
+| 8 | SVG Board rendering | board topology | Visualize what you built |
+| 9 | `useGame` hook | engine, Board | Wires interaction to engine |
+| 10 | Local 2P play | useGame | First playable milestone (Phase 1) |
+| 11 | `engine/ai/eval.ts` | moves, rules | Needed by both MCTS and Minimax |
+| 12 | `engine/ai/minimax.ts` | eval | Movement phase AI |
+| 13 | `engine/ai/mcts.ts` | eval | Placement phase AI |
+| 14 | `ai.worker.ts` + `useAI` | ai/ | Wire AI to Web Worker |
+| 15 | SetupScreen + difficulty | useAI | Single-player mode (Phase 2) |
+| 16 | Animations + audio | useGame events | Polish (Phase 3) |
+| 17 | Tutorial system | engine, Board | Guided learning (Phase 4) |
+| 18 | localStorage history | useGame | Replay/save (Phase 5) |
+| 19 | `useP2P` + P2P UI | useGame, engine | Multiplayer (Phase 6) |
+| 20 | Service worker + PWA | Vite build | Progressive enhancement (Phase 7) |
+
+**Critical dependency:** The AI Worker imports engine code directly (`import { chooseMove } from '../engine/ai'`). Vite handles this with `new URL('../workers/ai.worker.ts', import.meta.url)` + `{ type: 'module' }` — this bundles the worker separately including its engine imports. Confirm Vite worker config before building AI.
+
+---
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Engine That Imports React
+
+**What people do:** Put game state in a Zustand store or React context *inside* the engine directory, or import `useState` in engine functions.
+
+**Why it's wrong:** Breaks Web Worker compatibility (React isn't available in workers). Breaks portability for the future Rust port. Prevents pure unit testing.
+
+**Do this instead:** Engine is `GameState → GameState`. React hooks consume the engine; engine never knows React exists.
+
+### Anti-Pattern 2: Sharing State Over P2P Instead of Commands
+
+**What people do:** Serialize and send the full `GameState` object over the data channel after each move.
+
+**Why it's wrong:** State is large and redundant. Worse, it couples the wire format to internal state shape — any refactor of `GameState` breaks serialization. It also defeats local validation: if you just accept remote state wholesale, you can't detect cheating or bugs.
+
+**Do this instead:** Send `Move` objects only. Both clients run the engine locally. State stays a local implementation detail.
+
+### Anti-Pattern 3: Blocking the Main Thread with AI Computation
+
+**What people do:** Call the AI search synchronously in a button handler or `useEffect`, assuming it's "fast enough."
+
+**Why it's wrong:** MCTS at 25,000 simulations will freeze the browser for several seconds. Even at Easy (500 simulations), there's a visible jank spike.
+
+**Do this instead:** AI runs in a Web Worker unconditionally for all difficulty levels. The worker receives a message, computes, responds. The main thread remains responsive and can show a "thinking" indicator.
+
+### Anti-Pattern 4: Mutable Board Array
+
+**What people do:** Mutate the `board` array in place (e.g., `state.board[nodeId] = 'goat'`) for "performance."
+
+**Why it's wrong:** Makes undo/redo require deep-copy logic everywhere. Makes AI simulation leak into real state if not careful. Creates subtle bugs when React bails out of re-render because reference hasn't changed.
+
+**Do this instead:** `board` is a plain JS array — spread it on update: `board: [...state.board]` with the changed slot. For a 23-element array, this is negligible cost and eliminates an entire class of bugs.
+
+### Anti-Pattern 5: One Monolithic Game Component
+
+**What people do:** Build a single `<Game />` component that contains all state, all rendering, all handlers — 600+ line component.
+
+**Why it's wrong:** Untestable, hard to animate independently, performance: any state change re-renders everything including the SVG board.
+
+**Do this instead:** Separate `useGame` hook (logic) from `GameScreen` (layout) from `Board` (SVG) from individual `Piece` components. Memo the board when only UI state (selected node) changes but game state hasn't.
+
+---
+
+## Integration Points
+
+### Internal Boundaries
+
+| Boundary | Communication | Contract |
+|----------|--------------|---------|
+| Engine ↔ hooks | Direct function calls (same bundle) | `applyMove(state, move): MoveResult` |
+| `useGame` ↔ `useAI` | Promise-based async call | `requestMove(state, config): Promise<Move>` |
+| Main thread ↔ AI Worker | `postMessage` / `onmessage` | `AIWorkerRequest` / `AIWorkerResponse` typed messages |
+| `useGame` ↔ `useP2P` | Callback injection | `onRemoteMove: (move: Move) => void` passed to useP2P |
+| `useGame` ↔ localStorage | Sync read/write on state change | Versioned JSON schema |
+| Board ↔ `useGame` | React props + callbacks | `gameState`, `legalMoves`, `onNodeClick` |
+
+### External Boundaries
+
+| Service | Integration | Notes |
+|---------|------------|-------|
+| WebRTC (browser API) | `useP2P` hook wraps `RTCPeerConnection` | No signaling server; manual SDP exchange via UI |
+| localStorage | `useLocalStorage` hook + versioned schema | Migrate schema on version bump |
+| Service Worker (Phase 7) | Vite PWA plugin (`vite-plugin-pwa`) | Precaches built assets; no dynamic data |
+| GitHub Pages | Vite build → `gh-pages` branch via GitHub Actions | Static files only, hash-based routing |
+
+---
+
+## Scaling Considerations
+
+This is a static SPA with no server. "Scaling" means bundle size, AI performance, and rendering smoothness — not user concurrency.
+
+| Concern | Current approach | If it becomes a problem |
+|---------|-----------------|------------------------|
+| Bundle size (< 1MB target) | Tree-shaking via Vite, lazy-load non-game screens | Code-split screens; lazy-import audio assets |
+| AI computation time | Web Worker isolates it; difficulty caps control time | Iterative deepening with time budget; WASM Rust port |
+| Board re-render on every move | React.memo on Board; pieces re-render only on their node change | Already sufficient for 23 nodes |
+| localStorage size | ~1KB per game state; history can grow | Cap history at N games; offer export/clear |
+| WebRTC ICE negotiation | Manual SDP copy-paste sidesteps signaling server cost | Add a free STUN server (Google's public STUN is fine) |
+
+---
 
 ## Sources
 
-- [flutter_rust_bridge GitHub](https://github.com/fzyzcjy/flutter_rust_bridge) -- official repo, v2 architecture
-- [flutter_rust_bridge WASM Limitations](https://cjycode.com/flutter_rust_bridge/manual/miscellaneous/wasm-limitations) -- threading constraints
-- [flutter_rust_bridge Cross-Origin Docs](https://cjycode.com/flutter_rust_bridge/manual/miscellaneous/web-cross-origin) -- COOP/COEP guidance
-- [flutter_rust_bridge Async Dart Guide](https://cjycode.com/flutter_rust_bridge/guides/concurrency/async-dart) -- sync/async patterns
-- [Cargo Workspaces - Rust Book](https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html) -- workspace layout
-- [Large Rust Workspaces - matklad](https://matklad.github.io/2021/08/22/large-rust-workspaces.html) -- flat crate layout pattern
-- [Command Pattern - Game Programming Patterns](https://gameprogrammingpatterns.com/command.html) -- command/undo architecture
-- [Turn-Based Game in Rust](https://herluf-ba.github.io/making-a-turn-based-multiplayer-game-in-rust-01-whats-a-turn-based-game-anyway.html) -- reducer/event pattern
-- [Flutter Web WASM Support](https://docs.flutter.dev/platform-integration/web/wasm) -- single-threaded mode, header requirements
-- [Flutter Web Renderers](https://docs.flutter.dev/platform-integration/web/renderers) -- CanvasKit/Skwasm
-- [Riverpod Official Docs](https://riverpod.dev/) -- Notifier pattern, v3
-- [Riverpod Notifier/AsyncNotifier Guide](https://codewithandrea.com/articles/flutter-riverpod-async-notifier/) -- practical patterns
-- [wasm-bindgen Web Worker Example](https://rustwasm.github.io/docs/wasm-bindgen/examples/wasm-in-web-worker.html) -- WASM in WebWorker
-- [parcel-yavalath](https://github.com/N-McA/parcel-yavalath) -- Rust WASM MCTS board game reference
-- [Flutter CustomPainter Performance](https://plugfox.dev/high-performance-canvas-rendering/) -- repaint optimization
-- [Dart Isolates / Concurrency](https://docs.flutter.dev/perf/isolates) -- WebWorker on web
-- [isolate_manager package](https://pub.dev/packages/isolate_manager) -- cross-platform isolate/WebWorker
-- [Flutter Update - Single-threaded WASM mode](https://github.com/flutter/website/issues/11354) -- no headers required
+- MDN: WebRTC Data Channels for Games — https://developer.mozilla.org/en-US/docs/Games/Techniques/WebRTC_data_channels
+- WebRTC Hacks: P2P Multiplayer via DataChannel — https://webrtchacks.com/datachannel-multiplayer-game/
+- LogRocket: Web Workers with React and TypeScript — https://blog.logrocket.com/web-workers-react-typescript/
+- boardgame.io — open-source turn-based game framework (G/ctx pattern, engine/UI separation) — https://boardgame.io/documentation/
+- Game Programming Patterns (Nystrom) — Command pattern for game actions — https://gameprogrammingpatterns.com/command.html
+- Vite Worker docs — module worker bundling — https://vitejs.dev/guide/features.html#web-workers
+- Project TECH-SPEC.md — canonical architecture decisions for this project
+
+---
+*Architecture research for: web-based asymmetric board game with AI and P2P multiplayer*
+*Researched: 2026-03-04*

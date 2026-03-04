@@ -1,331 +1,332 @@
-# Domain Pitfalls
+# Pitfalls Research
 
-**Domain:** Rust game engine + Flutter web app (traditional board game via flutter_rust_bridge FFI, WASM, GitHub Pages)
-**Researched:** 2026-03-03
+**Domain:** Web-based asymmetric strategy board game (Pulijoodam / Tiger-Goat)
+**Researched:** 2026-03-04
+**Confidence:** HIGH (engine/AI/PWA sections), MEDIUM (WebRTC section)
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, major rework, or blocked deployments.
+### Pitfall 1: Jump-Path Derivation Misses Diagonal-vs-Orthogonal Direction
 
-### Pitfall 1: Cross-Origin Isolation Headers on GitHub Pages
+**What goes wrong:**
+The 23-node board has both orthogonal (grid) and diagonal (triangle apex) connections. When computing jump triples `(A, over B, land C)` by adding direction vectors, the code may register illegal jumps — e.g., a tiger at a grid corner computing a diagonal direction into the triangle zone and hitting a node that is geometrically collinear but not graph-adjacent to B. Captured goat is removed; landing node is accepted; no error is thrown. The bug is silent.
 
-**What goes wrong:** flutter_rust_bridge's async WASM mode requires `SharedArrayBuffer`, which requires cross-origin isolation (COOP/COEP headers). GitHub Pages does not allow custom HTTP headers. Without these headers, `SharedArrayBuffer` is unavailable, meaning multi-threaded WASM and async Rust-to-Dart communication may silently fail or degrade.
+**Why it happens:**
+Developers derive jump paths by arithmetic on (x, y) coordinates. The check "node C exists AND is adjacent to B" is the critical guard, but it is easy to write "node C exists AND distance from B equals expected step" instead — which is a different and weaker condition. In this board the apex triangle creates short diagonals that can produce false collinearity with distant grid nodes.
 
-**Why it happens:** Developers build and test locally with `flutter run --web-header=Cross-Origin-Opener-Policy=same-origin --web-header=Cross-Origin-Embedder-Policy=require-corp`, everything works, then deploy to GitHub Pages where those headers cannot be set. The app either crashes or silently falls back to degraded single-threaded mode.
+**How to avoid:**
+The TECH-SPEC derivation algorithm (step 3: "node C exists AND is adjacent to B") is correct. Implement it literally: `adjacencyList[B].includes(C)` — not a distance check. After building the jump map, enumerate all 23×23×23 triples and assert: every registered jump triple `(A,B,C)` must satisfy both `adj[A].includes(B)` and `adj[B].includes(C)`. Write this as an engine unit test that runs against the hard-coded board-graph.md adjacency list.
 
-**Consequences:** AI computation blocks the main thread, UI freezes during AI turns, or the app fails to load entirely on production. This is discovered late because local dev works fine.
+**Warning signs:**
+- AI captures goats from positions that feel "too far away"
+- Manual test: place goat at node 4 (corner), tiger at node 9 (below it), no empty node beyond — tiger should not be able to jump; if it can, the jump map is wrong
+- Tiger captures across the triangle/grid seam in unexpected directions
 
-**Prevention:**
-- Use `coi-serviceworker` (a service worker that injects COOP/COEP headers client-side) from day one. Include it in your `index.html` before any other scripts.
-- Test deployment to GitHub Pages in the very first milestone, not after the engine is built.
-- Configure flutter_rust_bridge with `default_dart_async: false` as a fallback, using `#[frb(sync)]` for functions that must work without cross-origin isolation.
-- Validate that the service worker approach works on Safari (Safari has additional restrictions on nested Workers).
-
-**Detection:** App works locally but shows blank screen or frozen UI on GitHub Pages. Console errors about `SharedArrayBuffer` or cross-origin isolation.
-
-**Phase:** Must be addressed in Phase 1 (FFI/WASM scaffold). Validate deployment to GitHub Pages before writing any game logic.
-
-**Confidence:** HIGH -- GitHub Pages header limitation is confirmed in [GitHub Community Discussion #13309](https://github.com/orgs/community/discussions/13309) and the `coi-serviceworker` workaround is documented in [flutter_rust_bridge cross-origin docs](https://cjycode.com/flutter_rust_bridge/manual/miscellaneous/web-cross-origin).
+**Phase to address:** Phase 1 (engine unit tests — topology, captures)
 
 ---
 
-### Pitfall 2: AI Computation Blocking the Browser Main Thread
+### Pitfall 2: Chain-Hop Termination Handled in UI Instead of Engine
 
-**What goes wrong:** Minimax with alpha-beta pruning at depth 6+ or MCTS with thousands of simulations takes hundreds of milliseconds to seconds. In WASM, this runs on the browser's main thread (unless explicitly moved to a Web Worker), freezing the UI completely. The user sees a hung app during AI turns.
+**What goes wrong:**
+Mid-chain-hop state (`chainJumpInProgress`) is a first-class game state concept, but developers often leak it into the UI layer ("if a capture just happened, check the board for more jumps"). When the engine and UI disagree on when a chain ends, you get: UI lets the goat player move while a chain is still live; or the tiger can "opt out" of a chain inconsistently; or undo during a chain leaves the board in a corrupt intermediate state.
 
-**Why it happens:** Native Rust uses OS threads trivially. WASM has no native threading -- `std::thread::spawn` does not work. Developers write threaded Rust code that compiles to WASM but silently becomes single-threaded, or panics at runtime.
+**Why it happens:**
+Chain-hops feel like a UI concern ("keep highlighting destinations") so developers handle the continuation check in the React component rather than in `getLegalMoves()`. The engine's `GameState.chainJumpInProgress` field then becomes decorative.
 
-**Consequences:** UI freezes for 2-5 seconds on Expert difficulty. Users think the app crashed. On mobile browsers, the OS may kill the tab. The "AI move < 2s at Hard" performance constraint becomes impossible to meet without architectural changes.
+**How to avoid:**
+`getLegalMoves()` must be the single authority. When `chainJumpInProgress !== null`, it returns only further-jump moves for the in-progress tiger, or an empty list (signalling chain end and turn switch). The UI reads `getLegalMoves()` on every render — it never reasons independently about whether a chain is ongoing. Write unit tests for: chain of 2 jumps, chain where second jump is optional (Andhra rules), undo in the middle of a chain.
 
-**Prevention:**
-- Design the AI computation as a message-passing architecture from the start: Dart spawns a Web Worker, sends game state, receives the move result.
-- Use flutter_rust_bridge's Web Worker support or manually create a dedicated Worker that loads the WASM module independently.
-- Implement iterative deepening with time budgets: the AI searches progressively deeper and returns the best move found when the budget expires (e.g., 1.5s for Hard, 4s for Expert).
-- For MCTS, use iteration-count budgets rather than time-based budgets to avoid variance across devices.
-- Profile WASM performance early: WASM runs at roughly 60-80% of native speed for compute-heavy Rust. A minimax that takes 1s natively may take 1.5-2s in WASM.
+**Warning signs:**
+- Undo during a chain-hop leaves a captured goat on the board
+- Goat player gets a move prompt between two tiger jumps
+- Chain logic works in isolation but breaks when the AI is playing tiger (because the AI calls `applyMove()` twice without going through the UI)
 
-**Detection:** UI freezes during AI turns. DevTools shows long tasks (>50ms) on the main thread. `performance.now()` measurements show AI calls taking >100ms.
-
-**Phase:** Must be architectured in Phase 1 (engine API design), implemented in Phase 2 (AI). The Command/Event pattern in PROJECT.md supports this -- commands go to the Worker, events come back.
-
-**Confidence:** HIGH -- WASM single-threaded limitation is well-documented. The [Rust WASM multithreading guide](https://rustwasm.github.io/2018/10/24/multithreading-rust-and-wasm.html) confirms Web Workers are the solution.
+**Phase to address:** Phase 1 (engine correctness), Phase 2 (AI self-play exposes chain-hop bugs quickly)
 
 ---
 
-### Pitfall 3: flutter_rust_bridge Codegen Version Drift and Build Breakage
+### Pitfall 3: Threefold Repetition Hash Includes Mutable Transient Fields
 
-**What goes wrong:** flutter_rust_bridge requires exact version alignment between the Dart package (`flutter_rust_bridge`), the Rust crate (`flutter_rust_bridge`), and the codegen tool (`flutter_rust_bridge_codegen`). A mismatch causes cryptic build failures. Additionally, Rust toolchain updates (especially LLVM version bumps) break wasm-opt compatibility.
+**What goes wrong:**
+The draw-detection hash is computed over `GameState`. If the hash includes fields that differ between two positions that are logically identical — e.g., `moveHistory`, `capturelessMoves`, or `chainJumpInProgress` when null — two identical board positions produce different hashes. Draws are never declared; the `stateHashes` map bloats. Or worse: if the hash is too shallow (only `board` array), two states that are positionally identical but have different `currentTurn` values hash the same, and a draw is declared prematurely.
 
-**Why it happens:** `cargo update` or `flutter pub upgrade` independently bumps one side. Rust 1.87+ with LLVM 20 produces WASM binaries that older `wasm-opt` cannot process, causing "Bulk memory operations require bulk memory" errors. The codegen silently modifies `Cargo.toml` version constraints in some cases.
+**Why it happens:**
+`JSON.stringify(state)` is tempting as a quick hash. It includes everything: history arrays, config, the works. Developers either include too much (false negatives for repetition) or too little (false positives).
 
-**Consequences:** Build fails with opaque error messages. CI pipeline breaks after a routine dependency update. Hours lost debugging toolchain interactions. In the worst case, you pin to an old Rust version and miss security patches.
+**How to avoid:**
+Hash exactly: `board` (piece positions) + `currentTurn` + `chainJumpInProgress`. Nothing else. Use a fast, consistent serialisation — concatenate the 23-slot board array as a string plus turn char plus chain state. For performance in MCTS simulations, pre-compute a Zobrist hash: 23 nodes × 3 states (empty/tiger/goat) = 69 random 32-bit numbers XOR'd together, plus turn bit and chain bit. This is O(1) incremental update on each move application. Write unit tests: same board same turn = same hash; same board different turn = different hash; history irrelevant to hash.
 
-**Prevention:**
-- Pin all three flutter_rust_bridge versions explicitly in both `pubspec.yaml` and `Cargo.toml`. Never use `^` ranges for this dependency.
-- Pin the Rust toolchain version in `rust-toolchain.toml` at the project root. Test Rust version upgrades in a separate branch.
-- For Rust 1.87+/LLVM 20+ wasm-opt failures, pass `--enable-bulk-memory --enable-threads --enable-nontrapping-float-to-int` flags to wasm-opt in the build script.
-- Run `flutter_rust_bridge_codegen generate` in CI and fail if the generated files differ from committed files (ensures codegen is never stale).
-- Lock `wasm-pack` or the build tooling version in CI explicitly.
+**Warning signs:**
+- Long games between two AIs at Expert level never trigger draw (check: is `stateHashes` actually accumulating entries?)
+- Draw triggered on move 2 or 3 (hash too coarse)
+- `stateHashes` map grows without bound during self-play benchmarks
 
-**Detection:** Build fails after `cargo update` or Rust toolchain update. Error messages mention `wasm-opt`, version mismatches, or "codegen version should be the same as runtime version."
-
-**Phase:** Phase 1 (project scaffold). Set up version pinning and CI validation before writing any application code.
-
-**Confidence:** HIGH -- The wasm-opt/LLVM 20 issue is tracked in [flutter_rust_bridge #2601](https://github.com/fzyzcjy/flutter_rust_bridge/issues/2601) and [rust-lang #141080](https://github.com/rust-lang/rust/issues/141080). Version mismatch errors are documented in [flutter_rust_bridge troubleshooting](https://cjycode.com/flutter_rust_bridge/manual/troubleshooting).
+**Phase to address:** Phase 1 (draw detection), Phase 2 (exposed by AI self-play loops)
 
 ---
 
-### Pitfall 4: Rust Panics in WASM Crash the Entire App
+### Pitfall 4: SVG Node Hit Areas Are Too Small on Mobile
 
-**What goes wrong:** An unhandled Rust panic (array out of bounds, `.unwrap()` on `None`, integer overflow in debug) in WASM aborts the entire WebAssembly instance. The Flutter app sees an unresolved JavaScript promise or a hard crash with no recovery path. Unlike native where you might get a crash report, WASM panics produce opaque "unreachable" errors in the browser console.
+**What goes wrong:**
+SVG `<circle>` elements for board nodes are sized visually (e.g., radius 8–12px) and are the sole touch target. On a 320px-wide phone screen, the 23 nodes of this board are packed at roughly 20–25px spacing in the grid section. Tapping a node reliably requires hitting a circle with a 16–24px diameter — less than half the 44px minimum. Users tap adjacent nodes constantly. The board feels broken.
 
-**Why it happens:** The `wasm32-unknown-unknown` target defaults to `panic = "abort"`. `std::panic::catch_unwind` has no effect. Developers write Rust with `.unwrap()` and `.expect()` during prototyping, which works fine in tests but any edge case in production kills the web app silently.
+**Why it happens:**
+The board renders correctly on a 1440px desktop monitor. Developers test on desktop, ship, then discover the mobile problem. SVG `viewBox` auto-scales the visual but not the interaction — a circle rendered at radius 10 in a viewBox will have a 10-unit touch area regardless of the rendered pixel size on screen.
 
-**Consequences:** User sees a blank screen or frozen UI with no error message. No crash telemetry. Extremely difficult to debug in production. The game state is lost.
+**How to avoid:**
+Overlay transparent `<circle>` or `<rect>` hit-area elements at a fixed 44px minimum, separate from the visual circles. Use a `hitRadius` computed as `max(visualRadius, 22)` in SVG user units scaled to match rendered size. Calculate: if the viewBox is 400 units wide and the screen is 320px, one unit = 0.8px — so you need hit circles of radius 27.5 units (= 22px / 0.8) to achieve 44px. Derive this from the container's `getBoundingClientRect()` at mount. Test on a real 375px-wide device, not browser devtools emulation.
 
-**Prevention:**
-- Add `console_error_panic_hook` as the very first thing in WASM initialization. This converts panics to `console.error` with full stack traces.
-- Adopt a zero-unwrap policy in any code that runs through WASM FFI. Use `Result<T, E>` everywhere and propagate errors to Dart as typed error enums.
-- The engine API boundary (the FFI layer) must catch all errors and return them as `Result` types that flutter_rust_bridge marshals into Dart exceptions.
-- Write property-based tests (using `proptest` or `quickcheck`) for the game engine to catch edge cases that cause panics.
-- In CI, run the WASM build with `RUST_BACKTRACE=1` and test all FFI functions to verify no panics escape.
+**Warning signs:**
+- Tap accuracy below 90% in manual playtesting on a physical iPhone SE
+- Users reporting "I tapped but nothing happened"
+- Devtools mobile emulation works but real device doesn't
 
-**Detection:** Browser console shows "RuntimeError: unreachable executed" or "Uncaught (in promise)" errors. App goes blank after certain game states.
-
-**Phase:** Phase 1 (engine scaffold). Establish error handling patterns before writing game logic. Every function exposed through FFI must return `Result`.
-
-**Confidence:** HIGH -- The [console_error_panic_hook](https://github.com/rustwasm/console_error_panic_hook) crate exists specifically for this. The panic=abort behavior is documented in the Rust WASM target specification.
+**Phase to address:** Phase 1 (board interaction), Phase 3 (responsive design audit), Phase 7 (final accessibility pass)
 
 ---
 
-## Moderate Pitfalls
+### Pitfall 5: Web Worker AI Serialization Blocks Main Thread on State Size
 
-### Pitfall 5: CanvasKit Bundle Size and Initial Load Time
+**What goes wrong:**
+`postMessage(gameState)` to the AI worker triggers structured clone serialization. The `GameState` includes `moveHistory: Move[]` (up to 100+ moves in a late game), `stateHashes: Map<string, number>` (potentially hundreds of entries), and the full `config` object. Structured clone of complex nested objects with Maps takes 5–15ms on mid-range devices. This runs on the main thread, stalling the UI briefly on every move — visible as a frame drop just before the "thinking" spinner appears.
 
-**What goes wrong:** CanvasKit adds ~1.5MB to the initial download. Combined with the Rust WASM binary (potentially 500KB-2MB depending on AI complexity) and Flutter's main.dart.js, the total initial payload exceeds 4MB. On slow connections (common in rural India, the target audience for a South Indian traditional game), this means 10+ second load times.
+**Why it happens:**
+The cost is invisible in Chrome devtools on a MacBook Pro. It appears in production on Android mid-range or under CPU throttling. The `Map` type is particularly expensive to serialize because it's not a plain object.
 
-**Why it happens:** CanvasKit is now the default and only renderer for Flutter web (HTML renderer removed in Flutter 3.29). There is no opt-out. The Rust WASM binary includes the full AI engine, board logic, and any static data.
+**How to avoid:**
+Serialise only what the AI needs: `{ board: number[], phase, currentTurn, goatsInPool, goatsCaptured, chainJumpInProgress, config }`. The AI does not need `moveHistory` or `stateHashes` — it computes its own search tree. Keep `GameState` intact in the main thread; pass a minimal `AIInput` type to the worker. This reduces the payload from ~10KB to ~200 bytes for a typical game state. Measure with a `performance.mark()` around the `postMessage()` call in development.
 
-**Prevention:**
-- Use Flutter's deferred loading (`deferred as`) for non-critical features (tutorial, replay, settings).
-- Compile the Rust WASM binary with `wasm-opt -Oz` for size optimization, and enable LTO (`lto = true` in `Cargo.toml` release profile).
-- Use `wee_alloc` as the global allocator in the WASM build to save ~10KB of allocator code.
-- Self-host CanvasKit from your GitHub Pages domain with proper cache headers instead of loading from Google's CDN (avoids CORS issues and enables service worker caching).
-- Add a loading screen/progress indicator in `index.html` (pure HTML/CSS, before Flutter loads) so users see immediate feedback.
-- Set up service worker caching so repeat visits are instant.
+**Warning signs:**
+- Slight UI freeze (jank) when the AI begins computing, separate from when it finishes
+- Chrome Performance tab shows a long "structured clone" task on the main thread call stack
+- Problem appears only on CPU-throttled devtools or real low-end devices
 
-**Detection:** Lighthouse performance audit shows >3s Time to Interactive. Initial load on throttled network (3G simulation in DevTools) exceeds 8 seconds.
-
-**Phase:** Phase 1 (scaffold) for the loading screen. Phase 3-4 (polish) for bundle optimization. Measure baseline early.
-
-**Confidence:** MEDIUM -- The 1.5MB CanvasKit figure is from [Flutter issue #89616](https://github.com/flutter/flutter/issues/89616). Flutter's move toward WASM compilation (Flutter 3.35+) may reduce this, but the timeline is uncertain.
+**Phase to address:** Phase 2 (Web Worker setup)
 
 ---
 
-### Pitfall 6: Service Worker Caching Causes Stale Deployments
+### Pitfall 6: MCTS Evaluation Asymmetry — Tiger Wins Without Training Signal
 
-**What goes wrong:** After deploying a new version to GitHub Pages, users continue seeing the old version. The Flutter service worker aggressively caches `index.html`, `main.dart.js`, and CanvasKit. Even hard-refreshing may not clear the cache. Users must manually clear browser data.
+**What goes wrong:**
+In random-play MCTS rollouts for the placement phase, tigers win dramatically more often than goats (research on comparable games like Bagh Chal confirms this bias). The MCTS tree therefore rates goat placement moves as near-equivalent (all lead to ~70% tiger win in rollouts), fails to distinguish good from bad goat positions, and produces an AI that plays mediocre goat placement but excellent tiger. Result: "Hard" goat AI feels Easy; "Easy" tiger AI feels Hard.
 
-**Why it happens:** Flutter generates a service worker (`flutter_service_worker.js`) that caches everything for offline support. The browser caches `index.html` itself, and even if the server has a new version, the service worker intercepts the request and serves the cached version.
+**Why it happens:**
+Pure MCTS rollouts assume random play is a reasonable proxy for game quality. In highly asymmetric games with a dominant player in random play, this proxy breaks down for the weaker-in-random-play side.
 
-**Consequences:** Bug fixes and new features don't reach users. "It works on my machine" but users report the old bug. Particularly problematic for a game where rule fixes need to propagate immediately.
+**How to avoid:**
+Replace pure random rollouts with heuristic-guided rollouts. During MCTS simulation, instead of selecting random moves, bias toward moves that score highly on a simple heuristic (e.g., goats: prefer placements that block tiger adjacencies; tigers: prefer placements that create capture opportunities). Even light guidance — selecting the best of 3 random moves — significantly improves goat evaluation signal. Validate with AI self-play: at each difficulty level, goat win rate should be 20–40% at Easy, rising to 35–50% at Expert. If goat win rate is under 10% at any level, rollout bias is the cause.
 
-**Prevention:**
-- Configure the service worker for "network-first" strategy for `index.html` by customizing `flutter_service_worker.js` or using a `serviceWorkerVersion` parameter tied to build timestamps.
-- Add cache-busting query parameters to critical asset references in `index.html`.
-- Implement a version check: on app startup, fetch a `version.json` from the server (with cache-busting), compare with the cached version, and trigger a cache clear + reload if different.
-- In `index.html`, set `serviceWorkerVersion` to a unique build hash or timestamp.
-- Consider disabling the service worker entirely if offline support is not critical for v1 (it likely is not for a game with server-less AI).
+**Warning signs:**
+- Easy AI beats new human players as tiger but loses trivially as goat
+- Expert AI as goat loses to Medium AI as tiger consistently
+- AI self-play shows tiger win rate above 85% at all difficulty levels
 
-**Detection:** Deploy a change, open the app in a browser that previously loaded the old version, and verify the new version appears. Automate this check in CI with version assertions.
-
-**Phase:** Phase 1 (deployment scaffold). Configure service worker strategy when setting up GitHub Pages deployment.
-
-**Confidence:** HIGH -- This is one of the most reported Flutter web issues. See [Flutter #106943](https://github.com/flutter/flutter/issues/106943) and [Flutter #164613](https://github.com/flutter/flutter/issues/164613).
+**Phase to address:** Phase 2 (AI implementation and self-play validation)
 
 ---
 
-### Pitfall 7: CustomPainter Repainting the Entire Board Every Frame
+### Pitfall 7: WebRTC P2P Fails for ~20–30% of Users Without TURN
 
-**What goes wrong:** `CustomPainter.paint()` redraws the entire board (23 nodes, all edges, all pieces, labels) on every frame during animations, causing GPU frame times to spike from ~12ms to 30-50ms, dropping below 60fps.
+**What goes wrong:**
+The plan is zero-server WebRTC with manual SDP exchange. STUN-only connections fail when either peer is behind a symmetric NAT or a strict corporate/mobile carrier firewall. Industry data: approximately 20% of users operate behind restrictive NAT, and up to 30% of WebRTC sessions require a TURN relay server. For these users, connection simply never establishes — the invite code exchange completes but the data channel never opens. There is no error message; the app silently hangs.
 
-**Why it happens:** Developers put the entire board rendering in a single `CustomPainter` without using `RepaintBoundary` or `shouldRepaint` optimization. Any state change (a piece moving, a highlight appearing) triggers a full repaint of the entire canvas.
+**Why it happens:**
+Developers test on their home/office network where STUN works. They don't test on mobile carrier networks, strict corporate proxies, or from behind double-NAT (common with 4G/5G). The assumption "it's just a turn-based game, no real-time needed" is correct for latency but not for connection establishment.
 
-**Consequences:** Janky animations during piece movement and captures. Particularly bad on low-end mobile browsers. The "60fps" requirement becomes unreachable.
+**How to avoid:**
+Use free public STUN servers (Google's `stun:stun.l.google.com:19302`) for the majority of users. Document the failure case explicitly: show a fallback UX ("Connection failed — your network may block direct connections. Try a different network or share a link via the local network."). Do NOT promise "zero server" in the UI — promise "no account required." For a future hardening phase, consider a free/self-hosted TURN server (Coturn on a $5/month VPS). The data channel is text-only turn-based game commands — TURN relay bandwidth is negligible. For Phase 6, the minimum viable bar is: connection works on home WiFi + mobile (most cases), and fails gracefully with a clear message elsewhere.
 
-**Prevention:**
-- Layer the rendering: static board (grid lines, node positions) in one `CustomPainter` wrapped in `RepaintBoundary`, pieces in a separate `CustomPainter`, animations/highlights in a third layer.
-- The static board layer should almost never repaint (only on theme change or resize). Use `shouldRepaint` to return `false` when the board geometry hasn't changed.
-- For piece movement animations, only repaint the pieces layer, not the board layer.
-- Use `Canvas.saveLayer()` sparingly -- it forces GPU texture allocation per layer.
-- Profile with Flutter DevTools in profile mode (not debug mode, which is 5-10x slower for rendering).
-- For capture animations (particle bursts), consider using a `RawImage` or pre-rendered sprite sheet rather than real-time particle simulation in `CustomPainter`.
+**Warning signs:**
+- Manual testing works between two machines on the same WiFi
+- Testing from phone (mobile data) to laptop (WiFi) hangs indefinitely
+- No ICE connection state progress visible in browser devtools WebRTC internals
 
-**Detection:** Flutter DevTools "Performance" tab shows frame render times >16ms. The "Raster" thread shows high GPU frame times.
-
-**Phase:** Phase 2 (board rendering). Design the painter layer hierarchy before implementing animations.
-
-**Confidence:** MEDIUM -- Based on known Flutter CustomPainter performance characteristics from [Flutter #72066](https://github.com/flutter/flutter/issues/72066) and [Flutter performance docs](https://docs.flutter.dev/perf/best-practices). The specific board complexity (23 nodes) is moderate and should be manageable with proper layering.
+**Phase to address:** Phase 6 (P2P multiplayer)
 
 ---
 
-### Pitfall 8: Web Audio Playback Failures on Mobile Browsers
+### Pitfall 8: State Desync in P2P Due to Both Clients Running Engine Independently
 
-**What goes wrong:** Sound effects fail to play on iOS Safari and some Android browsers. AudioContext creation requires a user gesture. Sounds that work in desktop Chrome are silent on mobile.
+**What goes wrong:**
+Both peers run the engine locally and relay only moves (commands). If the engine has any non-determinism — or if a client applies a move in a slightly different game state due to an earlier disagreement — the boards silently diverge. Tigers appear on different nodes on each screen. The game continues with each player seeing a different board. The bug is catastrophic and invisible.
 
-**Why it happens:** Mobile browsers enforce a strict autoplay policy: an `AudioContext` can only be created (or resumed) in response to a user tap/click event. If the audio system is initialized on app startup rather than on first user interaction, all subsequent `play()` calls are silently ignored.
+**Why it happens:**
+The "lockstep with relay" pattern requires the engine to be perfectly deterministic. Any hidden state — e.g., a `Math.random()` call inside move validation, a floating-point comparison, or an engine bug that triggers only on certain state transitions — produces divergence. Also: if undo is mistakenly enabled in P2P games, one client's undo is not relayed, and the states immediately diverge.
 
-**Consequences:** Sound toggle exists but sounds never play on mobile. No error messages -- the API succeeds silently. Users on mobile (likely the primary audience for a casual board game) get a degraded experience.
+**How to avoid:**
+The engine must be entirely deterministic and pure (no random calls — the AI's randomness lives in the worker, and only the chosen move is relayed). Enforce this at the type level: the engine takes no `Random` parameter; AI difficulty randomness is injected only at the AI layer. Add a state hash check: after each move, both clients compute the board hash and include it in the next message. If hashes diverge, surface a "Sync error — game state mismatch" banner and offer to restart. This catches divergence at the first bad move rather than 10 moves later. The TECH-SPEC notes to disable undo in P2P — enforce this in the engine layer, not just the UI.
 
-**Prevention:**
-- Initialize the AudioContext lazily on the first user tap, not on app startup. Store a "audio context initialized" flag and create it in the first `onTap` handler.
-- Pre-decode all audio assets after AudioContext initialization (they are small: place, slide, capture, win/lose sounds).
-- Use the Web Audio API directly through Dart's `package:web` (or JS interop) rather than relying on Flutter audio packages that may not handle the web platform well.
-- Test on real iOS Safari and Android Chrome early. The iOS simulator does not accurately reproduce audio restrictions.
-- Implement a graceful fallback: if AudioContext creation fails, disable sound silently and hide the sound toggle.
+**Warning signs:**
+- Manual P2P test where one player undoes via browser refresh and the other does not
+- AI-driven automated P2P test shows board position mismatch after 20 moves
+- One player sees "goat's turn" while the other sees "tiger's turn"
 
-**Detection:** Open the app on iOS Safari, tap around, no sounds play. Console shows no errors (it fails silently).
-
-**Phase:** Phase 3 (sound effects). But design the audio initialization pattern in Phase 2 when building the UI shell.
-
-**Confidence:** MEDIUM -- Based on well-known Web Audio API restrictions. See [howler.js iOS issues](https://github.com/goldfire/howler.js/issues/1220) and general browser autoplay policies.
+**Phase to address:** Phase 6 (P2P multiplayer)
 
 ---
 
-### Pitfall 9: GitHub Pages Base Href Misconfiguration
+### Pitfall 9: Service Worker Serves Stale Build After GitHub Pages Deploy
 
-**What goes wrong:** The Flutter web app loads a blank white screen when deployed to GitHub Pages at `username.github.io/pulijoodam/`. All asset requests (main.dart.js, CanvasKit, WASM binary, fonts) return 404 because they request from the root path instead of the repository subpath.
+**What goes wrong:**
+A user has the app installed as a PWA or cached offline. A new version is deployed to GitHub Pages. The service worker intercepts the request for `index.html`, serves the cached version, and never fetches the new one. The user runs old code — potentially with a bug that was just fixed — indefinitely, until they manually clear cache or the browser evicts it. Safari is particularly aggressive at serving stale service worker responses.
 
-**Why it happens:** Flutter's `index.html` defaults to `<base href="/">`. GitHub Pages project sites serve from a subpath (`/repository-name/`). Without `--base-href=/pulijoodam/` in the build command, every asset URL is wrong.
+**Why it happens:**
+Vite's `vite-plugin-pwa` default precache strategy caches `index.html` aggressively. GitHub Pages sets permissive cache headers. The service worker `sw.js` file itself is cached by the browser's HTTP cache, so even the new service worker is not fetched. The update loop is: new `sw.js` → new `sw.js` is fetched → install → wait for all tabs to close → activate. If users leave tabs open, they run old code for days.
 
-**Consequences:** Blank white screen in production. The app works perfectly on `localhost` but fails completely on GitHub Pages. This is the single most common Flutter web deployment failure.
+**How to avoid:**
+Configure `vite-plugin-pwa` with `registerType: 'autoUpdate'` — when a new service worker is detected, automatically skip waiting and reload the page. This is appropriate for a game (no unsaved form data to lose). Set `cache-control: no-cache` on `sw.js` and `index.html` at the GitHub Pages level (use a `_headers` file if the host supports it, or accept the browser's default behavior of re-checking the SW file every 24 hours). Add a visible "New version available — tap to update" prompt as a secondary measure. Vite's plugin handles cache-busting of hashed assets automatically — the risk is only for `index.html` and `sw.js`.
 
-**Prevention:**
-- Always build with `flutter build web --base-href=/pulijoodam/ --release`.
-- Encode the `--base-href` value in the GitHub Actions workflow file, not as a manual step.
-- The WASM binary path must also respect the base href -- verify that flutter_rust_bridge's WASM loader resolves the `.wasm` file relative to the base, not the root.
-- Test the built output by serving it locally with a subpath: `python3 -m http.server -d build/web` and access via `http://localhost:8000/pulijoodam/` (using a local reverse proxy or symlink to simulate the subpath).
+**Warning signs:**
+- After deploying a bug fix, some users still report the bug
+- The app version string in Settings shows an old version
+- Browser devtools > Application > Service Workers shows a "waiting" worker
 
-**Detection:** Blank screen on GitHub Pages. Browser DevTools Network tab shows 404 errors for JS and WASM files.
-
-**Phase:** Phase 1 (deployment scaffold). Get this right in the first CI pipeline.
-
-**Confidence:** HIGH -- This is the #1 reported Flutter web deployment issue. See [Flutter #95503](https://github.com/flutter/flutter/issues/95503) and [Flutter #98189](https://github.com/flutter/flutter/issues/98189).
+**Phase to address:** Phase 7 (service worker / PWA)
 
 ---
 
-## Minor Pitfalls
+### Pitfall 10: localStorage Game History Grows Without Bound
 
-### Pitfall 10: wasm-bindgen Ownership Transfers Dropping Rust Objects
+**What goes wrong:**
+Auto-save on every move writes the full game state (23-node board + history + metadata) to `localStorage`. A complete game is ~50 moves; at ~1KB per state snapshot, one game = ~50KB. After 200 games (realistic for an engaged player), the history store exceeds 10MB and hits the browser's `localStorage` quota. The next `setItem()` throws a silent `QuotaExceededError`, the auto-save silently fails, and the user's in-progress game is lost on browser close.
 
-**What goes wrong:** When Rust functions return objects through wasm-bindgen/flutter_rust_bridge, ownership transfers to JavaScript. If the Dart side doesn't hold a reference, the Rust object is dropped. Subsequent access from Dart causes "null pointer" or "use after free" style WASM traps.
+**Why it happens:**
+localStorage's 5–10MB limit feels large during development. The auto-save write is fire-and-forget without error handling. Developers test with a handful of games, never reach the limit, and ship.
 
-**Prevention:**
-- Design the FFI API to be stateless where possible: send game state as serialized data (Command pattern), receive results as serialized data (Event pattern). The PROJECT.md's Command/Event pattern naturally avoids this.
-- When stateful handles are necessary (e.g., an AI search context), wrap them in Dart classes with explicit `dispose()` methods.
-- Never pass Rust Vec references across FFI -- data is copied, not shared. Design APIs to accept and return owned data.
+**How to avoid:**
+Wrap every `localStorage.setItem()` in try/catch for `QuotaExceededError`. When quota is exceeded, evict the oldest N games before retrying. Store only the final game state (not every move snapshot) in the history list; use the engine's `moveHistory` array to reconstruct intermediate states for replay — do not store 50 snapshots per game. The in-progress game snapshot (one entry, overwritten every move) should be a separate key from the history archive. Cap history at a configurable maximum (e.g., 100 games); surface a "History full — oldest games deleted" notification.
 
-**Phase:** Phase 1 (FFI API design). The Command/Event architecture already mitigates this.
+**Warning signs:**
+- Long-term playtesting session loses a game on browser close with no warning
+- `localStorage.getItem('gameHistory')` returns a JSON string longer than 1MB
+- Any console error mentioning `QuotaExceededError` during manual testing
 
-**Confidence:** HIGH -- Documented in [wasm-bindgen pitfalls](https://www.rossng.eu/posts/2025-01-20-wasm-bindgen-pitfalls/).
-
----
-
-### Pitfall 11: Rust Edition 2024 / Resolver 3 Incompatibility
-
-**What goes wrong:** flutter_rust_bridge codegen may not support the latest Rust edition (2024) or Cargo resolver version (3). Using them causes build failures or codegen errors.
-
-**Prevention:**
-- Start with Rust edition 2021 and resolver 2 in `Cargo.toml`. Only upgrade after confirming flutter_rust_bridge compatibility.
-- Check the [flutter_rust_bridge #2576](https://github.com/fzyzcjy/flutter_rust_bridge/issues/2576) issue for current status before upgrading.
-
-**Phase:** Phase 1 (project scaffold).
-
-**Confidence:** MEDIUM -- Issue reported but may be resolved in newer flutter_rust_bridge releases.
+**Phase to address:** Phase 5 (game history), Phase 3 (settings persistence begins here)
 
 ---
 
-### Pitfall 12: Accessibility Semantics Invisible to Testing Tools
+## Technical Debt Patterns
 
-**What goes wrong:** Flutter web renders to a canvas, making the DOM invisible to standard web testing tools and screen readers unless the semantics tree is explicitly enabled. Testing tools (Cypress, Playwright) cannot find widgets by text or role.
-
-**Prevention:**
-- Enable semantics from app startup with `WidgetsBinding.instance.ensureSemantics()` or use `SemanticsBinding.instance.ensureSemantics()`.
-- Add `Semantics` widgets to all interactive game elements: board nodes, pieces, buttons.
-- For the board, provide semantic labels like "Node A1: Tiger" or "Node B3: empty, valid move target" for screen reader navigation.
-- Test with VoiceOver (macOS/iOS) and ChromeVox during development, not as an afterthought.
-
-**Phase:** Phase 2 (board rendering) for semantic labels. Phase 3 (polish) for screen reader testing.
-
-**Confidence:** MEDIUM -- Flutter's 2025 semantics improvements (80% faster tree compilation, 30% frame time reduction with semantics enabled) help, but the fundamental canvas-based architecture still requires explicit semantic annotations. See [Flutter web accessibility docs](https://docs.flutter.dev/ui/accessibility/web-accessibility).
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Hardcode adjacency as plain array literal | No graph abstraction needed for MVP | Cannot validate graph integrity; jump derivation harder to audit | Phase 1 only if exported as a tested constant |
+| Put chain-hop state in UI (React state, not engine) | Faster to implement in Phase 1 | Breaks AI move application; undo is unpredictable | Never — chain state belongs in engine |
+| Use `JSON.stringify(state)` as position hash | Zero implementation effort | Includes history/config; threefold detection broken | Never — always hash only the position tuple |
+| Pass full `GameState` to Web Worker | Simpler message protocol | Main-thread serialization jank on mid-range devices | Acceptable in Phase 2 MVP; fix before Phase 3 ships |
+| Skip TURN server entirely | Zero infra cost | 20–30% of users cannot connect via P2P | Acceptable for Phase 6 launch if error message is clear |
+| Auto-save full state snapshots per move | Simple replay implementation | localStorage quota exceeded after ~200 games | Phase 3 short-term; fix before Phase 5 ships |
+| Pure random MCTS rollouts | Fastest to implement | Goat AI is systematically weak; difficulty levels misleading | Phase 2 prototype only; fix before user-facing ships |
 
 ---
 
-### Pitfall 13: GitHub Secret Scanning Flags CanvasKit Build Output
+## Integration Gotchas
 
-**What goes wrong:** When pushing Flutter web build output (which includes CanvasKit) to a GitHub branch for Pages deployment, GitHub's secret scanning may flag content in the CanvasKit directory as potential secrets, blocking the push or creating false alerts.
-
-**Prevention:**
-- Use GitHub Actions to build and deploy to the `gh-pages` branch, rather than pushing build artifacts from a local machine.
-- Add the CanvasKit directory to `.gitignore` in the source branch. Only the deployment action should write to `gh-pages`.
-- If using the `peaceiris/actions-gh-pages` or similar actions, the deployment happens in an automated context that may handle these flags differently.
-
-**Phase:** Phase 1 (CI/CD setup).
-
-**Confidence:** MEDIUM -- Reported in [Flutter #145796](https://github.com/flutter/flutter/issues/145796). May depend on repository settings.
-
----
-
-## Phase-Specific Warnings
-
-| Phase Topic | Likely Pitfall | Mitigation | Severity |
-|-------------|---------------|------------|----------|
-| Phase 1: FFI/WASM Scaffold | Cross-origin isolation on GitHub Pages (#1) | Add `coi-serviceworker`, test deployment immediately | Critical |
-| Phase 1: FFI/WASM Scaffold | Base href misconfiguration (#9) | Encode `--base-href` in CI workflow | Critical |
-| Phase 1: FFI/WASM Scaffold | Codegen version drift (#3) | Pin all FRB versions, validate in CI | Critical |
-| Phase 1: FFI/WASM Scaffold | Rust panic handling (#4) | Add `console_error_panic_hook`, zero-unwrap policy | Critical |
-| Phase 1: FFI/WASM Scaffold | Rust edition incompatibility (#11) | Start with edition 2021 | Minor |
-| Phase 2: Game Engine + AI | AI blocking main thread (#2) | Web Worker architecture, iterative deepening | Critical |
-| Phase 2: Board Rendering | CustomPainter full repaint (#7) | Layer static board / pieces / animations | Moderate |
-| Phase 2: Board Rendering | Accessibility semantics (#12) | Add Semantics widgets from the start | Moderate |
-| Phase 3: Sound & Polish | Web Audio mobile failures (#8) | Lazy AudioContext init on first tap | Moderate |
-| Phase 3: Polish & Deploy | Stale cache after deployment (#6) | Version check + cache-busting strategy | Moderate |
-| Phase 3: Polish & Deploy | Bundle size / load time (#5) | Deferred loading, wasm-opt -Oz, loading screen | Moderate |
-| Phase 1: CI/CD | Secret scanning flags (#13) | Build in CI, deploy via Actions only | Minor |
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| Web Worker + Engine | Import React or Vite-specific modules into worker | Keep `src/engine/` import-free from React; worker imports engine directly |
+| Web Worker + AI | Terminate worker on component unmount without cancelling in-flight computation | Track worker state; ignore result if game mode changed before AI responds |
+| SVG + React | Animate `cx`/`cy` or `d` attributes (triggers layout) | Animate only `transform` and `opacity` via CSS transitions — GPU composited |
+| SVG + Touch | Attach `onClick` to visual `<circle>` | Overlay a larger transparent hit-area element with the click handler |
+| localStorage + JSON | Call `JSON.parse()` on potentially-corrupted data without try/catch | Always wrap in try/catch; on parse failure, discard the save and start fresh |
+| WebRTC + GitHub Pages | Use `http://` STUN URLs | STUN/TURN URLs must use `stun:` / `turns:` scheme; GitHub Pages is HTTPS so mixed-content rules apply |
+| vite-plugin-pwa + GitHub Pages | Default `registerType: 'prompt'` leaves stale content for weeks | Use `registerType: 'autoUpdate'` for a game app with no critical unsaved state |
 
 ---
 
-## Key Takeaway
+## Performance Traps
 
-The most dangerous pitfalls for this project cluster around the **deployment boundary**: the gap between "works on localhost" and "works on GitHub Pages." Cross-origin isolation headers, base href routing, service worker caching, and CanvasKit loading all interact in ways that are invisible during local development. The single most important risk mitigation is to **deploy a minimal hello-world to GitHub Pages through the full flutter_rust_bridge WASM pipeline in Phase 1, before writing any game logic.** If the deployment pipeline works for a trivial app, it will work for the real app. If it doesn't, you'll find out in hours instead of weeks.
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Re-rendering entire SVG board on every state change | Visible frame drops during animations; high CPU on React DevTools profiler | Memoize `<BoardLines>` and `<Node>` components; only re-render pieces that moved | From Phase 3 (animations) — invisible without animations |
+| MCTS running 100K simulations synchronously in worker | Worker returns after 8+ seconds; UI shows frozen "thinking" spinner | Use iterative deepening with a time budget: check `Date.now()` every 100 iterations; return best move found so far | Expert difficulty, move 1 of the game (highest branching) |
+| Animating chain-hop captures sequentially without queuing | Second jump animation fires before first resolves; board in wrong visual state | Use an animation queue: engine returns all `GameEvent[]`; UI dequeues one at a time with `setTimeout` gaps | Phase 3 (chain-hop animation) |
+| Loading full game history from localStorage synchronously on app start | App startup jank proportional to history size | Load only metadata (game list) on start; load full move history only when user opens replay | After ~50 saved games |
+
+---
+
+## UX Pitfalls
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| No visual distinction between "no legal moves" and "must continue chain-hop" | Player confused whether it's their turn | Show distinct UI state: "Tiger is jumping — watch for more captures" vs. "No moves — trapped" |
+| AI "thinking" with no time indication | Player thinks app is frozen on Expert AI (up to 5 seconds) | Show animated spinner from the moment the AI is invoked; show "Thinking..." text with elapsed seconds |
+| Tap-tap interaction: second tap on same piece deselects but looks like a miss | Player confused; double-tap feels broken | Animate deselection visually; treat second tap on selected piece as explicit "cancel selection" |
+| Chain-hop: player doesn't realise they can stop the chain | Mandatory multi-jump vs. optional (Andhra rules allow stopping) | Show "Stop chain" button explicitly during a chain in Andhra preset |
+| P2P: "connection failed" with no actionable guidance | User gives up, thinks the feature is broken | Show: "Try switching from WiFi to mobile data" / "Ask your friend to try a different network" |
+| Game over screen with no "Rematch" button | Friction kills engagement; user closes the app | Game-over screen must have: Rematch, Review Game, Main Menu — in that priority order |
+
+---
+
+## "Looks Done But Isn't" Checklist
+
+- [ ] **Capture logic:** Tigers can capture in both phases (placement AND movement) — verify tigers can capture during Phase 1 (placement phase) before all goats are placed
+- [ ] **Chain-hop opt-out:** In Andhra rules, chain continuation is optional — verify the engine allows tiger to stop mid-chain, and the UI shows this choice
+- [ ] **Draw detection:** Verify 50-move counter resets to zero on any capture; verify it does NOT reset on a non-capturing move
+- [ ] **Turn order correctness:** Goat player moves first in Phase 1 — verify the initial `currentTurn` is `'goat'`, not `'tiger'`
+- [ ] **Phase transition timing:** Phase transitions to movement when `goatsInPool === 0` and the current goat placement move is applied — not before the move is applied
+- [ ] **Win condition:** Tiger wins at 10 captures (Andhra) — verify the win check triggers after the 10th capture is applied, not at 9
+- [ ] **AI undo:** Undo in AI games should undo both the AI's move AND the human's preceding move — verify it undoes the pair, not just one move
+- [ ] **P2P undo disabled:** The P2P game mode must disable undo at the engine config level, not just hide the UI button
+- [ ] **localStorage on private browsing:** `localStorage.setItem()` throws immediately in strict private mode on Safari — verify graceful fallback (in-memory only, warn user)
+- [ ] **SVG `viewBox` scaling on orientation change:** Board must re-derive touch hit-area sizes after device rotation — verify `getBoundingClientRect()` is re-called on `resize`/`orientationchange`
+
+---
+
+## Recovery Strategies
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| Jump-path bug discovered after Phase 1 ships | MEDIUM | Engine fix + new test cases; no UI changes needed; deploy patch |
+| Chain-hop in UI not engine | HIGH | Refactor: move all chain state into engine; audit AI move application; re-test all capture scenarios |
+| Wrong position hash causing draw misfire | MEDIUM | Fix hash function; reset `stateHashes` key format; existing saved games become unreplayable (acceptable) |
+| SVG touch targets too small discovered in Phase 3 | LOW | Add transparent overlay elements; no engine changes |
+| MCTS goat bias discovered post-Phase 2 | MEDIUM | Rewrite rollout function; re-tune difficulty parameters; re-run self-play validation |
+| P2P desync in production | HIGH | Add state hash cross-check protocol; requires coordinated deploy (both peers must update); offer "Restart game" as escape hatch |
+| Service worker serving stale build | LOW | Update vite-plugin-pwa config; force SW update via version bump in manifest |
+| localStorage quota exceeded | LOW | Add eviction logic + error handling; existing data preserved (just capped) |
+
+---
+
+## Pitfall-to-Phase Mapping
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| Jump-path adjacency error | Phase 1 | Unit test: enumerate all jump triples, assert both adjacency conditions |
+| Chain-hop in UI not engine | Phase 1 | Unit test: `getLegalMoves()` during chain returns only continuation moves |
+| Threefold repetition hash wrong | Phase 1 | Unit test: hash equality for logically identical positions; inequality for different turns |
+| SVG touch targets too small | Phase 1 (layout), Phase 7 (audit) | Manual test on physical device ≤375px width |
+| Web Worker serialization jank | Phase 2 | `performance.mark()` on postMessage; must be <2ms |
+| MCTS goat bias | Phase 2 | AI self-play: tiger win rate at all levels must be between 55–80% |
+| WebRTC connection failure (no TURN) | Phase 6 | Test from mobile carrier network to home WiFi; verify error message shown on timeout |
+| P2P state desync | Phase 6 | Automated: run 50 self-play games via simulated P2P relay; compare final board hashes |
+| Service worker stale cache | Phase 7 | Deploy a canary build; verify returning users see new version within 24 hours |
+| localStorage quota overflow | Phase 5 | Stress test: simulate 300 completed games; verify no silent data loss |
 
 ---
 
 ## Sources
 
-- [flutter_rust_bridge WASM limitations](https://cjycode.com/flutter_rust_bridge/manual/miscellaneous/wasm-limitations)
-- [flutter_rust_bridge cross-origin docs](https://cjycode.com/flutter_rust_bridge/manual/miscellaneous/web-cross-origin)
-- [flutter_rust_bridge troubleshooting](https://cjycode.com/flutter_rust_bridge/manual/troubleshooting)
-- [GitHub Community: COOP/COEP headers on GitHub Pages](https://github.com/orgs/community/discussions/13309)
-- [Wasmer: Patching COOP/COEP for GitHub Pages](https://docs.wasmer.io/sdk/wasmer-js/how-to/coop-coep-headers)
-- [coi-serviceworker for static hosting](https://blog.tomayac.com/2025/03/08/setting-coop-coep-headers-on-static-hosting-like-github-pages/)
-- [wasm-opt LLVM 20 failure: flutter_rust_bridge #2601](https://github.com/fzyzcjy/flutter_rust_bridge/issues/2601)
-- [wasm-opt LLVM 20 failure: rust-lang #141080](https://github.com/rust-lang/rust/issues/141080)
-- [wasm-bindgen ownership pitfalls](https://www.rossng.eu/posts/2025-01-20-wasm-bindgen-pitfalls/)
-- [wasm-bindgen vec parameter pitfalls](https://www.rossng.eu/posts/2025-02-22-wasm-bindgen-vec-parameters/)
-- [console_error_panic_hook](https://github.com/rustwasm/console_error_panic_hook)
-- [Rust WASM multithreading](https://rustwasm.github.io/2018/10/24/multithreading-rust-and-wasm.html)
-- [Flutter web base href issue #95503](https://github.com/flutter/flutter/issues/95503)
-- [Flutter web 404 routing issue #98189](https://github.com/flutter/flutter/issues/98189)
-- [Flutter service worker caching #106943](https://github.com/flutter/flutter/issues/106943)
-- [Flutter cache busting #164613](https://github.com/flutter/flutter/issues/164613)
-- [CanvasKit bundle size #89616](https://github.com/flutter/flutter/issues/89616)
-- [Flutter CustomPainter performance #72066](https://github.com/flutter/flutter/issues/72066)
-- [Flutter web accessibility docs](https://docs.flutter.dev/ui/accessibility/web-accessibility)
-- [Flutter performance best practices](https://docs.flutter.dev/perf/best-practices)
-- [CanvasKit secret scanning #145796](https://github.com/flutter/flutter/issues/145796)
-- [flutter_rust_bridge Rust edition 2024 #2576](https://github.com/fzyzcjy/flutter_rust_bridge/issues/2576)
-- [WASM native vs performance benchmarks](https://karnwong.me/posts/2024/12/native-implementation-vs-wasm-for-go-python-and-rust-benchmark/)
-- [Flutter web loading speed optimization](https://medium.com/flutter/best-practices-for-optimizing-flutter-web-loading-speed-7cc0df14ce5c)
+- [Boardgame.io Hacker News discussion — adjacency recognition as hardest graph-board problem](https://news.ycombinator.com/item?id=42449497)
+- [Hybrid Minimax-MCTS and Difficulty Adjustment for General Game Playing (SBGames 2023)](https://arxiv.org/abs/2310.16581)
+- [Mastering Bagh Chal with self-learning AI — programiz.com (asymmetric game evaluation bias)](https://www.programiz.com/blog/mastering-bagh-chal-with-self-learning-ai/)
+- [Goats-and-Tigers RL — asymmetric game random-play bias documented](https://github.com/cjfelixx/Goats-and-Tigers)
+- [Is postMessage slow? — surma.dev (serialization cost analysis)](https://surma.dev/things/is-postmessage-slow/)
+- [Performance issue of using massive transferable objects in Web Worker — joji.me](https://joji.me/en-us/blog/performance-issue-of-using-massive-transferable-objects-in-web-worker/)
+- [WebRTC TURN server statistics — VideoSDK: 20–30% failure rate without TURN](https://www.videosdk.live/developer-hub/webrtc/turn-server-for-webrtc)
+- [Building Real-Time P2P Multiplayer Games — Medium/@aguiran (desync resolution patterns)](https://medium.com/@aguiran/building-real-time-p2p-multiplayer-games-in-the-browser-why-i-eliminated-the-server-d9f4ea7d4099)
+- [Mastering SVG Animation in React: Common Pitfalls — infinitejs.com](https://infinitejs.com/posts/mastering-svg-animation-react-pitfalls/)
+- [Repetitions — Chessprogramming wiki (Zobrist hash, hash collision probability)](https://www.chessprogramming.org/Repetitions)
+- [Storage quotas and eviction criteria — MDN (localStorage 5–10MB limit)](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)
+- [Web browser game randomly losing localStorage data — itch.io (QuotaExceededError in production)](https://itch.io/t/5464689/web-browser-game-randomly-losing-localstorage-data)
+- [Handling Service Worker updates — whatwebcando.today](https://whatwebcando.today/articles/handling-service-worker-updates/)
+- [Taming PWA Cache Behavior — iinteractive.com (Safari stale cache)](https://iinteractive.com/resources/blog/taming-pwa-cache-behavior)
+- [vite-plugin-pwa service worker not detecting updates — GitHub Discussion #821](https://github.com/vite-pwa/vite-plugin-pwa/discussions/821)
+- [Accessible tap target sizes — Smashing Magazine (44px standard, precision variation by screen zone)](https://www.smashingmagazine.com/2023/04/accessible-tap-target-sizes-rage-taps-clicks/)
+- [Rendering Game With SVG + React — radzion.com (board game SVG performance patterns)](https://radzion.com/blog/breakout-game/render/)
+
+---
+*Pitfalls research for: Pulijoodam — web-based asymmetric board game (Tiger vs Goat)*
+*Researched: 2026-03-04*

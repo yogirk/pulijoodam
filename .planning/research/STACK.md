@@ -1,151 +1,200 @@
 # Technology Stack
 
-**Project:** Pulijoodam (Traditional South Indian Board Game)
-**Researched:** 2026-03-03
-**Overall Confidence:** MEDIUM-HIGH
+**Project:** Pulijoodam — Web-based strategy board game SPA
+**Researched:** 2026-03-04
+**Overall confidence:** HIGH (all core choices verified against npm and official docs)
 
 ---
 
 ## Recommended Stack
 
-### Rust Engine (Game Logic + AI)
+### Core Framework
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Rust (stable) | 1.85.x (pin, see note) | Game engine language | Learning goal + WASM compilation target + zero-cost abstractions for AI perf | HIGH |
-| serde | 1.x (latest) | Serialization for Command/Event pattern | De facto standard; needed for game state serialization across FFI boundary | HIGH |
-| serde_json | 1.0.149+ | JSON serialization | Needed for debug tooling, game history export, future network layer | HIGH |
-| getrandom | latest, with `wasm_js` feature | RNG entropy source for AI | Required for `rand` crate on `wasm32-unknown-unknown`; must enable `wasm_js` feature explicitly | HIGH |
-| rand | 0.8.x | Random number generation for MCTS | Standard RNG crate; needed for MCTS random playouts. Requires getrandom `wasm_js` for web | HIGH |
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| TypeScript | 5.9.x | Language | Strict mode, latest features (import defer, erasable syntax); non-negotiable per project constraints |
+| React | 19.2.x | UI framework | Non-negotiable per project constraints; v19.2 is current stable as of Jan 2026 |
+| Vite | 7.x | Build tool | Current stable (7.3.1); Vite 7 dropped Node 18, requires Node 20.19+/22.12+; significantly faster than Vite 6 |
 
-**CRITICAL Rust Version Note:** Pin to Rust **<1.87.0** initially, or ensure wasm-opt flags are configured. Rust 1.87.0+ uses LLVM 20 which emits WASM features (`bulk-memory`, `threads`, `nontrapping-float-to-int`) that break `wasm-opt` in flutter_rust_bridge's build pipeline. The fix requires passing `--enable-bulk-memory --enable-threads --enable-nontrapping-float-to-int` flags to wasm-opt. Since Rust stable is now 1.93.1, you will need to apply these wasm-opt flags -- pinning to an old Rust is not practical long-term. Track [flutter_rust_bridge issue #2601](https://github.com/fzyzcjy/flutter_rust_bridge/issues/2601) for upstream resolution.
-
-**AI Libraries Decision: Build Custom, Don't Use Crates**
-
-The Rust MCTS/Minimax crate ecosystem is fragmented -- `minimax-alpha-beta` (0.1.6), `minimax` crate, various GitHub projects. None are well-maintained or widely used. For a learning project with a specific game topology (23-node graph, asymmetric pieces), **write MCTS and Minimax+alpha-beta from scratch**. This is:
-- A core learning goal of the project
-- Straightforward to implement (~500-1000 lines each)
-- Avoids fighting generic abstractions that don't fit the asymmetric Tiger/Goat game
-- Allows game-specific optimizations (transposition tables tuned to 23-node state space)
-
-### Flutter-Rust Bridge (FFI Layer)
-
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| flutter_rust_bridge | ~2.11.x | Dart<->Rust binding generator | Auto-generated bindings, WASM web support, async Dart futures, rich type marshalling. Non-negotiable per project constraints | MEDIUM |
-| flutter_rust_bridge_codegen | ~2.11.x | Code generation CLI | Generates Dart bindings from Rust API. Includes `build-web` command for WASM compilation | MEDIUM |
-| wasm-bindgen | 0.2.114 (transitive) | JS<->WASM interop | Pulled in by flutter_rust_bridge; provides the JS glue layer for WASM modules | HIGH |
-| wasm-pack | latest (transitive) | WASM build tooling | Used internally by `flutter_rust_bridge_codegen build-web` | MEDIUM |
-
-**Version Confidence Note:** flutter_rust_bridge version is listed as MEDIUM because pub.dev indexing lags and the project releases frequently. The `2.11.x` series appears current as of early 2026. Always run `dart pub upgrade` to get the latest patch.
-
-### Flutter App (Frontend)
-
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Flutter SDK | 3.41.x (stable) | App framework | Latest stable as of Feb 2026. Required for WASM web build support | HIGH |
-| Dart SDK | 3.7.x (bundled) | Programming language | Comes with Flutter 3.41; supports sealed classes, pattern matching, `package:web` for WASM compat | HIGH |
-| CustomPainter | (built-in) | Board rendering | Direct canvas control for the 23-node game board. No framework overhead. Perfect for a fixed-topology board game | HIGH |
-| audioplayers | latest | Sound effects | Simple audio playback for place/slide/capture/win sounds. Web-compatible via HTML5 Audio API. Works on web without dart:ffi | HIGH |
-| provider or riverpod | latest | State management | Lightweight reactive state for game state -> UI binding. Provider for simplicity given single-screen app | MEDIUM |
-
-**Why NOT Flame Engine:** Flame is a full game engine (game loop, sprites, ECS, collision detection) designed for action/arcade games. Pulijoodam is a turn-based board game with a static board and discrete piece positions. CustomPainter gives you exactly what you need -- draw nodes, edges, pieces, and highlights -- without Flame's overhead. Flame's component system would fight against the Rust engine owning all game logic.
-
-**Why NOT flutter_soloud for Audio:** flutter_soloud uses dart:ffi which does NOT work when compiling Flutter to WASM. The open [WASM support issue (#46)](https://github.com/alnitak/flutter_soloud/issues/46) remains unresolved. Use `audioplayers` instead -- its web implementation (`audioplayers_web`) uses the HTML5 Audio API directly, which works on all web targets including WASM builds.
-
-**Why Sealed Classes for Game State:** Dart 3's sealed classes + pattern matching are ideal for modeling game states (Placing, Moving, GameOver), moves (PlaceGoat, MoveTiger, CaptureGoat), and events. The compiler enforces exhaustive matching -- you can't forget to handle a state. Use them for the Dart-side game state representation.
-
-### Web Renderer
-
-| Technology | Purpose | Why | Confidence |
-|------------|---------|-----|------------|
-| skwasm (via `--wasm` build) | Primary web renderer | 2-3x faster than CanvasKit, smaller bundle (~1.1MB vs ~1.5MB), multi-threaded rendering. Flutter auto-selects skwasm for WASM builds | HIGH |
-| CanvasKit | Fallback renderer | Auto-fallback when browser lacks WasmGC support. No configuration needed -- Flutter handles this | HIGH |
-
-**Build command:** `flutter build web --wasm --release --base-href "/pulijoodam/"`
-
-**Browser support for skwasm:** Chrome 119+, Edge 119+. Firefox has WasmGC since 120 but has known issues. Safari lacks WasmGC support entirely (falls back to CanvasKit automatically).
-
-### Infrastructure & Deployment
-
-| Technology | Purpose | Why | Confidence |
-|------------|---------|-----|------------|
-| GitHub Pages | Static hosting | Free, integrates with repo, supports custom domains. $0 cost constraint | HIGH |
-| GitHub Actions | CI/CD | Build Flutter web + Rust WASM, deploy to gh-pages branch. Free for public repos | HIGH |
-| coi-serviceworker | COOP/COEP header injection | GitHub Pages cannot set HTTP headers. This service worker injects Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy headers required for SharedArrayBuffer (needed by skwasm multi-threading) | HIGH |
-| subosito/flutter-action | GH Actions Flutter setup | Standard action for installing Flutter SDK in CI. Pin to stable channel + specific version | HIGH |
-
-### Dev Dependencies & Tooling
-
-| Technology | Purpose | Why | Confidence |
-|------------|---------|-----|------------|
-| rust-src (rustup component) | WASM build requirement | Required for building std with WASM target features (atomics, bulk_memory, mutable_globals) | HIGH |
-| wasm32-unknown-unknown (rustup target) | WASM compilation target | The Rust target for browser WASM. Add via `rustup target add wasm32-unknown-unknown` | HIGH |
-| Rust nightly toolchain | WASM std build | flutter_rust_bridge build-web requires nightly for `-Zbuild-std` to build std with required target features | HIGH |
-| cargo-expand (optional) | Macro debugging | Useful for inspecting serde derive output and understanding generated code | LOW |
-| Flutter DevTools | Performance profiling | Built-in; use for identifying CustomPainter repaint issues and frame timing | HIGH |
+**tsconfig baseline — use strict mode plus these additional flags:**
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx"
+  }
+}
+```
+`noUncheckedIndexedAccess` is especially valuable for the game engine: `board[nodeId]` will force null-checking, preventing off-board access bugs.
 
 ---
 
-## Rust Cargo.toml Configuration
+### Styling
 
-```toml
-# engine/pulijoodam-core/Cargo.toml
-[package]
-name = "pulijoodam-core"
-version = "0.1.0"
-edition = "2021"
+**Recommendation: Tailwind CSS v4 via `@tailwindcss/vite`**
 
-[dependencies]
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-rand = "0.8"
-getrandom = { version = "0.2", features = ["wasm_js"] }  # CRITICAL for WASM
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| tailwindcss | 4.2.x | UI styling | Zero-config CSS-first setup; first-party Vite plugin (`@tailwindcss/vite`) — no PostCSS config required; 100x faster incremental builds vs v3 |
+| @tailwindcss/vite | 4.x | Vite integration | Replaces PostCSS pipeline; single plugin in `vite.config.ts` |
 
-# engine/pulijoodam-ffi/Cargo.toml
-[package]
-name = "pulijoodam-ffi"
-version = "0.1.0"
-edition = "2021"
+**Why not CSS Modules:** CSS Modules remain a valid choice, but Tailwind v4's `@tailwindcss/vite` plugin integrates with zero configuration. The game UI has no complex design system that would benefit from the separation CSS Modules provide. For game-specific SVG styling (board lines, pieces), CSS Modules or inline SVG attributes remain appropriate — Tailwind is for the surrounding shell UI only.
 
-[lib]
-crate-type = ["cdylib", "staticlib"]  # cdylib for WASM, staticlib for native
+**Why not CSS-in-JS (styled-components/emotion):** Runtime overhead conflicts with the `<1MB bundle` constraint. Eliminated.
 
-[dependencies]
-pulijoodam-core = { path = "../pulijoodam-core" }
-flutter_rust_bridge = "2"
+**Important:** SVG element styling (board lines, node circles, piece paths) should use **SVG presentation attributes and CSS custom properties** — not Tailwind classes. Tailwind applies to the React shell (screens, menus, buttons, layout).
 
-[profile.release]
-panic = "abort"       # Required for WASM; also reduces binary size
-codegen-units = 1     # Better optimization
-lto = true            # Link-time optimization; smaller WASM binary
-opt-level = "z"       # Optimize for size over speed (WASM download matters)
-strip = true          # Strip debug symbols
+---
+
+### State Management
+
+**Recommendation: React hooks + Context first; Zustand 5 as escape hatch**
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| React Context + useReducer | built-in | Game state | Sufficient for a single-game-at-a-time SPA; no extra dependency |
+| zustand | 5.0.x | Global state (if needed) | 20M weekly downloads; v5 drops React <18, uses native `useSyncExternalStore`; add when Context causes re-render problems |
+
+**Decision rule:** Start with `useReducer` + Context for game state (`GameState`, `currentScreen`, `settings`). Promote to Zustand when:
+- A state slice is needed in 4+ unrelated component subtrees, OR
+- Profiling shows context re-renders causing frame drops during animation
+
+Zustand v5's devtools middleware integrates cleanly with Redux DevTools — useful for debugging AI move sequences.
+
+---
+
+### Testing
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| vitest | 4.x | Unit + integration tests | Current stable (4.0.18); native ESM, Vite-aligned config, 10-20x faster than Jest; engine tests run without a DOM |
+| @testing-library/react | 16.3.x | React component tests | v16+ explicitly supports React 19; use for Board/Piece/Screen component tests |
+| @playwright/test | 1.58.x | E2E tests | Current stable (1.58.2); test full game flows in real Chromium/Firefox/WebKit |
+
+**Test layer mapping:**
+```
+src/engine/**     → Vitest only (pure functions, no DOM needed)
+src/components/** → Vitest + @testing-library/react
+Full game flows   → Playwright (placement → movement → win condition)
+AI worker         → Vitest with fake timers (stub postMessage)
 ```
 
-## Flutter pubspec.yaml (Key Dependencies)
+**Why not Jest:** Vite-based project, native ESM. Vitest shares the Vite config — no separate Babel transform, no `moduleNameMapper` hacks. Jest is eliminated.
 
-```yaml
-# app/pubspec.yaml
-name: pulijoodam
-description: Traditional South Indian strategy board game
+---
 
-environment:
-  sdk: ">=3.7.0 <4.0.0"
-  flutter: ">=3.41.0"
+### Web Workers (AI computation)
 
-dependencies:
-  flutter:
-    sdk: flutter
-  flutter_rust_bridge: ^2.11.0
-  audioplayers: ^6.0.0
-  provider: ^6.1.0     # Or riverpod ^2.6.0 if preferring code generation
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Native Worker API (Vite) | built-in | AI thread | Vite natively supports `new Worker(new URL('./ai.worker.ts', import.meta.url), { type: 'module' })`; no plugin needed |
+| comlink | 4.4.2 | Worker RPC | Wraps postMessage in an async/await proxy; eliminates message-switch boilerplate; 1.1KB gzipped; from Google Chrome Labs |
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^5.0.0
+**Pattern:**
+```typescript
+// src/engine/ai/ai.worker.ts
+import { expose } from 'comlink';
+import { chooseMove } from './index';
+expose({ chooseMove });
+
+// src/hooks/useAI.ts
+import { wrap } from 'comlink';
+const worker = new Worker(new URL('../engine/ai/ai.worker.ts', import.meta.url), { type: 'module' });
+const ai = wrap<{ chooseMove: typeof chooseMove }>(worker);
+// Usage: const move = await ai.chooseMove(gameState, difficulty);
 ```
+
+**Why Comlink over raw postMessage:** The message-switch pattern (`if (e.data.type === 'CHOOSE_MOVE')`) creates implicit contracts that break silently with TypeScript. Comlink makes the worker a typed async interface — the TypeScript compiler catches call-site mismatches.
+
+**Note:** `vite-plugin-comlink` exists but adds a build-system dependency for something Vite handles natively. Use Comlink directly with Vite's native worker import.
+
+---
+
+### WebRTC / P2P Multiplayer
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| peerjs | 1.5.5 | P2P data channels | Wraps WebRTC in a sane API; 13K+ GitHub stars; last published June 2025; supports data channels sufficient for game state sync |
+
+**Architecture note:** PeerJS requires a signaling server for initial connection handshake (STUN/TURN). PeerJS provides a free hosted PeerServer (`peerjs.com`). For a GitHub Pages deployment with zero-server constraint, this is acceptable — the PeerServer is only used during handshake (seconds), not during gameplay. Game state never passes through it.
+
+**Manual offer/answer fallback:** The TECH-SPEC describes a manual Base64 offer/answer exchange that bypasses the PeerServer entirely. This is a good fallback and should be implemented as the primary UX, using PeerJS's `peer.connect()` with manual SDP strings.
+
+**Why not simple-peer:** `feross/simple-peer` is more minimal but requires more boilerplate for data channel management. PeerJS's higher-level API maps better to the invite-code UX pattern described in the spec. Also, simple-peer's last release was 2021 — maintenance risk.
+
+**Signaling dependency:** Flag for phase-specific research when building multiplayer. The `peer` (PeerServer) npm package was last published 2 years ago — self-hosting the signaling server has maintenance risk. Rely on PeerJS's hosted server for v1.
+
+---
+
+### Animation (SVG)
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| motion (framer-motion) | 12.x | SVG piece animations | 30M monthly downloads; hybrid Web Animations API + JS engine; supports `motion.circle`, `motion.g` for SVG elements; timeline control for sequence animations (place → capture → phase change) |
+
+**Why Motion over React Spring:** Motion's `animate` + `variants` system maps well to board game event sequences emitted from the engine (`GameEvent[]`). React Spring's physics model is elegant but adds complexity for deterministic board-state transitions. Motion's `useAnimate()` hook lets you drive animations imperatively from the event list.
+
+**Why not pure CSS transitions:** Sufficient for simple piece slides, but cannot sequence multi-event turns (chain-hop: jump → capture → jump → capture → win). Motion's sequencing API handles this cleanly.
+
+**Bundle note:** `motion` (the new package name, formerly `framer-motion`) is tree-shakeable. Import only `motion`, `animate`, `useAnimate`. Estimated contribution: ~30-40KB gzipped — acceptable within the `<1MB` constraint.
+
+**Install:** `motion` is the current package name. `framer-motion` is a re-export shim kept for backward compatibility.
+
+---
+
+### Sound
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| howler | 2.2.4 | Sound effects | Web Audio API with HTML5 Audio fallback; audio sprites reduce network requests; battle-tested in web games; 7KB gzipped |
+
+**Maintenance caveat (MEDIUM confidence):** Howler 2.2.4 was last published ~March 2024 — no updates in 2 years. The library is stable and complete for the use case (discrete sound effects: piece placement, capture, win/lose stings). Monitor for browser API breakage; if issues emerge, the raw Web Audio API is a viable replacement given the simple sound requirements.
+
+**Why not `use-sound`:** `use-sound` is a thin React wrapper over Howler — it adds React coupling to what is naturally a non-React concern. Use Howler directly; wrap it in a `useSoundEffects()` custom hook in the project.
+
+**Audio sprites:** Compile all game sounds into a single sprite file. Reduces to 1 network request for all audio.
+
+---
+
+### PWA / Offline
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| vite-plugin-pwa | 1.2.x | Service worker + manifest | Vite 7-compatible (added in v1.0.1); zero-config precaching via Workbox; generates web app manifest; auto-registers service worker |
+
+**Configuration needed:**
+```typescript
+// vite.config.ts
+VitePWA({
+  registerType: 'autoUpdate',
+  workbox: {
+    globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3,ogg}'],
+    // Include audio assets in precache for full offline play
+  },
+  manifest: {
+    name: 'Pulijoodam',
+    short_name: 'Pulijoodam',
+    display: 'standalone',
+    background_color: '#1a1a1a',
+  }
+})
+```
+
+**Audio offline:** Sound files must be explicitly included in `globPatterns` — they are not JS/CSS and Workbox won't auto-include them.
+
+---
+
+### Linting / DX
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| ESLint | 9.x | Linting | Flat config (default in Vite-generated projects since ESLint 9); use `eslint-plugin-react-hooks` for exhaustive-deps enforcement |
+| Prettier | 3.x | Formatting | Pair with ESLint; no style debates |
 
 ---
 
@@ -153,202 +202,113 @@ dev_dependencies:
 
 | Category | Recommended | Alternative | Why Not |
 |----------|-------------|-------------|---------|
-| Game rendering | CustomPainter | Flame Engine | Flame is for action games with game loops, sprites, ECS. Board game with static topology needs direct canvas control. Flame would add unnecessary complexity and fight the Rust engine owning logic |
-| Audio | audioplayers | flutter_soloud | flutter_soloud uses dart:ffi which breaks WASM compilation. audioplayers_web uses HTML5 Audio API natively |
-| Audio | audioplayers | just_audio | just_audio is more powerful (playlists, streaming) but heavier. Short sound effects need simple fire-and-forget playback |
-| State management | provider | riverpod | riverpod is more powerful but adds code-gen complexity. Single-screen game app with Rust engine owning state doesn't need riverpod's dependency injection |
-| State management | provider | bloc | bloc adds event/state boilerplate. The Rust engine already implements Command/Event pattern -- duplicating in Dart adds no value |
-| FFI bridge | flutter_rust_bridge | Hand-rolled dart:ffi + wasm-bindgen | Manual approach requires maintaining two separate interfaces (native FFI + WASM JS). flutter_rust_bridge abstracts this with single API surface |
-| WASM tooling | flutter_rust_bridge build-web | Manual wasm-pack | build-web handles wasm-pack config, wasm-bindgen glue, and JS integration. Manual setup gives more control but more maintenance |
-| Web hosting | GitHub Pages + coi-serviceworker | Cloudflare Pages | Cloudflare Pages can set headers natively (no service worker hack) but adds vendor dependency. GitHub Pages keeps everything in one place ($0, integrated) |
-| Renderer | skwasm (WASM build) | CanvasKit (JS build) | skwasm is 2-3x faster startup and frame rendering. Only reason for CanvasKit is browser fallback (handled automatically) |
+| Styling | Tailwind CSS v4 | CSS Modules | Both valid; Tailwind chosen for speed and zero-config Vite plugin. CSS Modules remain appropriate inside SVG components |
+| State | Context + useReducer (+ Zustand if needed) | Redux Toolkit | RTK is overkill for a single-player game with one active game state; Zustand is the upgrade path |
+| Testing (unit) | Vitest | Jest | Jest requires separate Babel transform for ESM/TypeScript in Vite projects; Vitest is native |
+| Worker RPC | Comlink | Raw postMessage | Raw postMessage has no TypeScript contract enforcement; Comlink adds 1.1KB for meaningful type safety |
+| Animation | Motion (framer-motion) | React Spring | React Spring's physics model adds complexity for deterministic board sequences; Motion's timeline API is a better fit |
+| Animation | Motion (framer-motion) | CSS transitions | CSS transitions cannot sequence multi-event turns (chain-hops) |
+| P2P | PeerJS | simple-peer | simple-peer last released 2021; PeerJS actively maintained through June 2025 |
+| P2P | PeerJS | raw WebRTC | Raw WebRTC requires significant boilerplate for data channels and connection management |
+| Audio | Howler | Tone.js | Tone.js is for synthesis/music — overkill for discrete SFX; ~100KB heavier |
+| Audio | Howler | Raw Web Audio API | Howler's audio sprite + cross-browser support saves ~200 lines of boilerplate |
+| Build | Vite 7 | Vite 6 | Vite 7 is the current stable; no reason to pin to v6 |
 
 ---
 
-## WASM-Specific Configuration
-
-### Required Rust Toolchain Setup
+## Installation
 
 ```bash
-# Install nightly toolchain (required for -Zbuild-std)
-rustup toolchain install nightly
+# Core
+npm create vite@latest pulijoodam -- --template react-ts
+npm install
 
-# Add WASM target
-rustup target add wasm32-unknown-unknown --toolchain nightly
+# Styling
+npm install tailwindcss @tailwindcss/vite
 
-# Add rust-src component (required for building std with custom features)
-rustup component add rust-src --toolchain nightly
+# State (add later if needed)
+npm install zustand
 
-# Install wasm-pack (used by flutter_rust_bridge build-web)
-cargo install wasm-pack
+# Animation
+npm install motion
+
+# Audio
+npm install howler
+npm install -D @types/howler
+
+# Web Worker / AI
+npm install comlink
+
+# P2P Multiplayer
+npm install peerjs
+
+# PWA
+npm install -D vite-plugin-pwa
+
+# Testing
+npm install -D vitest @testing-library/react @testing-library/user-event @testing-library/jest-dom jsdom
+npm install -D @playwright/test
+npx playwright install
 ```
 
-### flutter_rust_bridge WASM Build
+**vite.config.ts (complete):**
+```typescript
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
-```bash
-# From the app/ directory
-flutter_rust_bridge_codegen build-web \
-  --rust-crate-dir ../engine/pulijoodam-ffi \
-  --output web/pkg \
-  --release
-```
-
-### Cross-Origin Isolation for GitHub Pages
-
-Add `coi-serviceworker.js` to `web/` directory. In `web/index.html`:
-
-```html
-<head>
-  <!-- Must be BEFORE any other scripts -->
-  <script src="coi-serviceworker.js"></script>
-  <!-- ... rest of head ... -->
-</head>
-```
-
-This injects the headers:
-- `Cross-Origin-Opener-Policy: same-origin`
-- `Cross-Origin-Embedder-Policy: require-corp`
-
-Without these, SharedArrayBuffer is blocked, skwasm falls back to single-threaded mode, and performance degrades.
-
-### Alternative: Force Single-Threaded skwasm
-
-If coi-serviceworker causes issues (first-visit reload, third-party embed breakage), you can force single-threaded skwasm in `web/index.html`:
-
-```javascript
-_flutter.loader.load({
-  config: {
-    canvasKitVariant: "chromium",
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({ registerType: 'autoUpdate' }),
+  ],
+  worker: {
+    format: 'es', // Required for Comlink + type: 'module' workers
   },
-  serviceWorkerSettings: {
-    // flutter service worker settings
+  test: {
+    environment: 'jsdom',        // for component tests
+    globals: true,
+    setupFiles: ['./src/test-setup.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    exclude: ['e2e/**'],
   },
 });
 ```
 
-Or pass `forceSingleThreadedSkwasm: true` in the engine configuration. This avoids needing COOP/COEP headers entirely but sacrifices multi-threaded rendering performance.
-
 ---
 
-## GitHub Actions CI/CD Workflow
+## Confidence Assessment
 
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [main]
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust nightly
-        uses: dtolnay/rust-action@v1
-        with:
-          toolchain: nightly
-          targets: wasm32-unknown-unknown
-          components: rust-src
-
-      - name: Install wasm-pack
-        run: cargo install wasm-pack
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.41.x"
-          channel: stable
-
-      - name: Install flutter_rust_bridge_codegen
-        run: cargo install flutter_rust_bridge_codegen
-
-      - name: Build Rust WASM
-        working-directory: app
-        run: flutter_rust_bridge_codegen build-web --rust-crate-dir ../engine/pulijoodam-ffi --release
-
-      - name: Build Flutter Web
-        working-directory: app
-        run: flutter build web --wasm --release --base-href "/pulijoodam/"
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: app/build/web
-```
-
----
-
-## Key WASM Limitations to Design Around
-
-| Limitation | Impact | Mitigation |
-|------------|--------|------------|
-| No `std::thread::spawn` in WASM | AI cannot use OS threads | Use Rust async or run AI computation in main thread. For <2s moves on a 23-node graph, single-threaded is likely sufficient. Profile first |
-| `panic!` aborts WASM module | Unrecoverable crash on unwrap failures | Use `.expect()` with messages or `Result<T, E>` everywhere in FFI-facing code. Never `.unwrap()` in code paths reachable from Dart |
-| No `Int64List`/`Uint64List` on web | Cannot pass 64-bit integer arrays across FFI | Use `i32`/`u32` for board indices and move encoding. 23 nodes fit in u8 |
-| `getrandom` requires explicit feature | `rand` crate fails to compile for WASM without it | Add `getrandom = { features = ["wasm_js"] }` to Cargo.toml |
-| Cross-origin isolation required | skwasm multi-threading needs COOP/COEP headers | Use coi-serviceworker on GitHub Pages, or accept single-threaded fallback |
-| Safari lacks WasmGC | Flutter app falls back to CanvasKit on Safari | Automatic fallback; no code changes needed. Test both renderers |
-| wasm-opt breakage with Rust 1.87+ | Build fails without extra flags | Pass `--enable-bulk-memory --enable-threads --enable-nontrapping-float-to-int` to wasm-opt, or wait for upstream fix |
-
----
-
-## Installation (Development Setup)
-
-```bash
-# 1. Rust toolchain
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-rustup toolchain install nightly
-rustup target add wasm32-unknown-unknown --toolchain nightly
-rustup component add rust-src --toolchain nightly
-
-# 2. WASM tooling
-cargo install wasm-pack
-cargo install flutter_rust_bridge_codegen
-
-# 3. Flutter SDK (via official installer or fvm)
-# Ensure Flutter 3.41.x stable is installed
-flutter --version
-
-# 4. Project dependencies
-cd engine && cargo build           # Verify Rust compiles
-cd app && flutter pub get          # Verify Flutter dependencies
-
-# 5. Verify WASM build
-cd app && flutter_rust_bridge_codegen build-web \
-  --rust-crate-dir ../engine/pulijoodam-ffi
-```
+| Area | Confidence | Notes |
+|------|------------|-------|
+| Core framework (React 19, Vite 7, TypeScript 5.9) | HIGH | Versions verified via npm search results (March 2026) |
+| Tailwind CSS v4 + @tailwindcss/vite | HIGH | v4.2.1 current; first-party Vite plugin confirmed released |
+| Zustand v5 | HIGH | v5.0.11 confirmed; 20M weekly downloads |
+| Vitest v4 | HIGH | v4.0.18 confirmed; Vite 7 compatible |
+| @testing-library/react v16 | HIGH | v16.3.0 confirmed React 19 compatible |
+| Playwright v1.58 | HIGH | v1.58.2 confirmed |
+| Motion/framer-motion v12 | HIGH | v12.34.5 confirmed; actively maintained (published daily) |
+| Comlink v4.4.2 | MEDIUM | Stable but last published ~1 year ago; functionality complete for use case |
+| PeerJS v1.5.5 | MEDIUM | Last published June 2025; active but infrequent releases; signaling dependency on hosted PeerServer |
+| Howler v2.2.4 | MEDIUM | Last published March 2024; stable but unmaintained; monitor for browser compatibility issues |
+| vite-plugin-pwa v1.2 | HIGH | Vite 7 support confirmed in v1.0.1 |
 
 ---
 
 ## Sources
 
-### HIGH Confidence (Official Documentation)
-- [Flutter Web Renderers](https://docs.flutter.dev/platform-integration/web/renderers) -- skwasm vs CanvasKit behavior
-- [Flutter WASM Support](https://docs.flutter.dev/platform-integration/web/wasm) -- build flags, browser requirements
-- [Flutter Build & Deploy Web](https://docs.flutter.dev/deployment/web) -- deployment configuration
-- [flutter_rust_bridge WASM Limitations](https://cjycode.com/flutter_rust_bridge/manual/miscellaneous/wasm-limitations) -- threading, type, and panic constraints
-- [flutter_rust_bridge Cross-Origin](https://cjycode.com/flutter_rust_bridge/manual/miscellaneous/web-cross-origin) -- COOP/COEP requirements
-- [wasm-bindgen Releases](https://github.com/wasm-bindgen/wasm-bindgen/releases) -- v0.2.114 current
-- [Rust Releases](https://blog.rust-lang.org/releases/) -- Rust 1.93.1 current stable
-- [Flutter 3.41 Announcement](https://blog.flutter.dev/whats-new-in-flutter-3-41-302ec140e632) -- current stable
-
-### MEDIUM Confidence (Verified with Multiple Sources)
-- [flutter_rust_bridge GitHub](https://github.com/fzyzcjy/flutter_rust_bridge) -- v2.11.x series
-- [coi-serviceworker](https://github.com/gzuidhof/coi-serviceworker) -- COOP/COEP service worker for GitHub Pages
-- [Shrinking WASM Size](https://rustwasm.github.io/book/reference/code-size.html) -- Cargo.toml optimization settings
-- [flutter_rust_bridge Issue #2601](https://github.com/fzyzcjy/flutter_rust_bridge/issues/2601) -- wasm-opt + Rust 1.87+ breakage
-- [Best Practices for Flutter Web Loading](https://blog.flutter.dev/best-practices-for-optimizing-flutter-web-loading-speed-7cc0df14ce5c) -- official Flutter blog
-
-### LOW Confidence (Single Source / Needs Validation)
-- flutter_rust_bridge exact latest version (pub.dev indexing lag; verify with `dart pub upgrade`)
-- `forceSingleThreadedSkwasm` configuration API (verify in Flutter 3.41 docs at build time)
-- Exact audioplayers version compatibility with Flutter 3.41 WASM builds (test during setup)
+- [Vite Releases](https://vite.dev/releases) — Vite 7 is current stable
+- [React v19.2 Blog Post](https://react.dev/blog/2025/10/01/react-19-2) — React 19.2 release
+- [Zustand v5 Announcement](https://pmnd.rs/blog/announcing-zustand-v5) — v5 changelog
+- [Vitest 3.0 Release](https://vitest.dev/blog/vitest-3) — Vitest major version history
+- [Tailwind CSS v4.0](https://tailwindcss.com/blog/tailwindcss-v4) — v4 release notes and Vite plugin
+- [Motion for React docs](https://motion.dev/docs/react) — SVG animation support
+- [vite-plugin-pwa GitHub](https://github.com/vite-pwa/vite-plugin-pwa) — Vite 7 compatibility
+- [PeerJS GitHub](https://github.com/peers/peerjs) — release history
+- [Comlink GitHub](https://github.com/GoogleChromeLabs/comlink) — Google Chrome Labs
+- [Web Workers + Comlink + Vite](https://johnnyreilly.com/web-workers-comlink-vite-tanstack-query) — integration pattern
+- [howler.js npm](https://www.npmjs.com/package/howler) — version and maintenance status
+- [Vitest vs Jest 2025](https://vitest.dev/guide/comparisons) — official comparison
+- [State Management 2026](https://medium.com/@abdurrehman1/state-management-in-2026-redux-vs-zustand-vs-context-api-ad5760bfab0b) — community consensus
