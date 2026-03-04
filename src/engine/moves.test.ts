@@ -120,12 +120,7 @@ describe('move validation', () => {
     const state = createGame();
     // Get to movement phase with specific setup
     // Place goat at 5 (tiger turn: move tiger from 0 to adjacent)
-    const s1 = applyMove(state, { type: 'PLACE', to: 5 }).state; // goat at 5, tiger's turn
-    // Try to jump tiger at 6 over goat at 5 — but goat IS at 5 now... wait, let me check
-    // Actually we need tiger at some node, goat adjacent, empty landing
-    // Tiger at 7, goat at 6 (placed), landing would be 5 (if occupied → error)
-    // But 5 just got placed... Let me place at a different node first
-    // Reset: place goat at 4 (empty node, not adjacent to tiger path)
+    // Place goat at 4 first (safe node, not blocking jump paths)
     const s2 = applyMove(state, { type: 'PLACE', to: 4 }).state; // goat at 4, tiger's turn
     // Now place goat at 5 on next goat turn; first tiger must move
     const tigerMove = getLegalMoves(s2).find(m => m.move.type === 'MOVE');
