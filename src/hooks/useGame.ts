@@ -100,18 +100,8 @@ function gameReducer(state: UIState, action: UIAction): UIState {
           return tryApplyMove(state, placeMove) ?? state;
         }
 
-        // Tiger's turn during placement
+        // Tiger's turn during placement: select-and-move behavior
         if (gameState.currentTurn === 'tiger') {
-          // If tigers still in pool: tap empty node → place tiger
-          if (gameState.tigersInPool > 0) {
-            const placeMove = legalMoves.find(
-              lm => lm.move.type === 'PLACE_TIGER' && lm.to === nodeId
-            );
-            if (!placeMove) return state;
-            return tryApplyMove(state, placeMove) ?? state;
-          }
-
-          // All tigers placed: select-and-move behavior
           if (selectedNode === null) {
             if (gameState.board[nodeId] !== 'tiger') return state;
             const movesFromNode = legalMoves.filter(lm => lm.from === nodeId);

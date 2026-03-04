@@ -6,12 +6,11 @@ import { NODES, JUMP_MAP } from './board';
  * Priority: tiger-wins > goat-wins > draw-repetition > draw-50moves > ongoing
  */
 export function getGameStatus(state: GameState): GameStatus {
-  // Tiger wins: 10+ goats captured
-  if (state.goatsCaptured >= 10) return 'tiger-wins';
+  // Tiger wins: 5+ goats captured
+  if (state.goatsCaptured >= 5) return 'tiger-wins';
 
-  // Goat wins: all tigers on board AND all immobilized
-  // (tigers with pieces in pool can always place, so they're not blocked)
-  if (state.tigersInPool === 0 && !hasTigerMoves(state)) return 'goat-wins';
+  // Goat wins: all tigers on board are immobilized
+  if (!hasTigerMoves(state)) return 'goat-wins';
 
   // Draw by threefold repetition
   if (Object.values(state.stateHashes).some(count => count >= 3)) return 'draw-repetition';

@@ -44,6 +44,9 @@ export const NODES: NodeDef[] = [
   { id: 22, label: 'L0_4',  x: 495,    y: 350, adj: [17, 21] },
 ];
 
+// Tiger starting positions (pre-placed at game start)
+export const TIGER_START_NODES: readonly number[] = [0, 3, 4] as const;
+
 // EDGES: unique undirected pairs for rendering board lines
 export const EDGES: [number, number][] = (() => {
   const result: [number, number][] = [];

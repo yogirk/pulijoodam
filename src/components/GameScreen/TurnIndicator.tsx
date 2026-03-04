@@ -3,17 +3,14 @@ import type { Role, Phase } from '../../engine';
 interface TurnIndicatorProps {
   currentTurn: Role;
   phase: Phase;
-  tigersInPool?: number;
 }
 
-export function TurnIndicator({ currentTurn, phase, tigersInPool = 0 }: TurnIndicatorProps) {
+export function TurnIndicator({ currentTurn, phase }: TurnIndicatorProps) {
   const isTiger = currentTurn === 'tiger';
 
   let action = '';
   if (phase === 'placement') {
-    if (isTiger && tigersInPool > 0) {
-      action = 'Place a Tiger';
-    } else if (isTiger) {
+    if (isTiger) {
       action = 'Move or Capture';
     } else {
       action = 'Place a Goat';

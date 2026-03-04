@@ -42,14 +42,13 @@ export interface GameState {
 
 export type Move =
   | { type: 'PLACE'; to: number }                               // goat places from pool
-  | { type: 'PLACE_TIGER'; to: number }                         // tiger places from pool
   | { type: 'MOVE'; from: number; to: number }                  // piece slides to adjacent node
   | { type: 'CAPTURE'; from: number; over: number; to: number } // tiger jumps over goat
   | { type: 'END_CHAIN' };                                      // tiger voluntarily ends chain-hop
 
 export interface LegalMove {
   move: Move;
-  from?: number; // convenience: source node (undefined for PLACE/PLACE_TIGER/END_CHAIN)
+  from?: number; // convenience: source node (undefined for PLACE/END_CHAIN)
   to?: number;   // convenience: destination node (undefined for END_CHAIN)
 }
 
@@ -57,7 +56,6 @@ export type GameEvent =
   | { type: 'PIECE_MOVED'; from: number; to: number; piece: Piece }
   | { type: 'GOAT_CAPTURED'; over: number; landedAt: number }
   | { type: 'GOAT_PLACED'; at: number }
-  | { type: 'TIGER_PLACED'; at: number }
   | { type: 'PHASE_CHANGED'; newPhase: Phase }
   | { type: 'GAME_OVER'; status: GameStatus }
   | { type: 'CHAIN_JUMP_AVAILABLE'; tigerAt: number }

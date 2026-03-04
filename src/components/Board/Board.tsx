@@ -45,13 +45,11 @@ export function Board({
     }
   }
 
-  // During placement (no selection needed), highlight all valid placement spots
-  // Applies to both goat placement and tiger placement (when tigers still in pool)
+  // During placement, highlight all valid placement spots for goat
   const showPlacementHints =
     gameState.phase === 'placement' &&
     selectedNode === null &&
-    (gameState.currentTurn === 'goat' ||
-      (gameState.currentTurn === 'tiger' && gameState.tigersInPool > 0));
+    gameState.currentTurn === 'goat';
 
   if (showPlacementHints) {
     for (const nodeId of legalMoveTo) {

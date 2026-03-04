@@ -11,11 +11,6 @@ describe('draw by threefold repetition', () => {
       ...createGame(),
       stateHashes: { 'somehash': 3 },
       tigersInPool: 0,
-      board: (() => {
-        const b = Array(23).fill(null) as GameState['board'];
-        b[0] = 'tiger'; b[10] = 'tiger'; b[22] = 'tiger';
-        return b;
-      })(),
     };
     expect(getGameStatus(state)).toBe('draw-repetition');
   });
@@ -25,18 +20,13 @@ describe('draw by threefold repetition', () => {
       ...createGame(),
       stateHashes: { 'somehash': 2 },
       tigersInPool: 0,
-      board: (() => {
-        const b = Array(23).fill(null) as GameState['board'];
-        b[0] = 'tiger'; b[10] = 'tiger'; b[22] = 'tiger';
-        return b;
-      })(),
     };
     expect(getGameStatus(state)).not.toBe('draw-repetition');
   });
 
   it('stateHashes incremented after each move', () => {
     const s0 = createGame();
-    const s1 = applyMove(s0, { type: 'PLACE', to: 0 }).state;
+    const s1 = applyMove(s0, { type: 'PLACE', to: 1 }).state;
     expect(Object.keys(s1.stateHashes).length).toBeGreaterThan(0);
     const firstHash = Object.keys(s1.stateHashes)[0];
     expect(s1.stateHashes[firstHash]).toBe(1);
@@ -47,9 +37,10 @@ describe('draw by threefold repetition', () => {
 describe('draw by 50 captureless moves', () => {
   it('capturelessMoves increments on non-capture moves', () => {
     const s0 = createGame();
-    const s1 = applyMove(s0, { type: 'PLACE', to: 0 }).state;
+    const s1 = applyMove(s0, { type: 'PLACE', to: 1 }).state;
     expect(s1.capturelessMoves).toBe(1);
-    const s2 = applyMove(s1, { type: 'PLACE_TIGER', to: 1 }).state;
+    // Tiger moves (tiger at 0 to adj node 2)
+    const s2 = applyMove(s1, { type: 'MOVE', from: 0, to: 2 }).state;
     expect(s2.capturelessMoves).toBe(2);
   });
 
@@ -76,11 +67,6 @@ describe('draw by 50 captureless moves', () => {
       capturelessMoves: 50,
       goatsCaptured: 0,
       tigersInPool: 0,
-      board: (() => {
-        const b = Array(23).fill(null) as GameState['board'];
-        b[0] = 'tiger'; b[10] = 'tiger'; b[22] = 'tiger';
-        return b;
-      })(),
     };
     expect(getGameStatus(state)).toBe('draw-50moves');
   });
@@ -111,7 +97,7 @@ describe('draw by 50 captureless moves', () => {
 describe('undo/redo', () => {
   it('undo restores previous GameState', () => {
     const s0 = createGame();
-    const s1 = applyMove(s0, { type: 'PLACE', to: 0 }).state;
+    const s1 = applyMove(s0, { type: 'PLACE', to: 1 }).state;
     const history: GameState[] = [s0, s1];
     const { state: undone, history: newHistory } = undo(s1, history);
     expect(undone).toBe(s0);
@@ -141,22 +127,22 @@ describe('undo/redo', () => {
 
   it('redo re-applies undone move', () => {
     const s0 = createGame();
-    const s1 = applyMove(s0, { type: 'PLACE', to: 4 }).state;
+    const s1 = applyMove(s0, { type: 'PLACE', to: 5 }).state;
     const redoStack: GameState[] = [s1];
     const { state: redone, history: newHistory, redoStack: newRedoStack } = redo(redoStack, [s0]);
-    expect(redone.board[4]).toBe('goat');
+    expect(redone.board[5]).toBe('goat');
     expect(newHistory).toHaveLength(2);
     expect(newRedoStack).toHaveLength(0);
   });
 
   it('redo stack clears when new move is made after undo', () => {
     const s0 = createGame();
-    const s1 = applyMove(s0, { type: 'PLACE', to: 4 }).state;
+    const s1 = applyMove(s0, { type: 'PLACE', to: 5 }).state;
     const history: GameState[] = [s0, s1];
     const { state: undone, history: newHistory } = undo(s1, history);
-    const s2 = applyMove(undone, { type: 'PLACE', to: 5 }).state;
-    expect(undone.board[4]).toBeNull();
-    expect(s2.board[5]).toBe('goat');
+    const s2 = applyMove(undone, { type: 'PLACE', to: 6 }).state;
+    expect(undone.board[5]).toBeNull();
+    expect(s2.board[6]).toBe('goat');
     expect(newHistory).toHaveLength(1);
   });
 });

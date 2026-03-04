@@ -62,17 +62,7 @@ export function getCaptureMovesFrom(state: GameState, tigerNode: number): LegalM
 function getTigerMoves(state: GameState): LegalMove[] {
   const moves: LegalMove[] = [];
 
-  // During placement, if tigers still in pool, must place
-  if (state.phase === 'placement' && state.tigersInPool > 0) {
-    for (let i = 0; i < state.board.length; i++) {
-      if (state.board[i] === null) {
-        moves.push({ move: { type: 'PLACE_TIGER', to: i }, to: i });
-      }
-    }
-    return moves;
-  }
-
-  // Normal tiger moves: slide + capture
+  // Tiger moves: slide + capture (always available, even during placement phase)
   for (let i = 0; i < state.board.length; i++) {
     if (state.board[i] !== 'tiger') continue;
     // Slide moves
@@ -125,16 +115,6 @@ export function applyMove(state: GameState, move: Move): MoveResult {
       }
 
       newState.currentTurn = 'tiger';
-      break;
-    }
-
-    case 'PLACE_TIGER': {
-      newBoard[move.to] = 'tiger';
-      newState.tigersInPool = state.tigersInPool - 1;
-      newState.capturelessMoves = state.capturelessMoves + 1;
-      events.push({ type: 'TIGER_PLACED', at: move.to });
-      newState.moveHistory = [...state.moveHistory, move];
-      newState.currentTurn = 'goat';
       break;
     }
 
@@ -221,21 +201,12 @@ function validateMove(state: GameState, move: Move): string | undefined {
       if (state.board[move.to] !== null) return 'Node is occupied';
       return undefined;
 
-    case 'PLACE_TIGER':
-      if (state.currentTurn !== 'tiger') return 'Not tiger\'s turn';
-      if (state.phase !== 'placement') return 'Cannot place in movement phase';
-      if (state.tigersInPool <= 0) return 'No tigers in pool';
-      if (state.board[move.to] !== null) return 'Node is occupied';
-      return undefined;
-
     case 'MOVE': {
       const piece = state.board[move.from];
       if (piece === null) return 'No piece at source';
       if (piece !== state.currentTurn) return 'Not your piece';
       if (state.currentTurn === 'goat' && state.phase === 'placement')
         return 'Goats cannot move during placement phase';
-      if (state.currentTurn === 'tiger' && state.phase === 'placement' && state.tigersInPool > 0)
-        return 'Must place tigers from pool first';
       if (state.board[move.to] !== null) return 'Destination is occupied';
       if (!NODES[move.from].adj.includes(move.to)) return 'Not adjacent';
       return undefined;
@@ -243,8 +214,6 @@ function validateMove(state: GameState, move: Move): string | undefined {
 
     case 'CAPTURE': {
       if (state.currentTurn !== 'tiger') return 'Only tigers can capture';
-      if (state.phase === 'placement' && state.tigersInPool > 0)
-        return 'Must place tigers from pool first';
       return validateCapture(state, move);
     }
 

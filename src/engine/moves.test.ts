@@ -4,7 +4,7 @@ import type { GameState } from './types';
 
 /**
  * Helper: advance game state to movement phase.
- * Places goats and tigers alternately, using the first legal move each turn.
+ * Goat places, then tiger moves (select first legal move each turn).
  */
 function reachMovementPhase(): GameState {
   let s = createGame();
@@ -43,11 +43,11 @@ function stateWithPieces(
 
 // ENG-03: Move generation
 describe('move generation', () => {
-  it('placement phase: goat can place on any empty node (23 empty)', () => {
+  it('placement phase: goat can place on any empty node (20 empty)', () => {
     const state = createGame();
     const moves = getLegalMoves(state);
     expect(moves.every(m => m.move.type === 'PLACE')).toBe(true);
-    expect(moves).toHaveLength(23); // board starts empty
+    expect(moves).toHaveLength(20); // 23 - 3 tigers pre-placed
   });
 
   it('placement phase: goat cannot move pieces already on board', () => {
@@ -56,23 +56,31 @@ describe('move generation', () => {
     expect(moves.every(m => m.move.type !== 'MOVE')).toBe(true);
   });
 
-  it('placement phase: tiger places from pool when pool > 0', () => {
-    const s1 = applyMove(createGame(), { type: 'PLACE', to: 0 }).state;
+  it('placement phase: tiger can move from Turn 1', () => {
+    const s1 = applyMove(createGame(), { type: 'PLACE', to: 1 }).state;
     expect(s1.currentTurn).toBe('tiger');
     const tigerMoves = getLegalMoves(s1);
-    expect(tigerMoves.every(m => m.move.type === 'PLACE_TIGER')).toBe(true);
-    expect(tigerMoves).toHaveLength(22); // 22 empty nodes
+    expect(tigerMoves.some(m => m.move.type === 'MOVE')).toBe(true);
+    expect(tigerMoves.every(m => m.move.type !== 'PLACE')).toBe(true);
   });
 
-  it('placement phase: tiger moves/captures once all tigers placed', () => {
+  it('placement phase: tiger can capture during placement', () => {
+    // Tiger at 0 (pre-placed), goat at 2. JUMP_MAP['0,2']=8
+    const s0 = createGame();
+    const s1 = applyMove(s0, { type: 'PLACE', to: 2 }).state; // goat at 2
+    const tigerMoves = getLegalMoves(s1);
+    const captures = tigerMoves.filter(m => m.move.type === 'CAPTURE');
+    expect(captures.length).toBeGreaterThan(0);
+  });
+
+  it('placement phase: tiger moves/captures with all tigers on board', () => {
     // Place all 3 tigers and 3 goats, then check tiger moves on next tiger turn
     const s = stateWithPieces([1, 5, 19], { currentTurn: 'goat', goatsInPool: 12 });
     // Goat places
     const s2 = applyMove(s, { type: 'PLACE', to: 7 }).state;
-    // Tiger's turn with tigersInPool = 0: should get MOVE/CAPTURE
+    // Tiger's turn: should get MOVE/CAPTURE
     const moves = getLegalMoves(s2);
     expect(moves.some(m => m.move.type === 'MOVE')).toBe(true);
-    expect(moves.every(m => m.move.type !== 'PLACE_TIGER')).toBe(true);
   });
 
   it('movement phase: goat can move to adjacent empty node', () => {
@@ -113,28 +121,18 @@ describe('move validation', () => {
   it('applyMove returns error when goat tries to move during placement', () => {
     const s0 = createGame();
     const s1 = applyMove(s0, { type: 'PLACE', to: 1 }).state; // goat at 1
-    const s2 = applyMove(s1, { type: 'PLACE_TIGER', to: 0 }).state; // tiger at 0
+    // Tiger moves (e.g. tiger at 0 to node 2)
+    const s2 = applyMove(s1, { type: 'MOVE', from: 0, to: 2 }).state;
     // Now goat's turn, placement phase: try to MOVE goat at 1
-    const result = applyMove(s2, { type: 'MOVE', from: 1, to: 2 });
+    const result = applyMove(s2, { type: 'MOVE', from: 1, to: 7 });
     expect(result.error).toBeDefined();
     expect(result.state).toBe(s2);
   });
 
-  it('applyMove returns error when placing on occupied node', () => {
+  it('applyMove returns error when placing on occupied node (tiger)', () => {
     const s0 = createGame();
-    const s1 = applyMove(s0, { type: 'PLACE', to: 1 }).state; // goat at 1
-    // Tiger tries to place on occupied node 1
-    const result = applyMove(s1, { type: 'PLACE_TIGER', to: 1 });
-    expect(result.error).toBeDefined();
-  });
-
-  it('applyMove returns error when tiger moves while pool not empty', () => {
-    const s0 = createGame();
-    const s1 = applyMove(s0, { type: 'PLACE', to: 1 }).state; // goat at 1
-    const s2 = applyMove(s1, { type: 'PLACE_TIGER', to: 0 }).state; // tiger at 0
-    const s3 = applyMove(s2, { type: 'PLACE', to: 5 }).state; // goat at 5
-    // Tiger has 2 in pool, try to MOVE tiger at 0
-    const result = applyMove(s3, { type: 'MOVE', from: 0, to: 2 });
+    // Try to place goat on node 0 which has a pre-placed tiger
+    const result = applyMove(s0, { type: 'PLACE', to: 0 });
     expect(result.error).toBeDefined();
   });
 
@@ -147,7 +145,8 @@ describe('move validation', () => {
 
   it('applyMove returns error when wrong player moves', () => {
     const state = createGame(); // goat's turn
-    const result = applyMove(state, { type: 'PLACE_TIGER', to: 0 });
+    // Try tiger move on goat's turn
+    const result = applyMove(state, { type: 'MOVE', from: 0, to: 2 });
     expect(result.error).toBeDefined();
   });
 
@@ -221,9 +220,6 @@ describe('capture mechanics', () => {
   });
 
   it('tiger cannot jump over another tiger', () => {
-    // Tigers at 0 and 10. Node 10.adj includes 4. JUMP_MAP['0,4']=10 — but try:
-    // Actually, tigers at 1 and 2. JUMP_MAP['1,2']=3 (horizontal H3).
-    // 2 is a tiger, not a goat → should fail
     const board = Array(23).fill(null) as GameState['board'];
     board[1] = 'tiger';
     board[2] = 'tiger';
@@ -248,15 +244,12 @@ describe('phase transition', () => {
   });
 
   it('PHASE_CHANGED event emitted on transition', () => {
-    // Advance to near end, then place the last goat
     let s = createGame();
-    let count = 0;
     while (s.phase === 'placement') {
       const moves = getLegalMoves(s);
       if (moves.length === 0) break;
       const r = applyMove(s, moves[0].move);
       if (r.error) break;
-      count++;
       // Check for PHASE_CHANGED event on the move that transitions
       if (r.state.phase === 'movement') {
         expect(r.events.some(e => e.type === 'PHASE_CHANGED')).toBe(true);
