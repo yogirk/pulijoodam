@@ -1,50 +1,37 @@
----
-gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: executing
-last_updated: "2026-03-03T16:35:00Z"
-progress:
-  total_phases: 5
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
----
-
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-03)
+See: .planning/PROJECT.md (updated 2026-03-04)
 
-**Core value:** A faithful, polished digital version of Pulijoodam with strong AI opponents -- the game should feel like sitting across from a real opponent.
-**Current focus:** Phase 2: Rust Engine & AI (Phase 1 complete)
+**Core value:** A human can play a complete, rules-correct game of Pulijoodam against a strong AI opponent in a browser — no install, no server, no account.
+**Current focus:** Phase 1 — Engine + Board
 
 ## Current Position
 
-Phase: 2 of 5 (Rust Engine & AI)
-Plan: 0 of ? in current phase (planning not started)
-Status: Phase 1 complete, ready for Phase 2 planning
-Last activity: 2026-03-03 -- Completed 01-02 (CI/CD & GitHub Pages deployment)
+Phase: 1 of 4 (Engine + Board)
+Plan: 0 of 3 in current phase
+Status: Ready to plan
+Last activity: 2026-03-04 — Roadmap created, ready to begin Phase 1 planning
 
-Progress: [##........] 20%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 37min
-- Total execution time: 1.25 hours
+- Total plans completed: 0
+- Average duration: —
+- Total execution time: —
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Scaffold & Pipeline | 2/2 | 75min | 37min |
+| - | - | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (30min), 01-02 (45min)
-- Trend: Consistent
+- Last 5 plans: —
+- Trend: —
 
 *Updated after each plan completion*
 
@@ -55,28 +42,26 @@ Progress: [##........] 20%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [Roadmap]: Risk front-load WASM/FFI/GitHub Pages pipeline before any game logic
-- [Roadmap]: AI thread isolation via WebWorker (not std::thread::spawn -- unavailable in WASM)
-- [Roadmap]: Pure Rust engine + AI phases before Flutter integration for isolated testing
-- [01-01]: Used FRB default project layout (rust/ in project root), deferring SPEC.md monorepo to Phase 2
-- [01-01]: FRB #[frb(init)] auto-calls init_app() during RustLib.init() -- no explicit Dart call needed
-- [01-01]: All FFI functions use Result<T, String> at boundary (zero-unwrap policy)
-- [01-02]: Used coi-serviceworker (gzuidhof) for COOP/COEP header injection on GitHub Pages
-- [01-02]: Single-job CI/CD pipeline with Rust cache and Flutter pub cache for build speed
-- [01-02]: Base-href /pulijoodam/ required for GitHub Pages project-site URL routing
-- [01-02]: coi-serviceworker.js must be copied to build/web/ post-Flutter-build
-- [01-02]: Added reload guard to coi-serviceworker to prevent infinite reload loop
+- Stack: TypeScript + React 19 + Vite — non-negotiable
+- Engine purity: zero UI imports in src/engine/ (Web Worker + Rust port compatibility)
+- Rendering: SVG with React components (not Canvas) — accessibility and auto-scaling
+- AI: MCTS for placement phase, Minimax+alpha-beta for movement phase
+- Andhra preset only for v1: chain-hops allowed, 10-capture tiger win
+- Hosting: GitHub Pages static SPA — no backend, no database
 
 ### Pending Todos
 
-None.
+None yet.
 
 ### Blockers/Concerns
 
-- Phase 3: Dart Isolate/WebWorker patterns for WASM AI dispatch need research during planning
+- AI difficulty tuning: evaluation function weights require self-play validation in Phase 2 — budget iteration time
+- MCTS goat bias: purely random rollouts undervalue goat play; heuristic-guided rollouts required (see SUMMARY.md Pitfall 6)
+- P2P WebRTC: STUN-only fails for ~20-30% of users on symmetric NAT; document as known limitation in Phase 4
+- PeerServer reliability: peerjs.com hosted server is outside project control; manual SDP exchange is primary UX
 
 ## Session Continuity
 
-Last session: 2026-03-03
-Stopped at: Completed 01-02-PLAN.md (CI/CD & GitHub Pages deployment) -- Phase 1 complete
-Resume file: .planning/phases/01-scaffold-pipeline/01-02-SUMMARY.md
+Last session: 2026-03-04
+Stopped at: Roadmap created — Phase 1 ready to plan
+Resume file: None

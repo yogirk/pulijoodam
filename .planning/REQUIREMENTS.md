@@ -148,13 +148,86 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (Populated by roadmapper) | | |
+| ENG-01 | Phase 1 | Pending |
+| ENG-02 | Phase 1 | Pending |
+| ENG-03 | Phase 1 | Pending |
+| ENG-04 | Phase 1 | Pending |
+| ENG-05 | Phase 1 | Pending |
+| ENG-06 | Phase 1 | Pending |
+| ENG-07 | Phase 1 | Pending |
+| ENG-08 | Phase 1 | Pending |
+| ENG-09 | Phase 1 | Pending |
+| ENG-10 | Phase 1 | Pending |
+| ENG-11 | Phase 1 | Pending |
+| ENG-12 | Phase 1 | Pending |
+| ENG-13 | Phase 1 | Pending |
+| BRD-01 | Phase 1 | Pending |
+| BRD-02 | Phase 1 | Pending |
+| BRD-03 | Phase 1 | Pending |
+| BRD-04 | Phase 1 | Pending |
+| BRD-05 | Phase 1 | Pending |
+| BRD-06 | Phase 1 | Pending |
+| BRD-07 | Phase 1 | Pending |
+| BRD-08 | Phase 1 | Pending |
+| BRD-09 | Phase 1 | Pending |
+| BRD-10 | Phase 1 | Pending |
+| AI-01 | Phase 2 | Pending |
+| AI-02 | Phase 2 | Pending |
+| AI-03 | Phase 2 | Pending |
+| AI-04 | Phase 2 | Pending |
+| AI-05 | Phase 2 | Pending |
+| AI-06 | Phase 2 | Pending |
+| AI-07 | Phase 2 | Pending |
+| AI-08 | Phase 2 | Pending |
+| AI-09 | Phase 2 | Pending |
+| AI-10 | Phase 2 | Pending |
+| AI-11 | Phase 2 | Pending |
+| POL-01 | Phase 3 | Pending |
+| POL-02 | Phase 3 | Pending |
+| POL-03 | Phase 3 | Pending |
+| POL-04 | Phase 3 | Pending |
+| POL-05 | Phase 3 | Pending |
+| POL-06 | Phase 3 | Pending |
+| POL-07 | Phase 3 | Pending |
+| POL-08 | Phase 3 | Pending |
+| POL-09 | Phase 3 | Pending |
+| TUT-01 | Phase 3 | Pending |
+| TUT-02 | Phase 3 | Pending |
+| TUT-03 | Phase 3 | Pending |
+| TUT-04 | Phase 3 | Pending |
+| TUT-05 | Phase 3 | Pending |
+| TUT-06 | Phase 3 | Pending |
+| TUT-07 | Phase 3 | Pending |
+| HIST-01 | Phase 3 | Pending |
+| HIST-02 | Phase 3 | Pending |
+| HIST-03 | Phase 3 | Pending |
+| HIST-04 | Phase 3 | Pending |
+| HIST-05 | Phase 3 | Pending |
+| HIST-06 | Phase 3 | Pending |
+| MP-01 | Phase 4 | Pending |
+| MP-02 | Phase 4 | Pending |
+| MP-03 | Phase 4 | Pending |
+| MP-04 | Phase 4 | Pending |
+| MP-05 | Phase 4 | Pending |
+| MP-06 | Phase 4 | Pending |
+| MP-07 | Phase 4 | Pending |
+| MP-08 | Phase 4 | Pending |
+| PROD-01 | Phase 4 | Pending |
+| PROD-02 | Phase 4 | Pending |
+| PROD-03 | Phase 4 | Pending |
+| PROD-04 | Phase 4 | Pending |
+| PROD-05 | Phase 4 | Pending |
+| PROD-06 | Phase 4 | Pending |
+| PROD-07 | Phase 4 | Pending |
+| PROD-08 | Phase 4 | Pending |
+| PROD-09 | Phase 4 | Pending |
+| PROD-10 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 54 total
-- Mapped to phases: 0
-- Unmapped: 54
+- v1 requirements: 74 total
+- Mapped to phases: 74
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after initial definition*
+*Last updated: 2026-03-04 — traceability populated after roadmap creation*

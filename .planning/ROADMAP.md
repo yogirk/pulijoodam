@@ -2,7 +2,7 @@
 
 ## Overview
 
-Pulijoodam goes from zero to deployed web app in 5 phases. Phase 1 validates the riskiest unknowns (WASM + flutter_rust_bridge + GitHub Pages pipeline) with a trivial hello-world before any game logic exists. Phase 2 builds the complete Rust game engine and AI in isolation, testable with `cargo test`. Phase 3 wires Rust to Flutter through the FFI bridge and delivers a playable game with core board interaction. Phase 4 adds the polish that makes the game feel complete: themes, audio, persistence, animations, and drag interaction. Phase 5 delivers the differentiators that separate Pulijoodam from every competitor: interactive tutorial, accessibility, and responsive layout.
+Four phases deliver a complete, production-quality Pulijoodam game. The foundation phase establishes a rules-correct engine and playable board — everything else builds on it. AI is the primary use case and comes second. The experience layer (animations, tutorial, persistence) is phase three, once mechanics are stable. The final phase ships P2P multiplayer and full PWA installability.
 
 ## Phases
 
@@ -12,104 +12,90 @@ Pulijoodam goes from zero to deployed web app in 5 phases. Phase 1 validates the
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [x] **Phase 1: Scaffold & Pipeline** - WASM/FFI hello-world deployed to GitHub Pages with CI/CD
-- [ ] **Phase 2: Rust Engine & AI** - Complete game rules and AI opponents, tested in isolation
-- [ ] **Phase 3: Playable Game** - FFI bridge + Flutter UI delivers a working game on screen
-- [ ] **Phase 4: Game Polish** - Themes, audio, persistence, capture animations, drag interaction
-- [ ] **Phase 5: Tutorial & Accessibility** - Interactive tutorial, accessibility, responsive layout
+- [ ] **Phase 1: Engine + Board** - Rules-correct engine and playable local hot-seat game
+- [ ] **Phase 2: AI Opponent** - Solo play against 4-difficulty AI in a Web Worker
+- [ ] **Phase 3: Experience** - Animations, sound, tutorial, and game history/replay
+- [ ] **Phase 4: Multiplayer + PWA** - P2P online play and production hardening
 
 ## Phase Details
 
-### Phase 1: Scaffold & Pipeline
-**Goal**: A trivial Rust function is callable from Flutter web via WASM and deployed to GitHub Pages with CI/CD -- proving the entire deployment pipeline works before any game logic investment
+### Phase 1: Engine + Board
+**Goal**: A human can play a complete, rules-correct game of Pulijoodam against another human on the same device
 **Depends on**: Nothing (first phase)
-**Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04
+**Requirements**: ENG-01, ENG-02, ENG-03, ENG-04, ENG-05, ENG-06, ENG-07, ENG-08, ENG-09, ENG-10, ENG-11, ENG-12, ENG-13, BRD-01, BRD-02, BRD-03, BRD-04, BRD-05, BRD-06, BRD-07, BRD-08, BRD-09, BRD-10
 **Success Criteria** (what must be TRUE):
-  1. A Flutter web app at the GitHub Pages URL calls a Rust function compiled to WASM and displays its return value on screen
-  2. Pushing to main triggers a GitHub Actions workflow that builds and deploys the app without manual intervention
-  3. The deployed app loads successfully in Chrome and Firefox (cross-origin isolation via coi-serviceworker is working)
-  4. A Rust panic in the WASM module logs a readable stack trace to the browser console instead of an opaque "unreachable" error
-**Plans**: 2 plans
+  1. Two players can play a full game from start to win/draw on any device without illegal moves being accepted
+  2. All 23 board nodes render at correct positions with connecting edges, pieces are visually distinct, and legal destinations highlight on selection
+  3. Chain-hop captures execute correctly — a tiger landing on a jump-capable square continues the chain until no further captures are available
+  4. The game detects and announces all three outcomes: Tiger wins (10+ goats captured), Goat wins (all tigers immobilized), Draw (threefold repetition or 50 captureless moves)
+  5. Undo is available and correctly restores the previous board state including chain-hop progress
+**Plans**: TBD
 
 Plans:
-- [x] 01-01-PLAN.md -- Scaffold FRB project, implement Rust API with panic safety, wire Flutter UI, verify WASM pipeline locally
-- [x] 01-02-PLAN.md -- Add coi-serviceworker for cross-origin isolation, create GitHub Actions CI/CD, deploy to GitHub Pages
+- [ ] 01-01: Engine core — board topology, move generation, capture mechanics, chain-hop, win/draw detection
+- [ ] 01-02: Board UI — SVG rendering, tap-tap interaction, legal move highlights, turn/counter indicators, result screen
+- [ ] 01-03: Engine hardening — unit tests for topology, moves, captures, chain-hops, phase transitions, win/draw, undo/redo
 
-### Phase 2: Rust Engine & AI
-**Goal**: The complete Pulijoodam rule engine and AI system exist as tested Rust crates -- every rule, capture mechanic, win condition, and AI difficulty level works, validated by cargo test suites
+### Phase 2: AI Opponent
+**Goal**: A human can play Pulijoodam against a computer opponent with meaningful difficulty progression
 **Depends on**: Phase 1
-**Requirements**: ENGINE-01, ENGINE-02, ENGINE-03, ENGINE-04, ENGINE-05, ENGINE-06, ENGINE-07, ENGINE-08, ENGINE-09, ENGINE-10, ENGINE-11, ENGINE-12, ENGINE-13, ENGINE-14, AI-01, AI-02, AI-03, AI-04, AI-05, AI-06, AI-07, AI-08, AI-09
+**Requirements**: AI-01, AI-02, AI-03, AI-04, AI-05, AI-06, AI-07, AI-08, AI-09, AI-10, AI-11
 **Success Criteria** (what must be TRUE):
-  1. A cargo test suite exercises full game scenarios (placement phase through movement phase through win/draw) for both Andhra and Tamil rule presets, with all tests passing
-  2. The AI produces legal moves at all 4 difficulty levels for both placement and movement phases, verified by engine validation in tests
-  3. Hard AI completes a move in under 2 seconds and Expert AI in under 5 seconds, measured by benchmark tests on the target architecture
-  4. Undo/redo correctly reverses and replays arbitrary move sequences, verified by property-based tests
-  5. The engine API accepts typed Commands and returns typed Events with no mutable state leaking across the API boundary
+  1. The UI remains fully responsive while the AI is computing — no jank, scroll lockup, or input freeze
+  2. Easy AI loses to a beginner player; Expert AI requires strategic effort to beat, confirming all four difficulty levels are correctly ranked
+  3. Hard AI completes its move in under 2 seconds and Expert in under 5 seconds on a mid-range mobile device
+  4. The game setup screen lets the user choose to play as Tiger or Goat and select a difficulty level before starting
+  5. Undo is available in AI games and correctly steps back through AI moves as well as player moves
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01: Web Worker setup — Comlink typed proxy, minimal AIInput serialization, stateless worker lifecycle
+- [ ] 02-02: AI algorithms — heuristic evaluation function, MCTS placement phase, Minimax+alpha-beta movement phase
+- [ ] 02-03: Difficulty levels and validation — 4 levels, time budgets, self-play ranking confirmation
 
-### Phase 3: Playable Game
-**Goal**: A human can play a complete game of Pulijoodam against the AI in a browser -- placing goats, moving pieces, seeing captures, and reaching a win/loss/draw result screen
+### Phase 3: Experience
+**Goal**: The game feels polished and discoverable — new players can learn through a tutorial and returning players can replay their games
 **Depends on**: Phase 2
-**Requirements**: FFI-01, FFI-02, FFI-03, FFI-04, BOARD-01, BOARD-02, BOARD-03, BOARD-05, BOARD-06, BOARD-07, BOARD-10, BOARD-11, BOARD-13, APP-01, APP-02, APP-03
+**Requirements**: POL-01, POL-02, POL-03, POL-04, POL-05, POL-06, POL-07, POL-08, POL-09, TUT-01, TUT-02, TUT-03, TUT-04, TUT-05, TUT-06, TUT-07, HIST-01, HIST-02, HIST-03, HIST-04, HIST-05, HIST-06
 **Success Criteria** (what must be TRUE):
-  1. A user can start a new game from the home screen, choose role (Tiger/Goat/Random), difficulty, and rule preset, then see the board rendered with all 23 nodes and connecting lines
-  2. A user can tap a piece and tap a destination to move it, with valid destinations highlighted and illegal moves rejected with visual feedback
-  3. The AI responds to each player move with an animated move of its own, with a brief thinking delay that feels natural
-  4. A completed game displays a result screen showing win/loss/draw with goats captured and moves played, with an option to play again
-  5. AI computation runs in a WebWorker and never freezes the browser UI, even at Expert difficulty
+  1. A player who has never heard of Pulijoodam can complete the three-lesson tutorial and understand placement, movement, chain-hop captures, and both win conditions
+  2. Piece movements, captures, and chain-hop sequences play smooth animations; goat placement and capture have distinct visual effects
+  3. Sound effects accompany every significant game event (place, slide, capture, win/loss, illegal move) and the sound toggle persists across sessions
+  4. A player can navigate to game history, see past games listed with date/opponent/result, and replay any game step-by-step including auto-play
+  5. An interrupted game automatically resumes when the app is reopened
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01: Animations — Motion-driven piece animations (place, slide, capture, chain-hop sequence), GameEvent queue
+- [ ] 03-02: Sound and themes — Howler audio sprites, sound toggle, two visual themes, settings persistence
+- [ ] 03-03: Tutorial — three-lesson guided first game, step overlays, first-launch prompt, skip option
+- [ ] 03-04: History and replay — auto-save on every move, resume on reopen, history list, step/scrubber/auto-play replay
 
-### Phase 4: Game Polish
-**Goal**: The game feels complete and satisfying -- pieces have weight through animations and sound, progress is never lost through auto-save, and visual themes give the game personality
+### Phase 4: Multiplayer + PWA
+**Goal**: Players can challenge a friend online with no server, and the app is installable and works offline
 **Depends on**: Phase 3
-**Requirements**: BOARD-04, BOARD-08, BOARD-09, THEME-01, THEME-02, THEME-03, THEME-04, AUDIO-01, AUDIO-02, AUDIO-03, AUDIO-04, AUDIO-05, AUDIO-06, AUDIO-07, PERSIST-01, PERSIST-02, PERSIST-03, APP-04
+**Requirements**: MP-01, MP-02, MP-03, MP-04, MP-05, MP-06, MP-07, MP-08, PROD-01, PROD-02, PROD-03, PROD-04, PROD-05, PROD-06, PROD-07, PROD-08, PROD-09, PROD-10
 **Success Criteria** (what must be TRUE):
-  1. A user can drag a piece to its destination with the piece following their finger and snapping to valid nodes
-  2. Capturing a goat plays a bounce/pop animation with particle burst, accompanied by a capture sound effect; chain-hops animate sequentially
-  3. The user can switch between Traditional (stone/earthy) and Modern (clean geometric) themes in settings, with the choice persisting across sessions
-  4. All game sounds play on piece placement, movement, capture, win/loss/draw, and illegal move; the user can mute/unmute all sounds from settings
-  5. Closing the browser mid-game and reopening it resumes the exact game state, including rule preset, player role, and full move history
+  1. Two players on different devices can start a game by exchanging two copy-paste codes with no account or server
+  2. Disconnection during a P2P game offers the remaining player a clear choice to continue against AI or end the game
+  3. The app loads and plays fully offline after the first visit, and can be installed to the home screen on iOS, Android, and desktop
+  4. Screen reader users can follow and play the game through move announcements and ARIA labels; color-blind users can distinguish tigers from goats
+  5. The total JS + assets bundle is under 1MB and the app passes a responsive layout audit across mobile, tablet, and desktop
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
-- [ ] 04-03: TBD
-
-### Phase 5: Tutorial & Accessibility
-**Goal**: A first-time player can learn Pulijoodam through guided lessons, and the game is usable by players with accessibility needs across all screen sizes
-**Depends on**: Phase 4
-**Requirements**: TUTOR-01, TUTOR-02, TUTOR-03, TUTOR-04, TUTOR-05, BOARD-12
-**Success Criteria** (what must be TRUE):
-  1. On first app launch, the user is prompted to start the tutorial; they can accept or skip it
-  2. A user completing all 3 tutorial lessons understands board structure, piece placement, movement, captures, chain-hops, and win/loss/draw conditions through guided interaction with highlighted targets and brief text overlays
-  3. The board renders correctly and remains playable across phone, tablet, and desktop screen sizes and aspect ratios
-  4. All interactive elements meet 44x44pt minimum touch targets, and the game is navigable with a screen reader
-**Plans**: TBD
-
-Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 04-01: P2P multiplayer — WebRTC/PeerJS data channel, offer/answer exchange UX, move relay, disconnect handling
+- [ ] 04-02: PWA and accessibility — service worker precaching, web app manifest, drag-to-move, screen reader announcements, color-blind safe design, ARIA labels
+- [ ] 04-03: Production hardening — memoization, lazy loading, bundle size audit, responsive design audit, GitHub Pages CI deployment
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
+Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffold & Pipeline | 2/2 | Complete | 2026-03-03 |
-| 2. Rust Engine & AI | 0/? | Not started | - |
-| 3. Playable Game | 0/? | Not started | - |
-| 4. Game Polish | 0/? | Not started | - |
-| 5. Tutorial & Accessibility | 0/? | Not started | - |
+| 1. Engine + Board | 0/3 | Not started | - |
+| 2. AI Opponent | 0/3 | Not started | - |
+| 3. Experience | 0/4 | Not started | - |
+| 4. Multiplayer + PWA | 0/3 | Not started | - |
