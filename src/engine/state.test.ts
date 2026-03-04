@@ -7,17 +7,9 @@ describe('createGame', () => {
     expect(state.board).toHaveLength(23);
   });
 
-  it('tigers start on nodes 0, 6, 7', () => {
+  it('board starts completely empty', () => {
     const state = createGame();
-    expect(state.board[0]).toBe('tiger');
-    expect(state.board[6]).toBe('tiger');
-    expect(state.board[7]).toBe('tiger');
-  });
-
-  it('all other nodes are empty', () => {
-    const state = createGame();
-    const nonTigerNodes = state.board.filter((_, i) => i !== 0 && i !== 6 && i !== 7);
-    expect(nonTigerNodes.every(p => p === null)).toBe(true);
+    expect(state.board.every(p => p === null)).toBe(true);
   });
 
   it('phase is placement', () => {
@@ -26,6 +18,10 @@ describe('createGame', () => {
 
   it('currentTurn is goat', () => {
     expect(createGame().currentTurn).toBe('goat');
+  });
+
+  it('tigersInPool is 3', () => {
+    expect(createGame().tigersInPool).toBe(3);
   });
 
   it('goatsInPool is 15', () => {
@@ -41,8 +37,7 @@ describe('createGame', () => {
   });
 
   it('stateHashes is empty object', () => {
-    const state = createGame();
-    expect(state.stateHashes).toEqual({});
+    expect(createGame().stateHashes).toEqual({});
   });
 
   it('capturelessMoves is 0', () => {

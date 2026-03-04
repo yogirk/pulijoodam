@@ -43,6 +43,26 @@ function makeInitialUIState(): UIState {
 
 const initialUIState: UIState = makeInitialUIState();
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Apply a move and return the new UIState, or null if the move failed. */
+function tryApplyMove(
+  state: UIState,
+  legalMove: LegalMove
+): UIState | null {
+  const result = applyMove(state.gameState, legalMove.move);
+  if (result.error) return null;
+  return {
+    ...state,
+    gameState: result.state,
+    history: [...state.history, result.state],
+    redoStack: [],
+    selectedNode: null,
+    legalMoves: getLegalMoves(result.state),
+    lastEvents: result.events,
+  };
+}
+
 // ─── Reducer ─────────────────────────────────────────────────────────────────
 
 function gameReducer(state: UIState, action: UIAction): UIState {
@@ -50,7 +70,7 @@ function gameReducer(state: UIState, action: UIAction): UIState {
 
     case 'NODE_TAPPED': {
       const { nodeId } = action;
-      const { gameState, selectedNode, history, legalMoves } = state;
+      const { gameState, selectedNode, legalMoves } = state;
 
       // If game is over, ignore all taps
       if (getGameStatus(gameState) !== 'ongoing') {
@@ -60,105 +80,58 @@ function gameReducer(state: UIState, action: UIAction): UIState {
       // ── Mid chain-hop: only the chain tiger can act ───────────────────────
       if (gameState.chainJumpInProgress !== null) {
         const chainTiger = gameState.chainJumpInProgress;
-
-        // Tap on the tiger itself → no-op
         if (nodeId === chainTiger) return state;
 
-        // Check if tapped node is a valid capture destination
         const captureMove = legalMoves.find(
           lm => lm.move.type === 'CAPTURE' && lm.to === nodeId
         );
-
-        if (!captureMove) return state; // not a legal capture target — ignore
-
-        const result = applyMove(gameState, captureMove.move);
-        if (result.error) return state;
-
-        const newLegalMoves = getLegalMoves(result.state);
-        return {
-          ...state,
-          gameState: result.state,
-          history: [...history, result.state],
-          redoStack: [],
-          selectedNode: null,
-          legalMoves: newLegalMoves,
-          lastEvents: result.events,
-        };
+        if (!captureMove) return state;
+        return tryApplyMove(state, captureMove) ?? state;
       }
 
-      // ── Placement phase (goat's turn) ─────────────────────────────────────
-      if (gameState.phase === 'placement' && gameState.currentTurn === 'goat') {
-        // Attempt a PLACE move at the tapped node
-        const placeMove = legalMoves.find(
-          lm => lm.move.type === 'PLACE' && lm.to === nodeId
-        );
-
-        if (!placeMove) return state; // not a valid placement node
-
-        const result = applyMove(gameState, placeMove.move);
-        if (result.error) return state;
-
-        const newLegalMoves = getLegalMoves(result.state);
-        return {
-          ...state,
-          gameState: result.state,
-          history: [...history, result.state],
-          redoStack: [],
-          selectedNode: null,
-          legalMoves: newLegalMoves,
-          lastEvents: result.events,
-        };
-      }
-
-      // ── Tiger placement phase (tiger's turn) ─────────────────────────────
-      if (gameState.phase === 'placement' && gameState.currentTurn === 'tiger') {
-        // If nothing selected: select a tiger piece if it has legal moves
-        if (selectedNode === null) {
-          if (gameState.board[nodeId] !== 'tiger') return state;
-
-          // Find legal moves from this tiger
-          const movesFromNode = legalMoves.filter(
-            lm => lm.from === nodeId
+      // ── Placement phase ─────────────────────────────────────────────────
+      if (gameState.phase === 'placement') {
+        // Goat placement: tap empty node → place goat
+        if (gameState.currentTurn === 'goat') {
+          const placeMove = legalMoves.find(
+            lm => lm.move.type === 'PLACE' && lm.to === nodeId
           );
-
-          if (movesFromNode.length === 0) return state; // no legal moves from this tiger
-
-          return {
-            ...state,
-            selectedNode: nodeId,
-            // Keep full legalMoves so destinations can be highlighted
-          };
+          if (!placeMove) return state;
+          return tryApplyMove(state, placeMove) ?? state;
         }
 
-        // Tiger already selected
-        if (selectedNode !== null) {
-          // Tapping the same tiger deselects
+        // Tiger's turn during placement
+        if (gameState.currentTurn === 'tiger') {
+          // If tigers still in pool: tap empty node → place tiger
+          if (gameState.tigersInPool > 0) {
+            const placeMove = legalMoves.find(
+              lm => lm.move.type === 'PLACE_TIGER' && lm.to === nodeId
+            );
+            if (!placeMove) return state;
+            return tryApplyMove(state, placeMove) ?? state;
+          }
+
+          // All tigers placed: select-and-move behavior
+          if (selectedNode === null) {
+            if (gameState.board[nodeId] !== 'tiger') return state;
+            const movesFromNode = legalMoves.filter(lm => lm.from === nodeId);
+            if (movesFromNode.length === 0) return state;
+            return { ...state, selectedNode: nodeId };
+          }
+
+          // Tiger already selected
           if (nodeId === selectedNode) {
             return { ...state, selectedNode: null };
           }
 
-          // Check if tapped node is a legal destination from selectedNode
           const moveToNode = legalMoves.find(
             lm => lm.from === selectedNode && lm.to === nodeId
           );
-
           if (moveToNode) {
-            const result = applyMove(gameState, moveToNode.move);
-            if (result.error) return state;
-
-            const newLegalMoves = getLegalMoves(result.state);
-            return {
-              ...state,
-              gameState: result.state,
-              history: [...history, result.state],
-              redoStack: [],
-              selectedNode: null,
-              legalMoves: newLegalMoves,
-              lastEvents: result.events,
-            };
+            return tryApplyMove(state, moveToNode) ?? state;
           }
 
-          // Tapped a different tiger — switch selection
+          // Switch selection to another tiger
           if (gameState.board[nodeId] === 'tiger') {
             const movesFromNew = legalMoves.filter(lm => lm.from === nodeId);
             if (movesFromNew.length > 0) {
@@ -166,7 +139,6 @@ function gameReducer(state: UIState, action: UIAction): UIState {
             }
           }
 
-          // Tapped elsewhere (non-destination, non-tiger) → deselect
           return { ...state, selectedNode: null };
         }
 
@@ -175,46 +147,27 @@ function gameReducer(state: UIState, action: UIAction): UIState {
 
       // ── Movement phase ────────────────────────────────────────────────────
       if (gameState.phase === 'movement') {
-        const currentPiece = gameState.currentTurn; // 'tiger' | 'goat'
+        const currentPiece = gameState.currentTurn;
 
         if (selectedNode === null) {
-          // Select a piece if it belongs to current player and has legal moves
           if (gameState.board[nodeId] !== currentPiece) return state;
-
           const movesFromNode = legalMoves.filter(lm => lm.from === nodeId);
           if (movesFromNode.length === 0) return state;
-
           return { ...state, selectedNode: nodeId };
         }
 
-        // A piece is selected
         if (nodeId === selectedNode) {
-          // Deselect on second tap
           return { ...state, selectedNode: null };
         }
 
-        // Check if tapped node is a legal destination from selectedNode
         const moveToNode = legalMoves.find(
           lm => lm.from === selectedNode && lm.to === nodeId
         );
-
         if (moveToNode) {
-          const result = applyMove(gameState, moveToNode.move);
-          if (result.error) return state;
-
-          const newLegalMoves = getLegalMoves(result.state);
-          return {
-            ...state,
-            gameState: result.state,
-            history: [...history, result.state],
-            redoStack: [],
-            selectedNode: null,
-            legalMoves: newLegalMoves,
-            lastEvents: result.events,
-          };
+          return tryApplyMove(state, moveToNode) ?? state;
         }
 
-        // Tapped a different piece of the same color → switch selection
+        // Switch selection to another own piece
         if (gameState.board[nodeId] === currentPiece) {
           const movesFromNew = legalMoves.filter(lm => lm.from === nodeId);
           if (movesFromNew.length > 0) {
@@ -222,7 +175,6 @@ function gameReducer(state: UIState, action: UIAction): UIState {
           }
         }
 
-        // Non-destination, non-own-piece → deselect
         return { ...state, selectedNode: null };
       }
 
@@ -236,34 +188,31 @@ function gameReducer(state: UIState, action: UIAction): UIState {
       const result = applyMove(gameState, { type: 'END_CHAIN' });
       if (result.error) return state;
 
-      const newLegalMoves = getLegalMoves(result.state);
       return {
         ...state,
         gameState: result.state,
         history: [...history, result.state],
         redoStack: [],
         selectedNode: null,
-        legalMoves: newLegalMoves,
+        legalMoves: getLegalMoves(result.state),
         lastEvents: result.events,
       };
     }
 
     case 'UNDO': {
       const { history, redoStack, gameState } = state;
-      // Need at least 2 states in history to undo (index 0 = initial)
       if (history.length <= 1) return state;
 
       const prevState = history[history.length - 2];
       const newHistory = history.slice(0, -1);
 
-      const newLegalMoves = getLegalMoves(prevState);
       return {
         ...state,
         gameState: prevState,
         history: newHistory,
         redoStack: [gameState, ...redoStack],
         selectedNode: null,
-        legalMoves: newLegalMoves,
+        legalMoves: getLegalMoves(prevState),
         lastEvents: [],
       };
     }
@@ -273,14 +222,13 @@ function gameReducer(state: UIState, action: UIAction): UIState {
       if (redoStack.length === 0) return state;
 
       const [nextState, ...remainingRedo] = redoStack;
-      const newLegalMoves = getLegalMoves(nextState);
       return {
         ...state,
         gameState: nextState,
         history: [...history, nextState],
         redoStack: remainingRedo,
         selectedNode: null,
-        legalMoves: newLegalMoves,
+        legalMoves: getLegalMoves(nextState),
         lastEvents: [],
       };
     }

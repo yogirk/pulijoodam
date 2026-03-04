@@ -45,11 +45,13 @@ export function Board({
     }
   }
 
-  // During goat placement (no selection needed), highlight all valid placement spots
+  // During placement (no selection needed), highlight all valid placement spots
+  // Applies to both goat placement and tiger placement (when tigers still in pool)
   const showPlacementHints =
     gameState.phase === 'placement' &&
-    gameState.currentTurn === 'goat' &&
-    selectedNode === null;
+    selectedNode === null &&
+    (gameState.currentTurn === 'goat' ||
+      (gameState.currentTurn === 'tiger' && gameState.tigersInPool > 0));
 
   if (showPlacementHints) {
     for (const nodeId of legalMoveTo) {
@@ -59,7 +61,7 @@ export function Board({
 
   return (
     <svg
-      viewBox="0 0 600 700"
+      viewBox="0 0 600 380"
       style={{ width: '100%', height: '100%', maxWidth: '600px' }}
       role="img"
       aria-label="Pulijoodam game board"

@@ -25,12 +25,18 @@ export function GameScreen() {
       <TurnIndicator
         currentTurn={gameState.currentTurn}
         phase={gameState.phase}
+        tigersInPool={gameState.tigersInPool}
       />
 
       {/* Counters */}
       <div className="flex gap-4 my-2">
         <PoolCounter
-          label="Pool"
+          label="Tigers"
+          count={gameState.tigersInPool}
+          visible={gameState.phase === 'placement' && gameState.tigersInPool > 0}
+        />
+        <PoolCounter
+          label="Goats"
           count={gameState.goatsInPool}
           visible={gameState.phase === 'placement'}
         />

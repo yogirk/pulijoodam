@@ -18,4 +18,4 @@ export { createGame } from './state';
 export { applyMove, getLegalMoves } from './moves';
 export { getGameStatus } from './rules';
 export { undo, redo } from './history';
-export { NODES, EDGES, JUMP_MAP } from './board';
+export { NODES, EDGES, LINES, JUMP_MAP } from './board';
