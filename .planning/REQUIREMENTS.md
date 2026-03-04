@@ -9,17 +9,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Engine
 
-- [ ] **ENG-01**: Board topology represents 23 nodes with coordinates, adjacency lists, and derived jump paths
-- [ ] **ENG-02**: Game state tracks board positions, phase, turn, goat pool, captures, and chain-hop progress
-- [ ] **ENG-03**: Move generation produces all legal moves for current player (placement and movement)
-- [ ] **ENG-04**: Move validation rejects illegal moves with clear error reason
-- [ ] **ENG-05**: Capture mechanics support single jump and chain-hop (Andhra preset)
-- [ ] **ENG-06**: Phase transitions from placement to movement when all 15 goats are placed
-- [ ] **ENG-07**: Tiger win detection when 10+ goats captured (< 6 remaining)
-- [ ] **ENG-08**: Goat win detection when all tigers are immobilized
-- [ ] **ENG-09**: Draw detection via threefold repetition (same board state + turn 3 times)
-- [ ] **ENG-10**: Draw detection via 50 consecutive captureless moves
-- [ ] **ENG-11**: Undo/redo support via move history stack
+- [x] **ENG-01**: Board topology represents 23 nodes with coordinates, adjacency lists, and derived jump paths
+- [x] **ENG-02**: Game state tracks board positions, phase, turn, goat pool, captures, and chain-hop progress
+- [x] **ENG-03**: Move generation produces all legal moves for current player (placement and movement)
+- [x] **ENG-04**: Move validation rejects illegal moves with clear error reason
+- [x] **ENG-05**: Capture mechanics support single jump and chain-hop (Andhra preset)
+- [x] **ENG-06**: Phase transitions from placement to movement when all 15 goats are placed
+- [x] **ENG-07**: Tiger win detection when 10+ goats captured (< 6 remaining)
+- [x] **ENG-08**: Goat win detection when all tigers are immobilized
+- [x] **ENG-09**: Draw detection via threefold repetition (same board state + turn 3 times)
+- [x] **ENG-10**: Draw detection via 50 consecutive captureless moves
+- [x] **ENG-11**: Undo/redo support via move history stack
 - [x] **ENG-12**: Engine has zero UI dependencies — pure TypeScript, functional API, immutable state
 - [x] **ENG-13**: Engine unit tests cover topology, moves, captures, chain-hops, win/draw, and phase transitions
 
@@ -148,17 +148,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ENG-01 | Phase 1 | Pending |
-| ENG-02 | Phase 1 | Pending |
-| ENG-03 | Phase 1 | Pending |
-| ENG-04 | Phase 1 | Pending |
-| ENG-05 | Phase 1 | Pending |
-| ENG-06 | Phase 1 | Pending |
-| ENG-07 | Phase 1 | Pending |
-| ENG-08 | Phase 1 | Pending |
-| ENG-09 | Phase 1 | Pending |
-| ENG-10 | Phase 1 | Pending |
-| ENG-11 | Phase 1 | Pending |
+| ENG-01 | Phase 1 | Complete |
+| ENG-02 | Phase 1 | Complete |
+| ENG-03 | Phase 1 | Complete |
+| ENG-04 | Phase 1 | Complete |
+| ENG-05 | Phase 1 | Complete |
+| ENG-06 | Phase 1 | Complete |
+| ENG-07 | Phase 1 | Complete |
+| ENG-08 | Phase 1 | Complete |
+| ENG-09 | Phase 1 | Complete |
+| ENG-10 | Phase 1 | Complete |
+| ENG-11 | Phase 1 | Complete |
 | ENG-12 | Phase 1 | Complete |
 | ENG-13 | Phase 1 | Complete |
 | BRD-01 | Phase 1 | Pending |

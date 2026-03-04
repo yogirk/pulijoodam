@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in-progress
-stopped_at: Phase 1 Plan 1 complete — scaffold + Wave 0 test stubs
-last_updated: "2026-03-04T08:48:02Z"
-last_activity: 2026-03-04 — Scaffolded Vite+React+TS project with Tailwind v4, Vitest 3, ESLint v9, 82 Wave 0 test stubs
+status: executing
+stopped_at: Completed 01-engine-board-02-PLAN.md
+last_updated: "2026-03-04T09:06:45.535Z"
+last_activity: "2026-03-04 — 01-01 complete: Vite+React+TS scaffold, Tailwind v4, Vitest 3, ESLint v9 engine-purity, 82 Wave 0 stubs"
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 9
-  completed_plans: 1
-  percent: 11
+  total_plans: 4
+  completed_plans: 2
+  percent: 22
 ---
 
 # Project State
@@ -26,27 +26,27 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 1 of 4 (Engine + Board)
-Plan: 1 of 3 in current phase (01-01 complete)
+Plan: 2 of 3 in current phase (01-02 complete)
 Status: In progress
-Last activity: 2026-03-04 — 01-01 complete: Vite+React+TS scaffold, Tailwind v4, Vitest 3, ESLint v9 engine-purity, 82 Wave 0 stubs
+Last activity: 2026-03-04 — 01-02 complete: pure-TS game engine, 7 files, 61 tests, JUMP_MAP, chain-hops, undo/redo
 
-Progress: [█░░░░░░░░░] 11%
+Progress: [██░░░░░░░░] 22%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 6 min
-- Total execution time: 6 min
+- Total plans completed: 2
+- Average duration: 10 min
+- Total execution time: 19 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-engine-board | 1/3 | 6 min | 6 min |
+| 01-engine-board | 2/3 | 19 min | 10 min |
 
 **Recent Trend:**
-- Last 5 plans: 6 min
+- Last 5 plans: 6 min, 13 min
 - Trend: —
 
 *Updated after each plan completion*
@@ -67,6 +67,9 @@ Recent decisions affecting current work:
 - ESLint v9 flat config (eslint.config.js) required — .eslintrc.cjs unsupported in ESLint 9
 - Split tsconfig: tsconfig.app.json excludes tests; tsconfig.test.json adds vitest/globals types
 - Engine purity ESLint rule excludes *.test.ts files (test files legitimately import testing utilities)
+- [Phase 01-engine-board]: JUMP_MAP uses coordinate extrapolation + adjacency guard (not adjacency alone) — pure adjacency produces false positives on triangle section
+- [Phase 01-engine-board]: History stack (GameState[]) lives in UI layer (useGame hook) — engine undo/redo are pure utilities, not stateful
+- [Phase 01-engine-board]: getGameStatus inlines hasTigerMoves to avoid circular import with moves.ts
 
 ### Pending Todos
 
@@ -81,6 +84,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T08:48:02Z
-Stopped at: Phase 1 Plan 1 complete — scaffold + Wave 0 test stubs
-Resume file: .planning/phases/01-engine-board/01-02-PLAN.md
+Last session: 2026-03-04T09:06:45.533Z
+Stopped at: Completed 01-engine-board-02-PLAN.md
+Resume file: None
