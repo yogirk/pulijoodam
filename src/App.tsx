@@ -1,3 +1,5 @@
+import { GameScreen } from './components/GameScreen/GameScreen';
+
 export default function App() {
-  return <div className="p-4 text-center">Pulijoodam — loading...</div>;
+  return <GameScreen />;
 }
