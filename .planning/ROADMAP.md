@@ -29,12 +29,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Chain-hop captures execute correctly — a tiger landing on a jump-capable square continues the chain until no further captures are available
   4. The game detects and announces all three outcomes: Tiger wins (10+ goats captured), Goat wins (all tigers immobilized), Draw (threefold repetition or 50 captureless moves)
   5. Undo is available and correctly restores the previous board state including chain-hop progress
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 01-01: Engine core — board topology, move generation, capture mechanics, chain-hop, win/draw detection
-- [ ] 01-02: Board UI — SVG rendering, tap-tap interaction, legal move highlights, turn/counter indicators, result screen
-- [ ] 01-03: Engine hardening — unit tests for topology, moves, captures, chain-hops, phase transitions, win/draw, undo/redo
+- [ ] 01-01-PLAN.md — Project scaffold, Tailwind v4, Vitest config, Wave 0 test stubs
+- [ ] 01-02-PLAN.md — Engine core: types, board topology, state, moves, captures, chain-hop, win/draw, undo/redo
+- [ ] 01-03-PLAN.md — Board UI: SVG board, useGame hook, HUD, game-over overlay, App wiring
+- [ ] 01-04-PLAN.md — Engine tests: comprehensive unit tests for all ENG-* requirements
 
 ### Phase 2: AI Opponent
 **Goal**: A human can play Pulijoodam against a computer opponent with meaningful difficulty progression
@@ -95,7 +96,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Engine + Board | 0/3 | Not started | - |
+| 1. Engine + Board | 0/4 | Planned | - |
 | 2. AI Opponent | 0/3 | Not started | - |
 | 3. Experience | 0/4 | Not started | - |
 | 4. Multiplayer + PWA | 0/3 | Not started | - |
