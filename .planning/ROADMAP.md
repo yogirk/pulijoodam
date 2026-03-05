@@ -47,12 +47,12 @@ Plans:
   3. Hard AI completes its move in under 2 seconds and Expert in under 5 seconds on a mid-range mobile device
   4. The game setup screen lets the user choose to play as Tiger or Goat and select a difficulty level before starting
   5. Undo is available in AI games and correctly steps back through AI moves as well as player moves
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: Web Worker setup — Comlink typed proxy, minimal AIInput serialization, stateless worker lifecycle
-- [ ] 02-02: AI algorithms — heuristic evaluation function, MCTS placement phase, Minimax+alpha-beta movement phase
-- [ ] 02-03: Difficulty levels and validation — 4 levels, time budgets, self-play ranking confirmation
+- [ ] 02-01-PLAN.md — AI foundation: types, heuristic eval function, Web Worker shell, chooseMove placeholder
+- [ ] 02-02-PLAN.md — AI algorithms: MCTS for placement, Minimax+alpha-beta for movement, Zobrist hashing, time-budgeted iterative deepening
+- [ ] 02-03-PLAN.md — UI integration: useAIGame hook, SetupScreen, App routing, undo pairing, self-play difficulty validation
 
 ### Phase 3: Experience
 **Goal**: The game feels polished and discoverable — new players can learn through a tutorial and returning players can replay their games
