@@ -5,19 +5,19 @@ import type { GameState } from './types';
 
 // ENG-07: Tiger win
 describe('tiger win detection', () => {
-  it('tiger wins when goatsCaptured reaches 5', () => {
+  it('tiger wins when goatsCaptured reaches 10', () => {
     const board = Array(23).fill(null) as GameState['board'];
     board[0] = 'tiger'; board[10] = 'tiger'; board[22] = 'tiger';
     const state: GameState = {
       ...createGame(),
       board,
-      goatsCaptured: 5,
+      goatsCaptured: 10,
       tigersInPool: 0,
     };
     expect(getGameStatus(state)).toBe('tiger-wins');
   });
 
-  it('no tiger win when goatsCaptured is 4', () => {
+  it('no tiger win when goatsCaptured is 9', () => {
     const board = Array(23).fill(null) as GameState['board'];
     board[0] = 'tiger';
     board[10] = 'tiger';
@@ -26,14 +26,14 @@ describe('tiger win detection', () => {
     const state: GameState = {
       ...createGame(),
       board,
-      goatsCaptured: 4,
+      goatsCaptured: 9,
       tigersInPool: 0,
     };
     expect(getGameStatus(state)).not.toBe('tiger-wins');
   });
 
   it('GAME_OVER event emitted with status tiger-wins', () => {
-    // Tiger at 0, goat at 2. JUMP_MAP['0,2']=8. goatsCaptured=4 → 5th capture
+    // Tiger at 0, goat at 2. JUMP_MAP['0,2']=8. goatsCaptured=9 → 10th capture
     const board = Array(23).fill(null) as GameState['board'];
     board[0] = 'tiger';
     board[10] = 'tiger';
@@ -46,11 +46,11 @@ describe('tiger win detection', () => {
       currentTurn: 'tiger',
       tigersInPool: 0,
       goatsInPool: 0,
-      goatsCaptured: 4,
+      goatsCaptured: 9,
     };
     const result = applyMove(state, { type: 'CAPTURE', from: 0, over: 2, to: 8 });
     expect(result.error).toBeUndefined();
-    expect(result.state.goatsCaptured).toBe(5);
+    expect(result.state.goatsCaptured).toBe(10);
     expect(result.events.some(e => e.type === 'GAME_OVER' && e.status === 'tiger-wins')).toBe(true);
   });
 });

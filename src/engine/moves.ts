@@ -7,7 +7,10 @@ import { getGameStatus } from './rules';
 function boardHash(state: GameState): string {
   return (
     state.board.map(p => (p === 'tiger' ? 'T' : p === 'goat' ? 'G' : '_')).join('') +
-    state.currentTurn[0]
+    state.currentTurn[0] +
+    state.goatsInPool.toString() +
+    state.goatsCaptured.toString() +
+    (state.chainJumpInProgress === null ? '-' : state.chainJumpInProgress.toString())
   );
 }
 

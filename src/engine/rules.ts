@@ -6,8 +6,8 @@ import { NODES, JUMP_MAP } from './board';
  * Priority: tiger-wins > goat-wins > draw-repetition > draw-50moves > ongoing
  */
 export function getGameStatus(state: GameState): GameStatus {
-  // Tiger wins: 5+ goats captured
-  if (state.goatsCaptured >= 5) return 'tiger-wins';
+  // Tiger wins: 10 goats captured (v1 Andhra preset)
+  if (state.goatsCaptured >= 10) return 'tiger-wins';
 
   // Goat wins: all tigers on board are immobilized
   if (!hasTigerMoves(state)) return 'goat-wins';

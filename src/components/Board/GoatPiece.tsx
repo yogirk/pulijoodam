@@ -12,6 +12,7 @@ export function GoatPiece({ x, y, isSelected }: GoatPieceProps) {
       fill="#d4a76a"
       stroke={isSelected ? '#f59e0b' : '#92400e'}
       strokeWidth={2}
+      style={{ pointerEvents: 'none' }}
       data-testid="goat-piece"
     />
   );
