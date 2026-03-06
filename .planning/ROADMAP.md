@@ -13,7 +13,7 @@ Four phases deliver a complete, production-quality Pulijoodam game. The foundati
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Engine + Board** - Rules-correct engine and playable local hot-seat game (completed 2026-03-04)
-- [ ] **Phase 2: AI Opponent** - Solo play against 4-difficulty AI in a Web Worker
+- [x] **Phase 2: AI Opponent** - Solo play against 4-difficulty AI in a Web Worker (completed 2026-03-06)
 - [ ] **Phase 3: Experience** - Animations, sound, tutorial, and game history/replay
 - [ ] **Phase 4: Multiplayer + PWA** - P2P online play and production hardening
 
@@ -50,9 +50,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — AI foundation: types, heuristic eval function, Web Worker shell, chooseMove placeholder
-- [ ] 02-02-PLAN.md — AI algorithms: MCTS for placement, Minimax+alpha-beta for movement, Zobrist hashing, time-budgeted iterative deepening
-- [ ] 02-03-PLAN.md — UI integration: useAIGame hook, SetupScreen, App routing, undo pairing, self-play difficulty validation
+- [x] 02-01-PLAN.md — AI foundation: types, heuristic eval function, Web Worker shell, chooseMove placeholder
+- [x] 02-02-PLAN.md — AI algorithms: MCTS for placement, Minimax+alpha-beta for movement, Zobrist hashing, time-budgeted iterative deepening
+- [x] 02-03-PLAN.md — UI integration: useAIGame hook, SetupScreen, App routing, undo pairing, self-play difficulty validation
 
 ### Phase 3: Experience
 **Goal**: The game feels polished and discoverable — new players can learn through a tutorial and returning players can replay their games
@@ -97,6 +97,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Engine + Board | 4/4 | Complete    | 2026-03-04 |
-| 2. AI Opponent | 2/3 | In Progress|  |
+| 2. AI Opponent | 3/3 | Complete | 2026-03-06 |
 | 3. Experience | 0/4 | Not started | - |
 | 4. Multiplayer + PWA | 0/3 | Not started | - |

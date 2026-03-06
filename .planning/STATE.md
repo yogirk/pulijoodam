@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-ai-opponent-02-PLAN.md
-last_updated: "2026-03-06T14:23:10.334Z"
-last_activity: "2026-03-06 — 02-02 complete: MCTS + minimax algorithms, Zobrist hashing, chooseMove dispatch, 15 new tests, 93 total passing"
+stopped_at: Completed 02-ai-opponent-03-PLAN.md
+last_updated: "2026-03-06T14:47:00Z"
+last_activity: "2026-03-06 — 02-03 complete: useAIGame hook, setup screen, app routing, self-play validation, 21 new tests, 114 total passing"
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
-  completed_plans: 6
-  percent: 86
+  completed_plans: 7
+  percent: 100
 ---
 
 # Project State
@@ -25,34 +25,35 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 
 ## Current Position
 
-Phase: 2 of 4 (AI Opponent)
-Plan: 2 of 3 in current phase (02-02 complete)
-Status: In progress
-Last activity: 2026-03-06 — 02-02 complete: MCTS + minimax algorithms, Zobrist hashing, chooseMove dispatch, 15 new tests, 93 total passing
+Phase: 2 of 4 (AI Opponent) -- COMPLETE
+Plan: 3 of 3 in current phase (02-03 complete)
+Status: Phase 2 complete
+Last activity: 2026-03-06 — 02-03 complete: useAIGame hook, setup screen, app routing, self-play validation, 21 new tests, 114 total passing
 
-Progress: [█████████░] 86%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 6 min
-- Total execution time: 31 min
+- Total plans completed: 7
+- Average duration: 8 min
+- Total execution time: 53 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-engine-board | 3/4 | 23 min | 8 min |
-| 02-ai-opponent | 2/3 | 8 min | 4 min |
+| 02-ai-opponent | 3/3 | 30 min | 10 min |
 
 **Recent Trend:**
-- Last 5 plans: 6 min, 13 min, 4 min, 4 min, 4 min
+- Last 5 plans: 13 min, 4 min, 4 min, 4 min, 22 min
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 02-ai-opponent P01 | 4 | 2 tasks | 7 files |
 | Phase 02-ai-opponent P02 | 4 | 2 tasks | 7 files |
+| Phase 02-ai-opponent P03 | 22 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,9 @@ Recent decisions affecting current work:
 - [Phase 02-ai-opponent]: MCTS with UCB1 (C=1.4) and heuristic-weighted rollouts for placement phase
 - [Phase 02-ai-opponent]: Negamax alpha-beta with iterative deepening and Zobrist transposition table for movement phase
 - [Phase 02-ai-opponent]: Chain-hop continuations preserve search depth (same logical turn)
+- [Phase 02-ai-opponent]: useAIGame hook uses separate AIGameScreen/LocalGameScreen components for conditional hook rendering
+- [Phase 02-ai-opponent]: Self-play uses reduced test configs (50-400ms) to keep validation under 2 minutes
+- [Phase 02-ai-opponent]: Paired undo in AI games: 2-step back normally, 1-step when AI moved first
 
 ### Pending Todos
 
@@ -96,6 +100,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T14:23:10.332Z
-Stopped at: Completed 02-ai-opponent-02-PLAN.md
+Last session: 2026-03-06T14:47:00Z
+Stopped at: Completed 02-ai-opponent-03-PLAN.md (Phase 2 complete)
 Resume file: None

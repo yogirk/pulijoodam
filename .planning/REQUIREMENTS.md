@@ -45,10 +45,10 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **AI-05**: 4 difficulty levels: Easy, Medium, Hard, Expert
 - [x] **AI-06**: Hard difficulty completes moves in < 2 seconds
 - [x] **AI-07**: Expert difficulty completes moves in < 5 seconds
-- [ ] **AI-08**: Game setup screen lets user choose role (Tiger/Goat) and difficulty
-- [ ] **AI-09**: AI move has brief delay for natural feel (not instant)
-- [ ] **AI-10**: Undo/redo available in AI games
-- [ ] **AI-11**: AI self-play validation confirms difficulty levels are correctly ranked
+- [x] **AI-08**: Game setup screen lets user choose role (Tiger/Goat) and difficulty
+- [x] **AI-09**: AI move has brief delay for natural feel (not instant)
+- [x] **AI-10**: Undo/redo available in AI games
+- [x] **AI-11**: AI self-play validation confirms difficulty levels are correctly ranked
 
 ### Polish
 
@@ -178,10 +178,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AI-05 | Phase 2 | Complete |
 | AI-06 | Phase 2 | Complete |
 | AI-07 | Phase 2 | Complete |
-| AI-08 | Phase 2 | Pending |
-| AI-09 | Phase 2 | Pending |
-| AI-10 | Phase 2 | Pending |
-| AI-11 | Phase 2 | Pending |
+| AI-08 | Phase 2 | Complete |
+| AI-09 | Phase 2 | Complete |
+| AI-10 | Phase 2 | Complete |
+| AI-11 | Phase 2 | Complete |
 | POL-01 | Phase 3 | Pending |
 | POL-02 | Phase 3 | Pending |
 | POL-03 | Phase 3 | Pending |
