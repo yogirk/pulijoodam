@@ -52,3 +52,15 @@
   --accent: #7c3aed;
   --accent-hover: #6d28d9;
 }
+
+/* ── Piece animations ──────────────────────────────────────────── */
+@keyframes goat-scale-in {
+  0% { r: 0; opacity: 0; }
+  100% { r: 9; opacity: 1; }
+}
+
+@keyframes piece-glow {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}

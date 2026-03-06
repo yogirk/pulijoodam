@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import type { GameEvent } from '../engine/types';
@@ -17,6 +18,19 @@ vi.mock('../audio/AudioEngine', () => ({
 
 // Import the mocked audioEngine to assert on it
 import { audioEngine } from '../audio/AudioEngine';
+
+/** Advance fake timers in small steps, flushing microtasks between each,
+ *  so chained async/await delay() calls resolve correctly. */
+async function advanceTimers(ms: number, step = 50) {
+  let remaining = ms;
+  while (remaining > 0) {
+    const chunk = Math.min(step, remaining);
+    await act(async () => {
+      vi.advanceTimersByTime(chunk);
+    });
+    remaining -= chunk;
+  }
+}
 
 describe('useAnimationQueue', () => {
   beforeEach(() => {
@@ -103,28 +117,20 @@ describe('useAnimationQueue', () => {
 
     expect(result.current.isAnimating).toBe(true);
 
-    // After first event pair finishes, should still be animating (more events)
-    await act(async () => {
-      vi.advanceTimersByTime(400); // PIECE_MOVED duration
-    });
+    // After first PIECE_MOVED (350ms), should still be animating
+    await advanceTimers(400);
     expect(result.current.isAnimating).toBe(true);
 
-    // Advance through GOAT_CAPTURED (400ms tiger arc + 200ms fade + 150ms pause)
-    await act(async () => {
-      vi.advanceTimersByTime(800);
-    });
+    // Advance through GOAT_CAPTURED (400ms arc + 200ms fade + 150ms pause)
+    await advanceTimers(800);
     expect(result.current.isAnimating).toBe(true);
 
-    // Advance through second PIECE_MOVED
-    await act(async () => {
-      vi.advanceTimersByTime(400);
-    });
+    // Advance through second PIECE_MOVED (350ms)
+    await advanceTimers(400);
     expect(result.current.isAnimating).toBe(true);
 
-    // Advance through second GOAT_CAPTURED
-    await act(async () => {
-      vi.advanceTimersByTime(700);
-    });
+    // Advance through second GOAT_CAPTURED (400ms + 200ms + 150ms)
+    await advanceTimers(800);
     expect(result.current.isAnimating).toBe(false);
   });
 
@@ -140,16 +146,12 @@ describe('useAnimationQueue', () => {
     );
 
     // First capture: chainIndex 0
-    // Advance through PIECE_MOVED (350ms) + GOAT_CAPTURED start
-    await act(async () => {
-      vi.advanceTimersByTime(400);
-    });
+    // Advance through PIECE_MOVED (350ms) to trigger GOAT_CAPTURED
+    await advanceTimers(400);
     expect(audioEngine.playCapture).toHaveBeenCalledWith('traditional', 0);
 
-    // Advance through rest of first capture + pause + second PIECE_MOVED + second capture start
-    await act(async () => {
-      vi.advanceTimersByTime(1200);
-    });
+    // Advance through first capture (400+200+150) + second PIECE_MOVED (350) to trigger second capture
+    await advanceTimers(1200);
     expect(audioEngine.playCapture).toHaveBeenCalledWith('traditional', 1);
   });
 
