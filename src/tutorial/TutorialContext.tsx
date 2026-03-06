@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { LESSONS } from './lessons';
 import type { TutorialStep } from './lessons';
-import type { GameState, LegalMove, Move, GameEvent } from '../engine';
+import type { GameState, LegalMove, GameEvent } from '../engine';
 import { applyMove, getLegalMoves } from '../engine';
 
 // ─── Types ──────────────────────────────────────────────────────────────────

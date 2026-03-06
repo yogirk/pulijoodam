@@ -4,11 +4,13 @@ import { SetupScreen } from './components/SetupScreen/SetupScreen';
 import { HistoryScreen } from './history/HistoryScreen';
 import { ReplayScreen } from './history/ReplayScreen';
 import { useGameResume } from './history/useGameHistory';
+import { TutorialScreen } from './tutorial/TutorialScreen';
+import { FirstLaunchModal } from './tutorial/FirstLaunchModal';
 import type { Role } from './engine';
 import type { AIDifficulty } from './engine/ai/types';
 import type { GameRecord } from './history/types';
 
-type Screen = 'setup' | 'game' | 'history' | 'replay';
+type Screen = 'setup' | 'game' | 'history' | 'replay' | 'tutorial';
 
 interface AIConfig {
   humanRole: Role;
@@ -53,6 +55,12 @@ export default function App() {
     setScreen('setup');
   };
 
+  if (screen === 'tutorial') {
+    return (
+      <TutorialScreen onBackToMenu={handleBackToMenu} />
+    );
+  }
+
   if (screen === 'replay' && replayGame) {
     return (
       <ReplayScreen
@@ -82,6 +90,7 @@ export default function App() {
       <GameScreen
         aiConfig={aiConfig}
         onBackToMenu={handleBackToMenu}
+        onStartTutorial={() => setScreen('tutorial')}
       />
     );
   }
@@ -91,6 +100,12 @@ export default function App() {
       <SetupScreen
         onStart={handleStart}
         onViewHistory={() => setScreen('history')}
+        onStartTutorial={() => setScreen('tutorial')}
+      />
+      {/* First-launch tutorial prompt */}
+      <FirstLaunchModal
+        onStartTutorial={() => setScreen('tutorial')}
+        onSkip={() => {}}
       />
       {/* Resume modal */}
       {showResume && savedGame && (

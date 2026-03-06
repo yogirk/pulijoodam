@@ -1,15 +1,31 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { FirstLaunchModal } from './FirstLaunchModal';
 
 const STORAGE_KEY = 'pulijoodam_tutorial_seen';
 
-describe('FirstLaunchModal', () => {
-  beforeEach(() => {
-    localStorage.clear();
-  });
+// Provide a working localStorage mock (happy-dom's may be incomplete)
+let store: Record<string, string> = {};
+const lsMock = {
+  getItem: (key: string): string | null => store[key] ?? null,
+  setItem: (key: string, value: string) => { store[key] = value; },
+  removeItem: (key: string) => { delete store[key]; },
+  clear: () => { store = {}; },
+  get length() { return Object.keys(store).length; },
+  key: (_i: number): string | null => null,
+};
 
+beforeEach(() => {
+  store = {};
+  vi.stubGlobal('localStorage', lsMock);
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('FirstLaunchModal', () => {
   it('renders modal when localStorage flag is not set', () => {
     render(
       <FirstLaunchModal onStartTutorial={() => {}} onSkip={() => {}} />
@@ -18,7 +34,7 @@ describe('FirstLaunchModal', () => {
   });
 
   it('does not render when localStorage flag is set', () => {
-    localStorage.setItem(STORAGE_KEY, 'true');
+    lsMock.setItem(STORAGE_KEY, 'true');
     render(
       <FirstLaunchModal onStartTutorial={() => {}} onSkip={() => {}} />
     );
@@ -32,7 +48,7 @@ describe('FirstLaunchModal', () => {
     );
     fireEvent.click(screen.getByText('Start Tutorial'));
     expect(onStart).toHaveBeenCalledOnce();
-    expect(localStorage.getItem(STORAGE_KEY)).toBe('true');
+    expect(lsMock.getItem(STORAGE_KEY)).toBe('true');
   });
 
   it('clicking Skip calls onSkip and sets flag', () => {
@@ -42,7 +58,7 @@ describe('FirstLaunchModal', () => {
     );
     fireEvent.click(screen.getByText('Skip'));
     expect(onSkip).toHaveBeenCalledOnce();
-    expect(localStorage.getItem(STORAGE_KEY)).toBe('true');
+    expect(lsMock.getItem(STORAGE_KEY)).toBe('true');
   });
 
   it('modal text contains expected description', () => {

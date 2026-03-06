@@ -13,6 +13,7 @@ import type { AIDifficulty } from '../../engine/ai/types';
 interface GameScreenProps {
   aiConfig?: { humanRole: Role; difficulty: AIDifficulty } | null;
   onBackToMenu?: () => void;
+  onStartTutorial?: () => void;
 }
 
 /** Shared game board UI -- accepts the hook return values as props. */
@@ -20,10 +21,12 @@ function GameBoard({
   game,
   isAIThinking,
   onBackToMenu,
+  onStartTutorial,
 }: {
   game: ReturnType<typeof useGame>;
   isAIThinking: boolean;
   onBackToMenu?: () => void;
+  onStartTutorial?: () => void;
 }) {
   const { theme, soundEnabled } = useSettings();
   const animationState = useAnimationQueue(game.lastEvents, soundEnabled, theme);
@@ -64,7 +67,7 @@ function GameBoard({
         ) : (
           <div />
         )}
-        <SettingsDropdown />
+        <SettingsDropdown onStartTutorial={onStartTutorial} />
       </div>
 
       {/* Turn indicator */}
@@ -161,30 +164,32 @@ function GameBoard({
 }
 
 /** Local 2-player game screen. */
-function LocalGameScreen({ onBackToMenu }: { onBackToMenu?: () => void }) {
+function LocalGameScreen({ onBackToMenu, onStartTutorial }: { onBackToMenu?: () => void; onStartTutorial?: () => void }) {
   const game = useGame();
-  return <GameBoard game={game} isAIThinking={false} onBackToMenu={onBackToMenu} />;
+  return <GameBoard game={game} isAIThinking={false} onBackToMenu={onBackToMenu} onStartTutorial={onStartTutorial} />;
 }
 
 /** AI game screen -- spins up worker. */
 function AIGameScreen({
   aiConfig,
   onBackToMenu,
+  onStartTutorial,
 }: {
   aiConfig: { humanRole: Role; difficulty: AIDifficulty };
   onBackToMenu?: () => void;
+  onStartTutorial?: () => void;
 }) {
   const game = useAIGame(aiConfig);
-  return <GameBoard game={game} isAIThinking={game.isAIThinking} onBackToMenu={onBackToMenu} />;
+  return <GameBoard game={game} isAIThinking={game.isAIThinking} onBackToMenu={onBackToMenu} onStartTutorial={onStartTutorial} />;
 }
 
 /**
  * GameScreen -- renders either local or AI game depending on aiConfig.
  * Uses separate components so each hook is called unconditionally within its component.
  */
-export function GameScreen({ aiConfig, onBackToMenu }: GameScreenProps) {
+export function GameScreen({ aiConfig, onBackToMenu, onStartTutorial }: GameScreenProps) {
   if (aiConfig) {
-    return <AIGameScreen aiConfig={aiConfig} onBackToMenu={onBackToMenu} />;
+    return <AIGameScreen aiConfig={aiConfig} onBackToMenu={onBackToMenu} onStartTutorial={onStartTutorial} />;
   }
-  return <LocalGameScreen onBackToMenu={onBackToMenu} />;
+  return <LocalGameScreen onBackToMenu={onBackToMenu} onStartTutorial={onStartTutorial} />;
 }

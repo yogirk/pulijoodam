@@ -20,7 +20,11 @@ function GearIcon() {
   );
 }
 
-export function SettingsDropdown() {
+interface SettingsDropdownProps {
+  onStartTutorial?: () => void;
+}
+
+export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, soundEnabled, setTheme, setSoundEnabled } = useSettings();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -101,6 +105,23 @@ export function SettingsDropdown() {
               {soundEnabled ? 'On' : 'Off'}
             </button>
           </div>
+
+          {/* Tutorial link */}
+          {onStartTutorial && (
+            <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--text-secondary)' }}>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  onStartTutorial();
+                }}
+                className="text-sm font-medium transition-colors w-full text-left"
+                style={{ color: 'var(--accent)' }}
+                data-testid="tutorial-link-btn"
+              >
+                Learn to Play
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
