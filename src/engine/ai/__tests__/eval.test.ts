@@ -16,20 +16,28 @@ describe('evaluate — terminal states', () => {
   });
 
   it('returns large negative for goat-wins (all tigers trapped)', () => {
-    // Place 3 tigers completely surrounded by goats with no empty adj or captures
+    // Place 3 tigers completely surrounded by goats with no empty adj or captures.
+    // Must also block jump landings so no capture moves exist.
     const board = Array(23).fill(null) as GameState['board'];
-    // Tiger at node 19 (adj: 14, 20) — block both
+    // Tiger at node 19 (adj: 14, 20).
+    //   Jump 19->14 lands on 8, jump 19->20 lands on 21. Block landings too.
     board[19] = 'tiger';
     board[14] = 'goat';
     board[20] = 'goat';
-    // Tiger at node 13 (adj: 7, 14) — block both
+    board[8] = 'goat';   // block jump landing 19->14->8
+    board[21] = 'goat';  // block jump landing 19->20->21
+    // Tiger at node 13 (adj: 7, 14).
+    //   Jump 13->14 lands on 15, jump 13->7 lands on 1. Block landings.
     board[13] = 'tiger';
     board[7] = 'goat';
-    // node 14 already occupied by goat
-    // Tiger at node 22 (adj: 17, 21) — block both
+    board[15] = 'goat';  // block jump landing 13->14->15
+    board[1] = 'goat';   // block jump landing 13->7->1
+    // Tiger at node 22 (adj: 17, 21).
+    //   Jump 22->17 lands on 11, jump 22->21 lands on 20. Both landings already blocked.
     board[22] = 'tiger';
     board[17] = 'goat';
-    board[21] = 'goat';
+    board[11] = 'goat';  // block jump landing 22->17->11
+    // node 21 already goat, node 20 already goat (block 22->21->20)
     const state = stateWith({
       board,
       phase: 'movement',
@@ -110,15 +118,19 @@ describe('evaluate — mid-game scoring', () => {
   });
 
   it('trapped tiger = lower score', () => {
-    // One tiger trapped, two free
+    // Same tiger positions (0, 3, 4), but in the trapped case one tiger
+    // is fully blocked (tiger at 4: adj 0,3,5,10).
+    // Block all of tiger-4's neighbors AND their jump landings so it's trapped.
     const boardTrapped = Array(23).fill(null) as GameState['board'];
-    boardTrapped[0] = 'tiger'; boardTrapped[3] = 'tiger';
-    // Tiger at 19 trapped (adj 14, 20 blocked)
-    boardTrapped[19] = 'tiger';
-    boardTrapped[14] = 'goat';
-    boardTrapped[20] = 'goat';
+    boardTrapped[0] = 'tiger'; boardTrapped[3] = 'tiger'; boardTrapped[4] = 'tiger';
+    // Block tiger at 4's adj: 0 (tiger), 3 (tiger), 5 and 10
+    boardTrapped[5] = 'goat';
+    boardTrapped[10] = 'goat';
+    // Block jump landings: 4->5 lands on 6, 4->10 lands on 16
+    boardTrapped[6] = 'goat';
+    boardTrapped[16] = 'goat';
 
-    // All three tigers free
+    // All three tigers free (same positions, no blocking goats)
     const boardFree = Array(23).fill(null) as GameState['board'];
     boardFree[0] = 'tiger'; boardFree[3] = 'tiger'; boardFree[4] = 'tiger';
 
