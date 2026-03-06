@@ -64,13 +64,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Tutorial
 
-- [ ] **TUT-01**: Lesson 1 — Board & Placement: guided goat placement explaining turns
-- [ ] **TUT-02**: Lesson 2 — Movement & Captures: pre-set board demonstrating jumps
-- [ ] **TUT-03**: Lesson 3 — Winning & Losing: trap tigers, show both win conditions
-- [ ] **TUT-04**: Forced move sequences with highlighted targets
-- [ ] **TUT-05**: Brief text overlays (2-3 sentences per step)
-- [ ] **TUT-06**: Skip option for experienced players
-- [ ] **TUT-07**: First-launch prompt ("New to Pulijoodam?")
+- [x] **TUT-01**: Lesson 1 — Board & Placement: guided goat placement explaining turns
+- [x] **TUT-02**: Lesson 2 — Movement & Captures: pre-set board demonstrating jumps
+- [x] **TUT-03**: Lesson 3 — Winning & Losing: trap tigers, show both win conditions
+- [x] **TUT-04**: Forced move sequences with highlighted targets
+- [x] **TUT-05**: Brief text overlays (2-3 sentences per step)
+- [x] **TUT-06**: Skip option for experienced players
+- [x] **TUT-07**: First-launch prompt ("New to Pulijoodam?")
 
 ### History
 
@@ -191,13 +191,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POL-07 | Phase 3 | Complete |
 | POL-08 | Phase 3 | Complete |
 | POL-09 | Phase 3 | Complete |
-| TUT-01 | Phase 3 | Pending |
-| TUT-02 | Phase 3 | Pending |
-| TUT-03 | Phase 3 | Pending |
-| TUT-04 | Phase 3 | Pending |
-| TUT-05 | Phase 3 | Pending |
-| TUT-06 | Phase 3 | Pending |
-| TUT-07 | Phase 3 | Pending |
+| TUT-01 | Phase 3 | Complete |
+| TUT-02 | Phase 3 | Complete |
+| TUT-03 | Phase 3 | Complete |
+| TUT-04 | Phase 3 | Complete |
+| TUT-05 | Phase 3 | Complete |
+| TUT-06 | Phase 3 | Complete |
+| TUT-07 | Phase 3 | Complete |
 | HIST-01 | Phase 3 | Complete |
 | HIST-02 | Phase 3 | Complete |
 | HIST-03 | Phase 3 | Complete |
