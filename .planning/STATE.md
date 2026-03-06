@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-ai-opponent-01-PLAN.md
-last_updated: "2026-03-06T14:14:05Z"
-last_activity: "2026-03-06 — 02-01 complete: AI types, heuristic eval (6 factors), worker shell, 12 new tests, 78 total passing"
+stopped_at: Completed 02-ai-opponent-02-PLAN.md
+last_updated: "2026-03-06T14:23:10.334Z"
+last_activity: "2026-03-06 — 02-02 complete: MCTS + minimax algorithms, Zobrist hashing, chooseMove dispatch, 15 new tests, 93 total passing"
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 7
-  completed_plans: 5
-  percent: 71
+  completed_plans: 6
+  percent: 86
 ---
 
 # Project State
@@ -26,32 +26,33 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 2 of 4 (AI Opponent)
-Plan: 1 of 3 in current phase (02-01 complete)
+Plan: 2 of 3 in current phase (02-02 complete)
 Status: In progress
-Last activity: 2026-03-06 — 02-01 complete: AI types, heuristic eval (6 factors), worker shell, 12 new tests, 78 total passing
+Last activity: 2026-03-06 — 02-02 complete: MCTS + minimax algorithms, Zobrist hashing, chooseMove dispatch, 15 new tests, 93 total passing
 
-Progress: [███████░░░] 71%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 7 min
-- Total execution time: 27 min
+- Total plans completed: 6
+- Average duration: 6 min
+- Total execution time: 31 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-engine-board | 3/4 | 23 min | 8 min |
-| 02-ai-opponent | 1/3 | 4 min | 4 min |
+| 02-ai-opponent | 2/3 | 8 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 6 min, 13 min, 4 min, 4 min
+- Last 5 plans: 6 min, 13 min, 4 min, 4 min, 4 min
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 02-ai-opponent P01 | 4 | 2 tasks | 7 files |
+| Phase 02-ai-opponent P02 | 4 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -75,9 +76,12 @@ Recent decisions affecting current work:
 - [Phase 01-engine-board]: Goat placement auto-highlights all valid nodes (no tap-to-select needed) — goats have exactly one action type per turn; selection adds friction
 - [Phase 01-engine-board]: GameScreen owns useGame() internally — AI phase will swap in a worker-aware hook variant without prop-drilling changes
 - [Phase 02-ai-opponent]: Eval weights: captures*100, mobility*10, trapped*-80, vulnerable*15, walls*-5, centrality*3
-- [Phase 02-ai-opponent]: chooseMove is random placeholder -- MCTS/minimax dispatch added in Plan 02
+- [Phase 02-ai-opponent]: chooseMove dispatches MCTS (placement) / minimax (movement) by game phase
 - [Phase 02-ai-opponent]: Worker tests validate chooseMove directly (Vitest runs in Node, not browser)
 - [Phase 02-ai-opponent]: ESLint worker globals pattern: *worker*.ts files get self, MessageEvent, postMessage
+- [Phase 02-ai-opponent]: MCTS with UCB1 (C=1.4) and heuristic-weighted rollouts for placement phase
+- [Phase 02-ai-opponent]: Negamax alpha-beta with iterative deepening and Zobrist transposition table for movement phase
+- [Phase 02-ai-opponent]: Chain-hop continuations preserve search depth (same logical turn)
 
 ### Pending Todos
 
@@ -92,6 +96,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T14:14:05Z
-Stopped at: Completed 02-ai-opponent-01-PLAN.md
+Last session: 2026-03-06T14:23:10.332Z
+Stopped at: Completed 02-ai-opponent-02-PLAN.md
 Resume file: None

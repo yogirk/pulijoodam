@@ -40,11 +40,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **AI-01**: AI runs in a Web Worker to keep UI responsive
 - [x] **AI-02**: Heuristic evaluation function scores positions from tiger perspective
-- [ ] **AI-03**: MCTS algorithm for placement phase (high branching factor)
-- [ ] **AI-04**: Minimax with alpha-beta pruning for movement phase
-- [ ] **AI-05**: 4 difficulty levels: Easy, Medium, Hard, Expert
-- [ ] **AI-06**: Hard difficulty completes moves in < 2 seconds
-- [ ] **AI-07**: Expert difficulty completes moves in < 5 seconds
+- [x] **AI-03**: MCTS algorithm for placement phase (high branching factor)
+- [x] **AI-04**: Minimax with alpha-beta pruning for movement phase
+- [x] **AI-05**: 4 difficulty levels: Easy, Medium, Hard, Expert
+- [x] **AI-06**: Hard difficulty completes moves in < 2 seconds
+- [x] **AI-07**: Expert difficulty completes moves in < 5 seconds
 - [ ] **AI-08**: Game setup screen lets user choose role (Tiger/Goat) and difficulty
 - [ ] **AI-09**: AI move has brief delay for natural feel (not instant)
 - [ ] **AI-10**: Undo/redo available in AI games
@@ -173,11 +173,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRD-10 | Phase 1 | Complete |
 | AI-01 | Phase 2 | Complete |
 | AI-02 | Phase 2 | Complete |
-| AI-03 | Phase 2 | Pending |
-| AI-04 | Phase 2 | Pending |
-| AI-05 | Phase 2 | Pending |
-| AI-06 | Phase 2 | Pending |
-| AI-07 | Phase 2 | Pending |
+| AI-03 | Phase 2 | Complete |
+| AI-04 | Phase 2 | Complete |
+| AI-05 | Phase 2 | Complete |
+| AI-06 | Phase 2 | Complete |
+| AI-07 | Phase 2 | Complete |
 | AI-08 | Phase 2 | Pending |
 | AI-09 | Phase 2 | Pending |
 | AI-10 | Phase 2 | Pending |
