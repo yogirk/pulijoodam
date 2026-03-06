@@ -1,10 +1,27 @@
 import { useGame } from '../../hooks/useGame';
+import { useAIGame } from '../../hooks/useAIGame';
 import { Board } from '../Board/Board';
 import { TurnIndicator } from './TurnIndicator';
 import { PoolCounter } from './PoolCounter';
 import { GameOverOverlay } from './GameOverOverlay';
+import type { Role } from '../../engine';
+import type { AIDifficulty } from '../../engine/ai/types';
 
-export function GameScreen() {
+interface GameScreenProps {
+  aiConfig?: { humanRole: Role; difficulty: AIDifficulty } | null;
+  onBackToMenu?: () => void;
+}
+
+/** Shared game board UI — accepts the hook return values as props. */
+function GameBoard({
+  game,
+  isAIThinking,
+  onBackToMenu,
+}: {
+  game: ReturnType<typeof useGame>;
+  isAIThinking: boolean;
+  onBackToMenu?: () => void;
+}) {
   const {
     gameState,
     selectedNode,
@@ -17,15 +34,33 @@ export function GameScreen() {
     onUndo,
     onRedo,
     onNewGame,
-  } = useGame();
+  } = game;
 
   return (
     <div className="min-h-screen bg-stone-900 flex flex-col items-center justify-center p-4">
+      {/* Top bar: Back to Menu */}
+      {onBackToMenu && (
+        <button
+          onClick={onBackToMenu}
+          className="self-start mb-2 px-3 py-1 text-stone-400 hover:text-stone-200 text-sm transition-colors"
+          data-testid="back-to-menu-btn"
+        >
+          &larr; Menu
+        </button>
+      )}
+
       {/* Turn indicator */}
       <TurnIndicator
         currentTurn={gameState.currentTurn}
         phase={gameState.phase}
       />
+
+      {/* AI thinking indicator */}
+      {isAIThinking && (
+        <p className="text-amber-400 text-sm animate-pulse mt-1" data-testid="ai-thinking">
+          AI is thinking...
+        </p>
+      )}
 
       {/* Counters */}
       <div className="flex gap-4 my-2">
@@ -88,4 +123,33 @@ export function GameScreen() {
       )}
     </div>
   );
+}
+
+/** Local 2-player game screen. */
+function LocalGameScreen({ onBackToMenu }: { onBackToMenu?: () => void }) {
+  const game = useGame();
+  return <GameBoard game={game} isAIThinking={false} onBackToMenu={onBackToMenu} />;
+}
+
+/** AI game screen — spins up worker. */
+function AIGameScreen({
+  aiConfig,
+  onBackToMenu,
+}: {
+  aiConfig: { humanRole: Role; difficulty: AIDifficulty };
+  onBackToMenu?: () => void;
+}) {
+  const game = useAIGame(aiConfig);
+  return <GameBoard game={game} isAIThinking={game.isAIThinking} onBackToMenu={onBackToMenu} />;
+}
+
+/**
+ * GameScreen — renders either local or AI game depending on aiConfig.
+ * Uses separate components so each hook is called unconditionally within its component.
+ */
+export function GameScreen({ aiConfig, onBackToMenu }: GameScreenProps) {
+  if (aiConfig) {
+    return <AIGameScreen aiConfig={aiConfig} onBackToMenu={onBackToMenu} />;
+  }
+  return <LocalGameScreen onBackToMenu={onBackToMenu} />;
 }

@@ -195,7 +195,7 @@ export function aiGameReducer(state: AIUIState, action: AIAction): AIUIState {
     }
 
     case 'UNDO': {
-      const { history, gameState } = state;
+      const { history } = state;
       if (history.length <= 1) return state;
 
       // Paired undo: step back 2 if we have at least 3 history entries
@@ -297,7 +297,7 @@ export function useAIGame(config: { humanRole: Role; difficulty: AIDifficulty })
       { type: 'module' }
     );
 
-    worker.onmessage = (e: MessageEvent) => {
+    worker.onmessage = (e) => {
       const data = e.data as { type: string; move: Move; thinkTimeMs: number };
       if (data.type !== 'MOVE_COMPUTED') return;
 
@@ -327,7 +327,7 @@ export function useAIGame(config: { humanRole: Role; difficulty: AIDifficulty })
       worker.terminate();
       workerRef.current = null;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // AI turn trigger: fire when it's the AI's turn
   useEffect(() => {
@@ -348,7 +348,7 @@ export function useAIGame(config: { humanRole: Role; difficulty: AIDifficulty })
       state: gameState,
       config: aiConfig,
     });
-  }, [state.gameState, state.isAIThinking, config.humanRole, config.difficulty]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [state.gameState, state.isAIThinking, config.humanRole, config.difficulty]);
 
   const status: GameStatus = getGameStatus(state.gameState);
 
