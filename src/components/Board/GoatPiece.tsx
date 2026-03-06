@@ -9,8 +9,8 @@ export function GoatPiece({ x, y, isSelected }: GoatPieceProps) {
     <circle
       transform={`translate(${x}, ${y})`}
       r={9}
-      fill="#d4a76a"
-      stroke={isSelected ? '#f59e0b' : '#92400e'}
+      fill="var(--goat-fill)"
+      stroke={isSelected ? 'var(--select-stroke)' : 'var(--goat-stroke)'}
       strokeWidth={2}
       style={{ pointerEvents: 'none' }}
       data-testid="goat-piece"

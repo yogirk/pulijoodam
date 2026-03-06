@@ -4,6 +4,7 @@ import type { AIDifficulty } from '../../engine/ai/types';
 
 interface SetupScreenProps {
   onStart: (config: { humanRole: Role; difficulty: AIDifficulty } | null) => void;
+  onViewHistory?: () => void;
 }
 
 const DIFFICULTIES: { key: AIDifficulty; label: string }[] = [
@@ -13,7 +14,7 @@ const DIFFICULTIES: { key: AIDifficulty; label: string }[] = [
   { key: 'expert', label: 'Expert' },
 ];
 
-export function SetupScreen({ onStart }: SetupScreenProps) {
+export function SetupScreen({ onStart, onViewHistory }: SetupScreenProps) {
   const [humanRole, setHumanRole] = useState<Role>('goat');
   const [difficulty, setDifficulty] = useState<AIDifficulty>('medium');
 
@@ -94,6 +95,17 @@ export function SetupScreen({ onStart }: SetupScreenProps) {
       >
         Local 2-Player
       </button>
+
+      {/* Game History */}
+      {onViewHistory && (
+        <button
+          data-testid="history-btn"
+          onClick={onViewHistory}
+          className="mt-4 min-h-[44px] px-6 py-2 text-stone-400 hover:text-stone-200 text-sm transition-colors"
+        >
+          Game History
+        </button>
+      )}
     </div>
   );
 }

@@ -12,8 +12,8 @@ export function BoardEdge({ from, to }: BoardEdgeProps) {
       y1={from.y}
       x2={to.x}
       y2={to.y}
-      stroke="#6b7280"
-      strokeWidth={2}
+      stroke="var(--board-line)"
+      strokeWidth="var(--board-line-width)"
     />
   );
 }

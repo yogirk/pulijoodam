@@ -19,11 +19,20 @@ export function TurnIndicator({ currentTurn, phase }: TurnIndicatorProps) {
 
   return (
     <div className="text-center mb-2">
-      <div className="text-white text-xl font-bold" data-testid="turn-indicator">
+      <div
+        className="text-xl font-bold"
+        style={{ color: 'var(--text-primary)' }}
+        data-testid="turn-indicator"
+      >
         {isTiger ? 'Tiger' : 'Goat'}'s Turn
       </div>
       {action && (
-        <div className="text-stone-400 text-sm mt-0.5">{action}</div>
+        <div
+          className="text-sm mt-0.5"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          {action}
+        </div>
       )}
     </div>
   );

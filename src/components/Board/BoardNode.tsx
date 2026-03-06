@@ -15,20 +15,23 @@ export function BoardNode({ node, isSelected, isLegalMove, onClick }: BoardNodeP
       aria-label={`Node ${node.id}`}
     >
       {/* Visual node circle */}
-      <circle r={8} fill={isSelected ? '#f59e0b' : '#374151'} />
+      <circle
+        r={8}
+        fill={isSelected ? 'var(--node-selected)' : 'var(--node-fill)'}
+      />
 
       {/* Legal move highlight ring */}
       {isLegalMove && (
         <circle
           r={16}
           fill="none"
-          stroke="#22d3ee"
+          stroke="var(--legal-move-stroke)"
           strokeWidth={2.5}
           opacity={0.9}
         />
       )}
 
-      {/* MANDATORY 44×44 hit area — MUST be last (top z-order) to capture clicks */}
+      {/* MANDATORY 44x44 hit area -- MUST be last (top z-order) to capture clicks */}
       <rect
         x={-22}
         y={-22}

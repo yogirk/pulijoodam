@@ -9,8 +9,8 @@ export function TigerPiece({ x, y, isSelected }: TigerPieceProps) {
     <polygon
       transform={`translate(${x}, ${y}) rotate(45)`}
       points="-10,-10 10,-10 10,10 -10,10"
-      fill="#dc2626"
-      stroke={isSelected ? '#f59e0b' : '#991b1b'}
+      fill="var(--tiger-fill)"
+      stroke={isSelected ? 'var(--select-stroke)' : 'var(--tiger-stroke)'}
       strokeWidth={isSelected ? 3 : 1.5}
       style={{ pointerEvents: 'none' }}
       data-testid="tiger-piece"

@@ -4,6 +4,7 @@ import { Board } from '../Board/Board';
 import { TurnIndicator } from './TurnIndicator';
 import { PoolCounter } from './PoolCounter';
 import { GameOverOverlay } from './GameOverOverlay';
+import { SettingsDropdown } from '../Settings/SettingsDropdown';
 import type { Role } from '../../engine';
 import type { AIDifficulty } from '../../engine/ai/types';
 
@@ -12,7 +13,7 @@ interface GameScreenProps {
   onBackToMenu?: () => void;
 }
 
-/** Shared game board UI — accepts the hook return values as props. */
+/** Shared game board UI -- accepts the hook return values as props. */
 function GameBoard({
   game,
   isAIThinking,
@@ -37,17 +38,26 @@ function GameBoard({
   } = game;
 
   return (
-    <div className="min-h-screen bg-stone-900 flex flex-col items-center justify-center p-4">
-      {/* Top bar: Back to Menu */}
-      {onBackToMenu && (
-        <button
-          onClick={onBackToMenu}
-          className="self-start mb-2 px-3 py-1 text-stone-400 hover:text-stone-200 text-sm transition-colors"
-          data-testid="back-to-menu-btn"
-        >
-          &larr; Menu
-        </button>
-      )}
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-4"
+      style={{ backgroundColor: 'var(--bg-primary)' }}
+    >
+      {/* Top bar: Back to Menu + Settings */}
+      <div className="w-full max-w-lg flex items-center justify-between mb-2">
+        {onBackToMenu ? (
+          <button
+            onClick={onBackToMenu}
+            className="px-3 py-1 text-sm transition-colors"
+            style={{ color: 'var(--text-secondary)' }}
+            data-testid="back-to-menu-btn"
+          >
+            &larr; Menu
+          </button>
+        ) : (
+          <div />
+        )}
+        <SettingsDropdown />
+      </div>
 
       {/* Turn indicator */}
       <TurnIndicator
@@ -57,7 +67,11 @@ function GameBoard({
 
       {/* AI thinking indicator */}
       {isAIThinking && (
-        <p className="text-amber-400 text-sm animate-pulse mt-1" data-testid="ai-thinking">
+        <p
+          className="text-sm animate-pulse mt-1"
+          style={{ color: 'var(--accent)' }}
+          data-testid="ai-thinking"
+        >
           AI is thinking...
         </p>
       )}
@@ -90,7 +104,11 @@ function GameBoard({
       {gameState.chainJumpInProgress !== null && (
         <button
           onClick={onEndChain}
-          className="mt-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded transition-colors"
+          className="mt-2 px-4 py-2 font-semibold rounded transition-colors"
+          style={{
+            backgroundColor: 'var(--accent)',
+            color: 'var(--text-primary)',
+          }}
           data-testid="end-chain-button"
         >
           End Turn
@@ -102,7 +120,11 @@ function GameBoard({
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className="px-3 py-1 bg-stone-700 text-white rounded disabled:opacity-40"
+          className="px-3 py-1 rounded disabled:opacity-40"
+          style={{
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+          }}
           data-testid="undo-button"
         >
           Undo
@@ -110,7 +132,11 @@ function GameBoard({
         <button
           onClick={onRedo}
           disabled={!canRedo}
-          className="px-3 py-1 bg-stone-700 text-white rounded disabled:opacity-40"
+          className="px-3 py-1 rounded disabled:opacity-40"
+          style={{
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+          }}
           data-testid="redo-button"
         >
           Redo
@@ -131,7 +157,7 @@ function LocalGameScreen({ onBackToMenu }: { onBackToMenu?: () => void }) {
   return <GameBoard game={game} isAIThinking={false} onBackToMenu={onBackToMenu} />;
 }
 
-/** AI game screen — spins up worker. */
+/** AI game screen -- spins up worker. */
 function AIGameScreen({
   aiConfig,
   onBackToMenu,
@@ -144,7 +170,7 @@ function AIGameScreen({
 }
 
 /**
- * GameScreen — renders either local or AI game depending on aiConfig.
+ * GameScreen -- renders either local or AI game depending on aiConfig.
  * Uses separate components so each hook is called unconditionally within its component.
  */
 export function GameScreen({ aiConfig, onBackToMenu }: GameScreenProps) {
