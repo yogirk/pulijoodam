@@ -11,6 +11,8 @@ import {
 import type { GameState, LegalMove, GameEvent, GameStatus, Move, Role } from '../engine';
 import type { AIDifficulty } from '../engine/ai/types';
 import { DIFFICULTY_CONFIGS } from '../engine/ai/types';
+import { useAutoSave } from '../history/useGameHistory';
+import { clearCurrentGame } from '../history/storage';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -352,6 +354,13 @@ export function useAIGame(config: { humanRole: Role; difficulty: AIDifficulty })
 
   const status: GameStatus = getGameStatus(state.gameState);
 
+  // Auto-save on every state change; save to history on game over
+  useAutoSave(state.gameState, status, {
+    humanRole: config.humanRole,
+    opponent: 'ai',
+    difficulty: config.difficulty,
+  });
+
   return {
     gameState: state.gameState,
     selectedNode: state.selectedNode,
@@ -365,6 +374,9 @@ export function useAIGame(config: { humanRole: Role; difficulty: AIDifficulty })
     onEndChain: useCallback(() => dispatch({ type: 'END_CHAIN' }), []),
     onUndo: useCallback(() => dispatch({ type: 'UNDO' }), []),
     onRedo: useCallback(() => dispatch({ type: 'REDO' }), []),
-    onNewGame: useCallback(() => dispatch({ type: 'NEW_GAME' }), []),
+    onNewGame: useCallback(() => {
+      clearCurrentGame();
+      dispatch({ type: 'NEW_GAME' });
+    }, []),
   };
 }

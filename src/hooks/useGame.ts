@@ -6,6 +6,8 @@ import {
   getGameStatus,
 } from '../engine';
 import type { GameState, LegalMove, GameEvent } from '../engine';
+import { useAutoSave } from '../history/useGameHistory';
+import { clearCurrentGame } from '../history/storage';
 
 // ─── State shape ─────────────────────────────────────────────────────────────
 
@@ -236,19 +238,29 @@ function gameReducer(state: UIState, action: UIAction): UIState {
 
 export function useGame() {
   const [state, dispatch] = useReducer(gameReducer, initialUIState);
+  const status = getGameStatus(state.gameState);
+
+  // Auto-save on every state change; save to history on game over
+  useAutoSave(state.gameState, status, {
+    humanRole: 'goat', // arbitrary for local games
+    opponent: 'local',
+  });
 
   return {
     gameState: state.gameState,
     selectedNode: state.selectedNode,
     legalMoves: state.legalMoves,
     lastEvents: state.lastEvents,
-    status: getGameStatus(state.gameState),
+    status,
     canUndo: state.history.length > 1,
     canRedo: state.redoStack.length > 0,
     onNodeTap: (nodeId: number) => dispatch({ type: 'NODE_TAPPED', nodeId }),
     onEndChain: () => dispatch({ type: 'END_CHAIN' }),
     onUndo: () => dispatch({ type: 'UNDO' }),
     onRedo: () => dispatch({ type: 'REDO' }),
-    onNewGame: () => dispatch({ type: 'NEW_GAME' }),
+    onNewGame: () => {
+      clearCurrentGame();
+      dispatch({ type: 'NEW_GAME' });
+    },
   };
 }
