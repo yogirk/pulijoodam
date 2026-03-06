@@ -1,5 +1,5 @@
 import { createGame } from '../../state';
-import { applyMove, getLegalMoves } from '../../moves';
+import { getLegalMoves } from '../../moves';
 import { minimaxSearch } from '../minimax';
 import { zobristHash } from '../zobrist';
 import { chooseMove } from '../index';

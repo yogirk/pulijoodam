@@ -1,19 +1,33 @@
 // AI entry point — chooseMove dispatcher
-// Currently a random-move placeholder. Will be replaced by MCTS/minimax in Plan 02.
+// Routes to MCTS for placement phase, minimax for movement phase.
 
 import type { GameState, Move } from '../types';
 import type { AIConfig } from './types';
-import { getLegalMoves } from '../moves';
+import { mctsSearch } from './mcts';
+import { minimaxSearch } from './minimax';
 
 /**
  * Choose a move for the current player given a game state and AI config.
- * Placeholder: picks a random legal move.
+ *
+ * Dispatch logic:
+ * - Placement phase (or goatsInPool > 0): MCTS (handles high branching factor)
+ * - Movement phase: Minimax with alpha-beta (more precise evaluation)
+ * - Chain-hop in progress during movement: still minimax (mid-turn, phase is movement)
  */
-export function chooseMove(state: GameState, _config: AIConfig): Move {
-  const legalMoves = getLegalMoves(state);
-  if (legalMoves.length === 0) {
-    throw new Error('No legal moves available');
+export function chooseMove(state: GameState, config: AIConfig): Move {
+  if (state.phase === 'placement' || state.goatsInPool > 0) {
+    return mctsSearch(
+      state,
+      config.mctsSims,
+      config.timeBudgetMs,
+      state.currentTurn
+    );
   }
-  const idx = Math.floor(Math.random() * legalMoves.length);
-  return legalMoves[idx].move;
+
+  return minimaxSearch(
+    state,
+    config.minimaxDepth,
+    config.timeBudgetMs,
+    state.currentTurn
+  );
 }
