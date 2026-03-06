@@ -54,7 +54,7 @@ class TimeoutError extends Error {
 
 // ─── Move ordering ──────────────────────────────────────────────────────────
 
-function orderMoves(state: GameState, moves: Move[], ttBestMove: Move | null): Move[] {
+function orderMoves(_state: GameState, moves: Move[], ttBestMove: Move | null): Move[] {
   const scored: { move: Move; score: number }[] = [];
 
   for (const move of moves) {
