@@ -64,13 +64,13 @@ Plans:
   3. Sound effects accompany every significant game event (place, slide, capture, win/loss, illegal move) and the sound toggle persists across sessions
   4. A player can navigate to game history, see past games listed with date/opponent/result, and replay any game step-by-step including auto-play
   5. An interrupted game automatically resumes when the app is reopened
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 03-01: Animations — Motion-driven piece animations (place, slide, capture, chain-hop sequence), GameEvent queue
-- [ ] 03-02: Sound and themes — Howler audio sprites, sound toggle, two visual themes, settings persistence
-- [ ] 03-03: Tutorial — three-lesson guided first game, step overlays, first-launch prompt, skip option
-- [ ] 03-04: History and replay — auto-save on every move, resume on reopen, history list, step/scrubber/auto-play replay
+- [ ] 03-01-PLAN.md — Themes, sound engine, and settings: CSS custom properties for two visual themes, Web Audio API sound synthesis, settings dropdown with persistence
+- [ ] 03-02-PLAN.md — Animations: useAnimationQueue hook, piece slide/capture/placement transitions, chain-hop sequencing, game-over glow
+- [ ] 03-03-PLAN.md — Tutorial: three-lesson guided gameplay, tutorial overlay, first-launch modal, settings menu entry
+- [ ] 03-04-PLAN.md — History and replay: auto-save on every move, resume on reopen, history list, step/scrubber/auto-play replay viewer
 
 ### Phase 4: Multiplayer + PWA
 **Goal**: Players can challenge a friend online with no server, and the app is installable and works offline
