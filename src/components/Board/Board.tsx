@@ -1,5 +1,6 @@
 import { NODES, EDGES } from '../../engine/board';
 import type { GameState, LegalMove } from '../../engine';
+import type { AnimationState } from '../../hooks/useAnimationQueue';
 import { BoardEdge } from './BoardEdge';
 import { BoardNode } from './BoardNode';
 import { TigerPiece } from './TigerPiece';
@@ -11,6 +12,7 @@ interface BoardProps {
   legalMoves: LegalMove[];
   onNodeTap: (id: number) => void;
   chainJumpInProgress: number | null;
+  animationState?: AnimationState;
 }
 
 export function Board({
@@ -19,6 +21,7 @@ export function Board({
   legalMoves,
   onNodeTap,
   chainJumpInProgress,
+  animationState,
 }: BoardProps) {
   // Build a fast lookup set of legal move destination node IDs
   const legalMoveTo = new Set(
@@ -57,6 +60,8 @@ export function Board({
     }
   }
 
+  const isAnimating = animationState?.isAnimating ?? false;
+
   return (
     <svg
       viewBox="0 0 600 380"
@@ -77,7 +82,7 @@ export function Board({
       </g>
 
       {/* Layer 2: nodes (intersection circles + hit areas) */}
-      <g className="nodes">
+      <g className="nodes" style={isAnimating ? { pointerEvents: 'none' } : undefined}>
         {NODES.map(node => (
           <BoardNode
             key={`node-${node.id}`}
@@ -90,26 +95,38 @@ export function Board({
       </g>
 
       {/* Layer 3: pieces (rendered on top of nodes) */}
-      <g className="pieces">
+      <g className="pieces" style={isAnimating ? { pointerEvents: 'none' } : undefined}>
         {gameState.board.map((piece, nodeId) => {
           if (piece === null) return null;
           const node = NODES[nodeId];
+
+          // Check if this piece has an animation override position
+          const animEntry = animationState?.animatingPieces.get(nodeId);
+          const pieceX = animEntry ? animEntry.toX : node.x;
+          const pieceY = animEntry ? animEntry.toY : node.y;
+
           if (piece === 'tiger') {
+            const tigerGlowing =
+              animationState?.gameOverGlow === 'tiger-wins';
             return (
               <TigerPiece
                 key={`tiger-${nodeId}`}
-                x={node.x}
-                y={node.y}
+                x={pieceX}
+                y={pieceY}
                 isSelected={selectedNode === nodeId}
+                isGlowing={tigerGlowing}
               />
             );
           }
           return (
             <GoatPiece
               key={`goat-${nodeId}`}
-              x={node.x}
-              y={node.y}
+              x={pieceX}
+              y={pieceY}
               isSelected={selectedNode === nodeId}
+              isFading={animationState?.fadingGoat === nodeId}
+              isPlacing={animationState?.placingGoat === nodeId}
+              isGlowing={animationState?.gameOverGlow === 'goat-wins'}
             />
           );
         })}

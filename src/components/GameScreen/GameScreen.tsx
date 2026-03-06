@@ -1,5 +1,7 @@
 import { useGame } from '../../hooks/useGame';
 import { useAIGame } from '../../hooks/useAIGame';
+import { useAnimationQueue } from '../../hooks/useAnimationQueue';
+import { useSettings } from '../../hooks/useSettings';
 import { Board } from '../Board/Board';
 import { TurnIndicator } from './TurnIndicator';
 import { PoolCounter } from './PoolCounter';
@@ -23,6 +25,9 @@ function GameBoard({
   isAIThinking: boolean;
   onBackToMenu?: () => void;
 }) {
+  const { theme, soundEnabled } = useSettings();
+  const animationState = useAnimationQueue(game.lastEvents, soundEnabled, theme);
+
   const {
     gameState,
     selectedNode,
@@ -36,6 +41,9 @@ function GameBoard({
     onRedo,
     onNewGame,
   } = game;
+
+  // Both AI thinking and animations gate user input
+  const inputDisabled = isAIThinking || animationState.isAnimating;
 
   return (
     <div
@@ -95,13 +103,14 @@ function GameBoard({
           gameState={gameState}
           selectedNode={selectedNode}
           legalMoves={legalMoves}
-          onNodeTap={onNodeTap}
+          onNodeTap={inputDisabled ? () => {} : onNodeTap}
           chainJumpInProgress={gameState.chainJumpInProgress}
+          animationState={animationState}
         />
       </div>
 
       {/* Chain-hop: End Turn button */}
-      {gameState.chainJumpInProgress !== null && (
+      {gameState.chainJumpInProgress !== null && !inputDisabled && (
         <button
           onClick={onEndChain}
           className="mt-2 px-4 py-2 font-semibold rounded transition-colors"
@@ -119,7 +128,7 @@ function GameBoard({
       <div className="flex gap-4 mt-2">
         <button
           onClick={onUndo}
-          disabled={!canUndo}
+          disabled={!canUndo || inputDisabled}
           className="px-3 py-1 rounded disabled:opacity-40"
           style={{
             backgroundColor: 'var(--bg-secondary)',
@@ -131,7 +140,7 @@ function GameBoard({
         </button>
         <button
           onClick={onRedo}
-          disabled={!canRedo}
+          disabled={!canRedo || inputDisabled}
           className="px-3 py-1 rounded disabled:opacity-40"
           style={{
             backgroundColor: 'var(--bg-secondary)',
@@ -143,8 +152,8 @@ function GameBoard({
         </button>
       </div>
 
-      {/* Game over overlay */}
-      {status !== 'ongoing' && (
+      {/* Game over overlay -- only show after animation completes */}
+      {status !== 'ongoing' && !animationState.isAnimating && (
         <GameOverOverlay status={status} onNewGame={onNewGame} />
       )}
     </div>
