@@ -56,11 +56,11 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **POL-02**: Capture animation (tiger jump arc, goat removal effect)
 - [ ] **POL-03**: Chain-hop sequential animation plays captures in order
 - [ ] **POL-04**: Placement drop-in animation for goats
-- [ ] **POL-05**: Sound effects for place, slide, capture, win/loss, and illegal move
-- [ ] **POL-06**: Sound toggle in settings (on/off)
-- [ ] **POL-07**: Two visual themes: Traditional (stone/earth tones) and Modern (clean/geometric)
-- [ ] **POL-08**: Theme toggle in settings
-- [ ] **POL-09**: Settings persistence via localStorage
+- [x] **POL-05**: Sound effects for place, slide, capture, win/loss, and illegal move
+- [x] **POL-06**: Sound toggle in settings (on/off)
+- [x] **POL-07**: Two visual themes: Traditional (stone/earth tones) and Modern (clean/geometric)
+- [x] **POL-08**: Theme toggle in settings
+- [x] **POL-09**: Settings persistence via localStorage
 
 ### Tutorial
 
@@ -186,11 +186,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POL-02 | Phase 3 | Pending |
 | POL-03 | Phase 3 | Pending |
 | POL-04 | Phase 3 | Pending |
-| POL-05 | Phase 3 | Pending |
-| POL-06 | Phase 3 | Pending |
-| POL-07 | Phase 3 | Pending |
-| POL-08 | Phase 3 | Pending |
-| POL-09 | Phase 3 | Pending |
+| POL-05 | Phase 3 | Complete |
+| POL-06 | Phase 3 | Complete |
+| POL-07 | Phase 3 | Complete |
+| POL-08 | Phase 3 | Complete |
+| POL-09 | Phase 3 | Complete |
 | TUT-01 | Phase 3 | Pending |
 | TUT-02 | Phase 3 | Pending |
 | TUT-03 | Phase 3 | Pending |

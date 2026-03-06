@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-03-06T19:31:42.914Z"
-last_activity: "2026-03-06 — 02-03 complete: useAIGame hook, setup screen, app routing, self-play validation, 21 new tests, 114 total passing"
+status: in-progress
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-03-06T19:30:49Z"
+last_activity: "2026-03-07 — 03-01 complete: theme system, audio engine, settings UI, 29 new tests, 153 total passing"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 11
-  completed_plans: 9
-  percent: 100
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A human can play a complete, rules-correct game of Pulijoodam against a strong AI opponent in a browser — no install, no server, no account.
-**Current focus:** Phase 2 — AI Opponent
+**Current focus:** Phase 3 — Experience Layer
 
 ## Current Position
 
 Phase: 3 of 4 (Experience Layer)
-Plan: 4 of 4 in current phase (03-04 complete)
+Plan: 1 of 4 in current phase (03-01 complete)
 Status: Executing phase 3
-Last activity: 2026-03-06 — 03-04 complete: localStorage auto-save, game history list, replay viewer with scrubber/auto-play, 20 new tests, 187 total passing
+Last activity: 2026-03-07 — 03-01 complete: theme system, audio engine, settings UI, 29 new tests, 153 total passing
 
-Progress: [██████████] 100%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 8 min
-- Total execution time: 53 min
+- Total plans completed: 10
+- Average duration: 9 min
+- Total execution time: 64 min
 
 **By Phase:**
 
@@ -45,15 +45,17 @@ Progress: [██████████] 100%
 |-------|-------|-------|----------|
 | 01-engine-board | 3/4 | 23 min | 8 min |
 | 02-ai-opponent | 3/3 | 30 min | 10 min |
+| 03-experience | 1/4 | 11 min | 11 min |
 
 **Recent Trend:**
-- Last 5 plans: 13 min, 4 min, 4 min, 4 min, 22 min
+- Last 5 plans: 4 min, 4 min, 22 min, 10 min, 11 min
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 02-ai-opponent P01 | 4 | 2 tasks | 7 files |
 | Phase 02-ai-opponent P02 | 4 | 2 tasks | 7 files |
 | Phase 02-ai-opponent P03 | 22 | 3 tasks | 7 files |
+| Phase 03-experience P01 | 11 | 2 tasks | 21 files |
 | Phase 03-experience P04 | 10 | 2 tasks | 12 files |
 
 ## Accumulated Context
@@ -87,6 +89,12 @@ Recent decisions affecting current work:
 - [Phase 02-ai-opponent]: useAIGame hook uses separate AIGameScreen/LocalGameScreen components for conditional hook rendering
 - [Phase 02-ai-opponent]: Self-play uses reduced test configs (50-400ms) to keep validation under 2 minutes
 - [Phase 02-ai-opponent]: Paired undo in AI games: 2-step back normally, 1-step when AI moved first
+- [Phase 03-experience]: CSS custom properties on :root/[data-theme] for all colors -- no hardcoded hex in components
+- [Phase 03-experience]: useSettings.tsx uses .Provider pattern (not React 19 Context-as-JSX) for esbuild compatibility
+- [Phase 03-experience]: happy-dom added for DOM-requiring hook tests (jsdom localStorage broken on opaque origins)
+- [Phase 03-experience]: AudioEngine singleton with lazy AudioContext creation on first sound call
+- [Phase 03-experience]: Traditional theme: warm stone/earth/brass tones; Modern theme: dark charcoal/cyan/amber tones
+- [Phase 03-experience]: Anti-flicker inline script in index.html reads localStorage before React mounts
 - [Phase 03-experience]: Store only moveHistory in localStorage, reconstruct GameState via engine replay
 - [Phase 03-experience]: ReplayScreen pre-computes all state snapshots on mount for instant scrubbing
 - [Phase 03-experience]: Resume modal overlays SetupScreen; user can dismiss to start fresh
@@ -104,6 +112,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T19:31:42.912Z
-Stopped at: Completed 03-04-PLAN.md
-Resume file: None
+Last session: 2026-03-06T19:30:49Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: .planning/phases/03-experience/03-01-SUMMARY.md
