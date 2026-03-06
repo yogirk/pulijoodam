@@ -52,10 +52,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Polish
 
-- [ ] **POL-01**: Piece slide animations via CSS transitions on SVG transforms
-- [ ] **POL-02**: Capture animation (tiger jump arc, goat removal effect)
-- [ ] **POL-03**: Chain-hop sequential animation plays captures in order
-- [ ] **POL-04**: Placement drop-in animation for goats
+- [x] **POL-01**: Piece slide animations via CSS transitions on SVG transforms
+- [x] **POL-02**: Capture animation (tiger jump arc, goat removal effect)
+- [x] **POL-03**: Chain-hop sequential animation plays captures in order
+- [x] **POL-04**: Placement drop-in animation for goats
 - [x] **POL-05**: Sound effects for place, slide, capture, win/loss, and illegal move
 - [x] **POL-06**: Sound toggle in settings (on/off)
 - [x] **POL-07**: Two visual themes: Traditional (stone/earth tones) and Modern (clean/geometric)
@@ -182,10 +182,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AI-09 | Phase 2 | Complete |
 | AI-10 | Phase 2 | Complete |
 | AI-11 | Phase 2 | Complete |
-| POL-01 | Phase 3 | Pending |
-| POL-02 | Phase 3 | Pending |
-| POL-03 | Phase 3 | Pending |
-| POL-04 | Phase 3 | Pending |
+| POL-01 | Phase 3 | Complete |
+| POL-02 | Phase 3 | Complete |
+| POL-03 | Phase 3 | Complete |
+| POL-04 | Phase 3 | Complete |
 | POL-05 | Phase 3 | Complete |
 | POL-06 | Phase 3 | Complete |
 | POL-07 | Phase 3 | Complete |

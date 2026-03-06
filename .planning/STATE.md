@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-03-06T19:30:49Z"
-last_activity: "2026-03-07 — 03-01 complete: theme system, audio engine, settings UI, 29 new tests, 153 total passing"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-03-06T19:41:02Z"
+last_activity: "2026-03-07 — 03-02 complete: animation queue, piece transitions, input gating, 10 new tests, 169 total passing"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 11
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 100
 ---
 
 # Project State
@@ -26,18 +26,18 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 3 of 4 (Experience Layer)
-Plan: 1 of 4 in current phase (03-01 complete)
+Plan: 2 of 4 in current phase (03-02 complete)
 Status: Executing phase 3
-Last activity: 2026-03-07 — 03-01 complete: theme system, audio engine, settings UI, 29 new tests, 153 total passing
+Last activity: 2026-03-07 — 03-02 complete: animation queue, piece transitions, input gating, 10 new tests, 169 total passing
 
-Progress: [█████████░] 91%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: 9 min
-- Total execution time: 64 min
+- Total execution time: 71 min
 
 **By Phase:**
 
@@ -45,10 +45,10 @@ Progress: [█████████░] 91%
 |-------|-------|-------|----------|
 | 01-engine-board | 3/4 | 23 min | 8 min |
 | 02-ai-opponent | 3/3 | 30 min | 10 min |
-| 03-experience | 1/4 | 11 min | 11 min |
+| 03-experience | 2/4 | 18 min | 9 min |
 
 **Recent Trend:**
-- Last 5 plans: 4 min, 4 min, 22 min, 10 min, 11 min
+- Last 5 plans: 4 min, 22 min, 10 min, 11 min, 7 min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -57,6 +57,7 @@ Progress: [█████████░] 91%
 | Phase 02-ai-opponent P03 | 22 | 3 tasks | 7 files |
 | Phase 03-experience P01 | 11 | 2 tasks | 21 files |
 | Phase 03-experience P04 | 10 | 2 tasks | 12 files |
+| Phase 03-experience P02 | 7 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,10 @@ Recent decisions affecting current work:
 - [Phase 03-experience]: Store only moveHistory in localStorage, reconstruct GameState via engine replay
 - [Phase 03-experience]: ReplayScreen pre-computes all state snapshots on mount for instant scrubbing
 - [Phase 03-experience]: Resume modal overlays SetupScreen; user can dismiss to start fresh
+- [Phase 03-experience]: Async/await with delay() for sequential animation event processing (testable with fake timers)
+- [Phase 03-experience]: GoatPiece uses cx/cy attributes (not transform) for reliable CSS transitions on SVG circles
+- [Phase 03-experience]: Combined inputDisabled flag (isAIThinking || isAnimating) gates all user interaction
+- [Phase 03-experience]: Game over overlay gated by !animationState.isAnimating for automatic glow-then-overlay timing
 
 ### Pending Todos
 
@@ -112,6 +117,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T19:30:49Z
-Stopped at: Completed 03-01-PLAN.md
-Resume file: .planning/phases/03-experience/03-01-SUMMARY.md
+Last session: 2026-03-06T19:41:02Z
+Stopped at: Completed 03-02-PLAN.md
+Resume file: .planning/phases/03-experience/03-02-SUMMARY.md
