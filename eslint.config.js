@@ -63,6 +63,17 @@ export default [
     },
   },
   {
+    // Web Worker files: add worker globals (self, MessageEvent, postMessage)
+    files: ['src/**/*worker*.ts'],
+    languageOptions: {
+      globals: {
+        self: 'readonly',
+        MessageEvent: 'readonly',
+        postMessage: 'readonly',
+      },
+    },
+  },
+  {
     // Engine purity: no React, testing-library, or UI imports allowed (ENG-12)
     // Applied to non-test engine files only (test files import testing utilities)
     files: ['src/engine/**/*.ts'],
