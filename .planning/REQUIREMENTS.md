@@ -74,12 +74,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### History
 
-- [ ] **HIST-01**: Auto-save game to localStorage on every move (crash-safe)
-- [ ] **HIST-02**: Resume interrupted games on app reopen
-- [ ] **HIST-03**: Game history screen showing date, role, opponent, result, duration
-- [ ] **HIST-04**: Replay mode with step forward/backward controls
-- [ ] **HIST-05**: Timeline scrubber for replay navigation
-- [ ] **HIST-06**: Auto-play replay at 1 move/second with pause
+- [x] **HIST-01**: Auto-save game to localStorage on every move (crash-safe)
+- [x] **HIST-02**: Resume interrupted games on app reopen
+- [x] **HIST-03**: Game history screen showing date, role, opponent, result, duration
+- [x] **HIST-04**: Replay mode with step forward/backward controls
+- [x] **HIST-05**: Timeline scrubber for replay navigation
+- [x] **HIST-06**: Auto-play replay at 1 move/second with pause
 
 ### Multiplayer
 
@@ -198,12 +198,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TUT-05 | Phase 3 | Pending |
 | TUT-06 | Phase 3 | Pending |
 | TUT-07 | Phase 3 | Pending |
-| HIST-01 | Phase 3 | Pending |
-| HIST-02 | Phase 3 | Pending |
-| HIST-03 | Phase 3 | Pending |
-| HIST-04 | Phase 3 | Pending |
-| HIST-05 | Phase 3 | Pending |
-| HIST-06 | Phase 3 | Pending |
+| HIST-01 | Phase 3 | Complete |
+| HIST-02 | Phase 3 | Complete |
+| HIST-03 | Phase 3 | Complete |
+| HIST-04 | Phase 3 | Complete |
+| HIST-05 | Phase 3 | Complete |
+| HIST-06 | Phase 3 | Complete |
 | MP-01 | Phase 4 | Pending |
 | MP-02 | Phase 4 | Pending |
 | MP-03 | Phase 4 | Pending |

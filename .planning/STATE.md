@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-06T18:53:40.254Z"
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-03-06T19:31:42.914Z"
 last_activity: "2026-03-06 — 02-03 complete: useAIGame hook, setup screen, app routing, self-play validation, 21 new tests, 114 total passing"
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 11
+  completed_plans: 9
   percent: 100
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 
 ## Current Position
 
-Phase: 2 of 4 (AI Opponent) -- COMPLETE
-Plan: 3 of 3 in current phase (02-03 complete)
-Status: Phase 2 complete
-Last activity: 2026-03-06 — 02-03 complete: useAIGame hook, setup screen, app routing, self-play validation, 21 new tests, 114 total passing
+Phase: 3 of 4 (Experience Layer)
+Plan: 4 of 4 in current phase (03-04 complete)
+Status: Executing phase 3
+Last activity: 2026-03-06 — 03-04 complete: localStorage auto-save, game history list, replay viewer with scrubber/auto-play, 20 new tests, 187 total passing
 
 Progress: [██████████] 100%
 
@@ -54,6 +54,7 @@ Progress: [██████████] 100%
 | Phase 02-ai-opponent P01 | 4 | 2 tasks | 7 files |
 | Phase 02-ai-opponent P02 | 4 | 2 tasks | 7 files |
 | Phase 02-ai-opponent P03 | 22 | 3 tasks | 7 files |
+| Phase 03-experience P04 | 10 | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,9 @@ Recent decisions affecting current work:
 - [Phase 02-ai-opponent]: useAIGame hook uses separate AIGameScreen/LocalGameScreen components for conditional hook rendering
 - [Phase 02-ai-opponent]: Self-play uses reduced test configs (50-400ms) to keep validation under 2 minutes
 - [Phase 02-ai-opponent]: Paired undo in AI games: 2-step back normally, 1-step when AI moved first
+- [Phase 03-experience]: Store only moveHistory in localStorage, reconstruct GameState via engine replay
+- [Phase 03-experience]: ReplayScreen pre-computes all state snapshots on mount for instant scrubbing
+- [Phase 03-experience]: Resume modal overlays SetupScreen; user can dismiss to start fresh
 
 ### Pending Todos
 
@@ -100,6 +104,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T18:53:40.252Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-experience/03-CONTEXT.md
+Last session: 2026-03-06T19:31:42.912Z
+Stopped at: Completed 03-04-PLAN.md
+Resume file: None
