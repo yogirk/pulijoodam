@@ -2,9 +2,9 @@
 import { createGame, applyMove, getLegalMoves } from '../engine';
 import type { GameState, Role } from '../engine';
 import { aiGameReducer, MIN_AI_DELAY_MS } from './useAIGame';
-import type { AIUIState, AIAction } from './useAIGame';
+import type { AIUIState } from './useAIGame';
 
-function makeInitialAIState(humanRole: Role = 'goat'): AIUIState {
+function makeInitialAIState(_humanRole: Role = 'goat'): AIUIState {
   const gameState = createGame();
   return {
     gameState,
