@@ -1,1 +1,54 @@
 @import "tailwindcss";
+
+/* ── Theme: Traditional (default) ───────────────────────────────── */
+:root,
+[data-theme="traditional"] {
+  /* Board */
+  --board-bg: #c4a882;
+  --board-line: #7a6548;
+  --board-line-width: 2.5;
+  --node-fill: #5c4a32;
+  --node-selected: #f59e0b;
+  --legal-move-stroke: #22d3ee;
+
+  /* Pieces */
+  --tiger-fill: #c8a84e;
+  --tiger-stroke: #8b7635;
+  --goat-fill: #6b6b6b;
+  --goat-stroke: #4a4a4a;
+  --select-stroke: #f59e0b;
+
+  /* Shell */
+  --bg-primary: #1c1917;
+  --bg-secondary: #292524;
+  --text-primary: #fafaf9;
+  --text-secondary: #a8a29e;
+  --accent: #b87333;
+  --accent-hover: #a06028;
+}
+
+/* ── Theme: Modern ──────────────────────────────────────────────── */
+[data-theme="modern"] {
+  /* Board */
+  --board-bg: #1a1a2e;
+  --board-line: #3a3a4e;
+  --board-line-width: 1.5;
+  --node-fill: #2a2a3e;
+  --node-selected: #f59e0b;
+  --legal-move-stroke: #7c3aed;
+
+  /* Pieces */
+  --tiger-fill: #f59e0b;
+  --tiger-stroke: #d97706;
+  --goat-fill: #06b6d4;
+  --goat-stroke: #0891b2;
+  --select-stroke: #f59e0b;
+
+  /* Shell */
+  --bg-primary: #0f0f1a;
+  --bg-secondary: #1a1a2e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0b0;
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+}
