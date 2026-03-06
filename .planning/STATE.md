@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-engine-board-03-PLAN.md
-last_updated: "2026-03-04T09:18:36.030Z"
-last_activity: "2026-03-04 — 01-04 complete: 61 engine tests certified green, 93.78% coverage, all ENG-* requirements proven"
+stopped_at: Completed 02-ai-opponent-01-PLAN.md
+last_updated: "2026-03-06T14:14:05Z"
+last_activity: "2026-03-06 — 02-01 complete: AI types, heuristic eval (6 factors), worker shell, 12 new tests, 78 total passing"
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
-  percent: 33
+  total_plans: 7
+  completed_plans: 5
+  percent: 71
 ---
 
 # Project State
@@ -21,36 +21,37 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A human can play a complete, rules-correct game of Pulijoodam against a strong AI opponent in a browser — no install, no server, no account.
-**Current focus:** Phase 1 — Engine + Board
+**Current focus:** Phase 2 — AI Opponent
 
 ## Current Position
 
-Phase: 1 of 4 (Engine + Board)
-Plan: 4 of 4 in current phase (01-04 complete)
+Phase: 2 of 4 (AI Opponent)
+Plan: 1 of 3 in current phase (02-01 complete)
 Status: In progress
-Last activity: 2026-03-04 — 01-04 complete: 61 engine tests certified green, 93.78% coverage, all ENG-* requirements proven
+Last activity: 2026-03-06 — 02-01 complete: AI types, heuristic eval (6 factors), worker shell, 12 new tests, 78 total passing
 
-Progress: [███░░░░░░░] 33%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 8 min
-- Total execution time: 23 min
+- Total plans completed: 4
+- Average duration: 7 min
+- Total execution time: 27 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-engine-board | 3/4 | 23 min | 8 min |
+| 02-ai-opponent | 1/3 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 6 min, 13 min, 4 min
-- Trend: —
+- Last 5 plans: 6 min, 13 min, 4 min, 4 min
+- Trend: stable
 
 *Updated after each plan completion*
-| Phase 01-engine-board P03 | 8 | 3 tasks | 11 files |
+| Phase 02-ai-opponent P01 | 4 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,10 @@ Recent decisions affecting current work:
 - [Phase 01-engine-board]: getGameStatus inlines hasTigerMoves to avoid circular import with moves.ts
 - [Phase 01-engine-board]: Goat placement auto-highlights all valid nodes (no tap-to-select needed) — goats have exactly one action type per turn; selection adds friction
 - [Phase 01-engine-board]: GameScreen owns useGame() internally — AI phase will swap in a worker-aware hook variant without prop-drilling changes
+- [Phase 02-ai-opponent]: Eval weights: captures*100, mobility*10, trapped*-80, vulnerable*15, walls*-5, centrality*3
+- [Phase 02-ai-opponent]: chooseMove is random placeholder -- MCTS/minimax dispatch added in Plan 02
+- [Phase 02-ai-opponent]: Worker tests validate chooseMove directly (Vitest runs in Node, not browser)
+- [Phase 02-ai-opponent]: ESLint worker globals pattern: *worker*.ts files get self, MessageEvent, postMessage
 
 ### Pending Todos
 
@@ -87,6 +92,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T09:13:27.904Z
-Stopped at: Completed 01-engine-board-03-PLAN.md
+Last session: 2026-03-06T14:14:05Z
+Stopped at: Completed 02-ai-opponent-01-PLAN.md
 Resume file: None

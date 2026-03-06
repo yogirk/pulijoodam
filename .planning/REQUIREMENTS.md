@@ -38,8 +38,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### AI
 
-- [ ] **AI-01**: AI runs in a Web Worker to keep UI responsive
-- [ ] **AI-02**: Heuristic evaluation function scores positions from tiger perspective
+- [x] **AI-01**: AI runs in a Web Worker to keep UI responsive
+- [x] **AI-02**: Heuristic evaluation function scores positions from tiger perspective
 - [ ] **AI-03**: MCTS algorithm for placement phase (high branching factor)
 - [ ] **AI-04**: Minimax with alpha-beta pruning for movement phase
 - [ ] **AI-05**: 4 difficulty levels: Easy, Medium, Hard, Expert
@@ -171,8 +171,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRD-08 | Phase 1 | Complete |
 | BRD-09 | Phase 1 | Complete |
 | BRD-10 | Phase 1 | Complete |
-| AI-01 | Phase 2 | Pending |
-| AI-02 | Phase 2 | Pending |
+| AI-01 | Phase 2 | Complete |
+| AI-02 | Phase 2 | Complete |
 | AI-03 | Phase 2 | Pending |
 | AI-04 | Phase 2 | Pending |
 | AI-05 | Phase 2 | Pending |

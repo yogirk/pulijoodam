@@ -97,6 +97,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Engine + Board | 4/4 | Complete    | 2026-03-04 |
-| 2. AI Opponent | 0/3 | Not started | - |
+| 2. AI Opponent | 1/3 | In Progress|  |
 | 3. Experience | 0/4 | Not started | - |
 | 4. Multiplayer + PWA | 0/3 | Not started | - |
