@@ -3,6 +3,7 @@ import { useAIGame } from '../../hooks/useAIGame';
 import { useAnimationQueue } from '../../hooks/useAnimationQueue';
 import { useSettings } from '../../hooks/useSettings';
 import { Board } from '../Board/Board';
+import { ScreenReaderAnnouncer } from '../Board/ScreenReaderAnnouncer';
 import { TurnIndicator } from './TurnIndicator';
 import { PoolCounter } from './PoolCounter';
 import { GameOverOverlay } from './GameOverOverlay';
@@ -109,8 +110,12 @@ function GameBoard({
           onNodeTap={inputDisabled ? () => {} : onNodeTap}
           chainJumpInProgress={gameState.chainJumpInProgress}
           animationState={animationState}
+          lastEvents={game.lastEvents}
         />
       </div>
+
+      {/* Screen reader announcements */}
+      <ScreenReaderAnnouncer lastEvents={game.lastEvents} gameState={gameState} />
 
       {/* Chain-hop: End Turn button */}
       {gameState.chainJumpInProgress !== null && !inputDisabled && (
