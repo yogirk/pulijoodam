@@ -14,9 +14,9 @@ describe('SetupScreen', () => {
     const goatBtn = screen.getByTestId('role-goat');
     const mediumBtn = screen.getByTestId('difficulty-medium');
 
-    // Check selected state (amber background class)
-    expect(goatBtn.className).toContain('bg-amber-600');
-    expect(mediumBtn.className).toContain('bg-amber-600');
+    // Check selected state (scale class for selected buttons)
+    expect(goatBtn.className).toContain('scale-105');
+    expect(mediumBtn.className).toContain('scale-[1.02]');
   });
 
   it('switches role when tiger is clicked', () => {
@@ -27,8 +27,8 @@ describe('SetupScreen', () => {
 
     fireEvent.click(tigerBtn);
 
-    expect(tigerBtn.className).toContain('bg-amber-600');
-    expect(goatBtn.className).not.toContain('bg-amber-600');
+    expect(tigerBtn.className).toContain('scale-105');
+    expect(goatBtn.className).toContain('opacity-70');
   });
 
   it('calls onStart with correct config when Start Game is clicked', () => {
@@ -69,9 +69,9 @@ describe('SetupScreen', () => {
 
     const expertBtn = screen.getByTestId('difficulty-expert');
     fireEvent.click(expertBtn);
-    expect(expertBtn.className).toContain('bg-amber-600');
+    expect(expertBtn.className).toContain('scale-[1.02]');
 
     const mediumBtn = screen.getByTestId('difficulty-medium');
-    expect(mediumBtn.className).not.toContain('bg-amber-600');
+    expect(mediumBtn.className).toContain('opacity-70');
   });
 });
