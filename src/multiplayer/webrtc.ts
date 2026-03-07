@@ -30,7 +30,7 @@ async function compressString(str: string): Promise<string> {
   const stream = new Blob([str]).stream();
   const compressedStream = stream.pipeThrough(new CompressionStream('gzip'));
   const chunks = [];
-  for await (const chunk of compressedStream as any) {
+  for await (const chunk of compressedStream as AsyncIterable<Uint8Array>) {
     chunks.push(chunk);
   }
   const result = new Uint8Array(chunks.reduce((acc, val) => acc + val.length, 0));
@@ -54,7 +54,7 @@ async function decompressString(b64Str: string): Promise<string> {
   const stream = new Blob([bytes]).stream();
   const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
   const chunks = [];
-  for await (const chunk of decompressedStream as any) {
+  for await (const chunk of decompressedStream as AsyncIterable<Uint8Array>) {
     chunks.push(chunk);
   }
 

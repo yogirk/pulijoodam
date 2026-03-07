@@ -55,6 +55,12 @@ const browserGlobals = {
   Element: 'readonly',
   HTMLButtonElement: 'readonly',
   KeyboardEvent: 'readonly',
+  Blob: 'readonly',
+  CompressionStream: 'readonly',
+  DecompressionStream: 'readonly',
+  TextDecoder: 'readonly',
+  TextEncoder: 'readonly',
+  Uint8Array: 'readonly',
 };
 
 export default [
