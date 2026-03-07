@@ -12,17 +12,16 @@ A human can play a complete, rules-correct game of Pulijoodam against a strong A
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Core game engine with board topology, move generation, capture mechanics, win/draw detection — Phase 1
+- ✓ SVG board rendering with piece interaction (tap-tap) — Phase 1
+- ✓ Local 2-player hot-seat mode — Phase 1
+- ✓ AI opponent with 4 difficulty levels (MCTS placement + Minimax movement) — Phase 2
+- ✓ Animations, sound effects, and visual themes — Phase 3
+- ✓ Interactive tutorial for new players — Phase 3
+- ✓ Game history, auto-save, and replay — Phase 3
 
 ### Active
 
-- [ ] Core game engine with board topology, move generation, capture mechanics, win/draw detection
-- [ ] SVG board rendering with piece interaction (tap-tap)
-- [ ] Local 2-player hot-seat mode
-- [ ] AI opponent with 4 difficulty levels (MCTS placement + Minimax movement)
-- [ ] Animations, sound effects, and visual themes
-- [ ] Interactive tutorial for new players
-- [ ] Game history, auto-save, and replay
 - [ ] P2P multiplayer via WebRTC (zero server)
 - [ ] Offline support (service worker / PWA)
 - [ ] Accessibility (screen reader, color-blind safe, touch targets)
@@ -73,6 +72,9 @@ A human can play a complete, rules-correct game of Pulijoodam against a strong A
 | Andhra preset only for v1 | Reduce scope, Tamil preset adds complexity | — Pending |
 | WebRTC P2P over server multiplayer | Zero infrastructure cost, fits GitHub Pages constraint | — Pending |
 | Functional engine API (immutable state) | Clean interface for Rust port, trivial undo/redo, no shared mutation bugs | — Pending |
+| CSS custom properties for theming | Two themes (Traditional/Modern) via :root/[data-theme], anti-flicker inline script | ✓ Phase 3 |
+| Web Audio API synthesis (no audio files) | Zero asset downloads, theme-specific tones, lazy AudioContext | ✓ Phase 3 |
+| Engine replay for state reconstruction | Store only moveHistory in localStorage, reconstruct via replay — smaller, crash-safe | ✓ Phase 3 |
 
 ---
-*Last updated: 2026-03-04 after initialization*
+*Last updated: 2026-03-07 after Phase 3*

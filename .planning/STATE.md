@@ -18,10 +18,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-04)
+See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** A human can play a complete, rules-correct game of Pulijoodam against a strong AI opponent in a browser — no install, no server, no account.
-**Current focus:** Phase 3 — Experience Layer
+**Current focus:** Phase 4 — Multiplayer + PWA
 
 ## Current Position
 
@@ -114,13 +114,11 @@ None.
 
 ### Blockers/Concerns
 
-- AI difficulty tuning: evaluation function weights require self-play validation in Phase 2 — budget iteration time
-- MCTS goat bias: purely random rollouts undervalue goat play; heuristic-guided rollouts required (see SUMMARY.md Pitfall 6)
 - P2P WebRTC: STUN-only fails for ~20-30% of users on symmetric NAT; document as known limitation in Phase 4
 - PeerServer reliability: peerjs.com hosted server is outside project control; manual SDP exchange is primary UX
 
 ## Session Continuity
 
-Last session: 2026-03-06T19:57:00Z
-Stopped at: Completed 03-03-PLAN.md
-Resume file: .planning/phases/03-experience/03-03-SUMMARY.md
+Last session: 2026-03-07
+Stopped at: Phase 3 complete, ready to plan Phase 4
+Resume file: None
