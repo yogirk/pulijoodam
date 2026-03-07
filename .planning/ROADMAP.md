@@ -82,12 +82,12 @@ Plans:
   3. The app loads and plays fully offline after the first visit, and can be installed to the home screen on iOS, Android, and desktop
   4. Screen reader users can follow and play the game through move announcements and ARIA labels; color-blind users can distinguish tigers from goats
   5. The total JS + assets bundle is under 1MB and the app passes a responsive layout audit across mobile, tablet, and desktop
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: P2P multiplayer — WebRTC/PeerJS data channel, offer/answer exchange UX, move relay, disconnect handling
-- [ ] 04-02: PWA and accessibility — service worker precaching, web app manifest, drag-to-move, screen reader announcements, color-blind safe design, ARIA labels
-- [ ] 04-03: Production hardening — memoization, lazy loading, bundle size audit, responsive design audit, GitHub Pages CI deployment
+- [ ] 04-01-PLAN.md — Drag-to-move interaction, screen reader announcements, ARIA labels, color-blind safe piece markers
+- [ ] 04-02-PLAN.md — P2P multiplayer: WebRTC data channel, manual SDP exchange UX, move relay, disconnect handling, App routing
+- [ ] 04-03-PLAN.md — PWA offline/installability, performance memoization, lazy loading, CI/CD pipeline, bundle size audit
 
 ## Progress
 
