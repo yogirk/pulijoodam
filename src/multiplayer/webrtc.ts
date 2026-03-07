@@ -23,7 +23,51 @@ export interface P2PConnection {
   _testTriggerStateChange(state: string): void;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Compression Helpers ─────────────────────────────────────────────────────
+
+/** Compresses a string using gzip and encodes it to Base64 */
+async function compressString(str: string): Promise<string> {
+  const stream = new Blob([str]).stream();
+  const compressedStream = stream.pipeThrough(new CompressionStream('gzip'));
+  const chunks = [];
+  for await (const chunk of compressedStream as any) {
+    chunks.push(chunk);
+  }
+  const result = new Uint8Array(chunks.reduce((acc, val) => acc + val.length, 0));
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  // Convert binary to base64
+  return btoa(String.fromCharCode.apply(null, Array.from(result)));
+}
+
+/** Decodes a Base64 string and decompresses it using gzip */
+async function decompressString(b64Str: string): Promise<string> {
+  const binaryString = atob(b64Str);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+
+  const stream = new Blob([bytes]).stream();
+  const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
+  const chunks = [];
+  for await (const chunk of decompressedStream as any) {
+    chunks.push(chunk);
+  }
+
+  const result = new Uint8Array(chunks.reduce((acc, val) => acc + val.length, 0));
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return new TextDecoder().decode(result);
+}
+
+// ─── WebRTC Helpers ──────────────────────────────────────────────────────────
 
 /** Wait for ICE gathering to complete, with a timeout. */
 function waitForICE(pc: RTCPeerConnection): Promise<void> {
@@ -117,12 +161,13 @@ export async function createOffer(): Promise<OfferResult> {
   await waitForICE(pc);
 
   const localDesc = pc.localDescription!;
-  const offerCode = btoa(JSON.stringify({ type: localDesc.type, sdp: localDesc.sdp }));
+  const offerCode = await compressString(JSON.stringify({ type: localDesc.type, sdp: localDesc.sdp }));
 
   const connection = wrapChannel(pc, channel);
 
   const applyAnswer = async (answerCode: string): Promise<P2PConnection> => {
-    const answerDesc = JSON.parse(atob(answerCode));
+    const decompressed = await decompressString(answerCode);
+    const answerDesc = JSON.parse(decompressed);
     await pc.setRemoteDescription(new RTCSessionDescription(answerDesc));
     return connection;
   };
@@ -162,7 +207,8 @@ export async function joinWithOffer(offerCode: string): Promise<JoinResult> {
     for (const cb of stateCallbacks) cb(pc.connectionState);
   };
 
-  const offerDesc = JSON.parse(atob(offerCode));
+  const decompressed = await decompressString(offerCode);
+  const offerDesc = JSON.parse(decompressed);
   await pc.setRemoteDescription(new RTCSessionDescription(offerDesc));
 
   const answer = await pc.createAnswer();
@@ -170,7 +216,7 @@ export async function joinWithOffer(offerCode: string): Promise<JoinResult> {
   await waitForICE(pc);
 
   const localDesc = pc.localDescription!;
-  const answerCode = btoa(JSON.stringify({ type: localDesc.type, sdp: localDesc.sdp }));
+  const answerCode = await compressString(JSON.stringify({ type: localDesc.type, sdp: localDesc.sdp }));
 
   const connection: P2PConnection = {
     send(msg: P2PMessage) {

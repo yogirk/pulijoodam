@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { Role } from '../../engine';
 import type { AIDifficulty } from '../../engine/ai/types';
+import { useGame } from '../../hooks/useGame';
+import { Board } from '../Board/Board';
 
 interface SetupScreenProps {
   onStart: (config: { humanRole: Role; difficulty: AIDifficulty } | null) => void;
@@ -31,11 +33,32 @@ export function SetupScreen({
   const [humanRole, setHumanRole] = useState<Role>('goat');
   const [difficulty, setDifficulty] = useState<AIDifficulty>('medium');
 
+  // Initialize a dummy game state just for the atmospheric background
+  const dummyGame = useGame();
+
   return (
     <div
       className="min-h-screen-safe flex flex-col items-center justify-center p-4 relative overflow-hidden"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
+      {/* ATMOSPHERIC BACKGROUND BOARD */}
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none z-0"
+        style={{ opacity: 0.35, filter: 'blur(8px)', transform: 'scale(1.15)' }}
+      >
+        <div className="w-full max-w-2xl px-8">
+          <Board
+            gameState={dummyGame.gameState}
+            selectedNode={null}
+            legalMoves={[]}
+            onNodeTap={() => { }}
+            chainJumpInProgress={null}
+            animationState={{ isAnimating: false, animatingPieces: new Map(), fadingGoat: null, placingGoat: null, gameOverGlow: null }}
+            lastEvents={[]}
+          />
+        </div>
+      </div>
+
       {/* Decorative Background Orbs */}
       <div
         className="absolute top-[-10%] left-[-10%] w-[50vmin] h-[50vmin] rounded-full mix-blend-screen filter blur-[100px] opacity-30 pointer-events-none"

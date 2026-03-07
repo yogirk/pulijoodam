@@ -168,14 +168,40 @@ export const Board = memo(function Board({
   return (
     <svg
       ref={svgRef}
-      viewBox="0 0 600 380"
-      style={{ width: '100%', height: '100%', maxWidth: '600px', touchAction: 'none' }}
+      viewBox="-60 -60 720 540"
+      style={{ width: '100%', height: '100%', maxWidth: 'none', touchAction: 'none' }}
       role="group"
       aria-label="Pulijoodam game board"
       data-testid="game-board"
       onPointerMove={handlers.onPointerMove}
       onPointerUp={handlers.onPointerUp}
+      className="drop-shadow-2xl"
     >
+      {/* Layer 0: Physical Board Arena Surface */}
+      <rect
+        x="-30"
+        y="-30"
+        width="660"
+        height="480"
+        rx="24"
+        fill="var(--bg-secondary)"
+        stroke="var(--board-line)"
+        strokeWidth="4"
+        opacity={0.9}
+        className="shadow-2xl"
+      />
+      {/* Inner decorative rim for the board base */}
+      <rect
+        x="-20"
+        y="-20"
+        width="640"
+        height="460"
+        rx="20"
+        fill="transparent"
+        stroke="rgba(255, 255, 255, 0.05)"
+        strokeWidth="2"
+      />
+
       {/* Layer 1: edges */}
       <g className="edges">
         {EDGES.map(([fromId, toId]) => (
