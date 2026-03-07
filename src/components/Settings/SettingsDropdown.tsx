@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useSettings } from '../../hooks/useSettings.tsx';
+import { useSettings } from '../../hooks/useSettings';
 
 /** Gear icon SVG for settings button */
 function GearIcon() {
@@ -29,7 +29,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
   const { theme, soundEnabled, setTheme, setSoundEnabled } = useSettings();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
+  // Close dropdown on outside click or Escape key
   useEffect(() => {
     if (!isOpen) return;
 
@@ -39,8 +39,21 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
       }
     }
 
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        // Return focus to the trigger button
+        const trigger = dropdownRef.current?.querySelector<HTMLButtonElement>('[data-testid="settings-gear-btn"]');
+        trigger?.focus();
+      }
+    }
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen]);
 
   return (
@@ -50,6 +63,8 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
         className="p-2 rounded-lg transition-colors"
         style={{ color: 'var(--text-secondary)' }}
         aria-label="Settings"
+        aria-expanded={isOpen}
+        aria-haspopup="true"
         data-testid="settings-gear-btn"
       >
         <GearIcon />
@@ -60,7 +75,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
           className="absolute right-0 top-full mt-1 rounded-lg shadow-xl p-3 min-w-[180px] z-50"
           style={{
             backgroundColor: 'var(--bg-secondary)',
-            border: '1px solid var(--text-secondary)',
+            border: '1px solid color-mix(in srgb, var(--text-secondary) 30%, transparent)',
           }}
         >
           {/* Theme toggle */}
@@ -108,7 +123,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
 
           {/* Tutorial link */}
           {onStartTutorial && (
-            <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--text-secondary)' }}>
+            <div className="mt-3 pt-3" style={{ borderTop: '1px solid color-mix(in srgb, var(--text-secondary) 30%, transparent)' }}>
               <button
                 onClick={() => {
                   setIsOpen(false);

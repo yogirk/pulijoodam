@@ -13,7 +13,7 @@ export function JoinScreen({ onConnected, onBack }: JoinScreenProps) {
   const [isJoining, setIsJoining] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
-  const [_connection, setConnection] = useState<P2PConnection | null>(null);
+  const [, setConnection] = useState<P2PConnection | null>(null);
 
   const handleJoin = async () => {
     if (!offerInput.trim()) return;
@@ -54,7 +54,7 @@ export function JoinScreen({ onConnected, onBack }: JoinScreenProps) {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-4"
+      className="min-h-screen-safe flex flex-col items-center justify-center p-4"
       style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
     >
       <button
@@ -91,7 +91,8 @@ export function JoinScreen({ onConnected, onBack }: JoinScreenProps) {
           <button
             onClick={handleJoin}
             disabled={!offerInput.trim() || isJoining}
-            className="mt-2 min-h-[44px] px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg text-lg transition-colors disabled:opacity-50"
+            className="mt-2 min-h-[44px] px-8 py-3 font-bold rounded-lg text-lg transition-colors disabled:opacity-50"
+            style={{ backgroundColor: 'var(--legal-move-stroke)', color: '#ffffff' }}
             data-testid="join-game-btn"
           >
             {isJoining ? 'Joining...' : 'Join Game'}
@@ -120,7 +121,7 @@ export function JoinScreen({ onConnected, onBack }: JoinScreenProps) {
             onClick={handleCopyResponse}
             className="mt-2 px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
             style={{
-              backgroundColor: copied ? '#22c55e' : 'var(--bg-secondary)',
+              backgroundColor: copied ? 'var(--status-success)' : 'var(--bg-secondary)',
               color: 'var(--text-primary)',
             }}
             data-testid="copy-answer-btn"
@@ -146,7 +147,7 @@ export function JoinScreen({ onConnected, onBack }: JoinScreenProps) {
       </p>
 
       {error && (
-        <p className="mt-3 text-sm text-red-400" data-testid="join-error">
+        <p className="mt-3 text-sm" style={{ color: 'var(--status-error)' }} data-testid="join-error">
           {error}
         </p>
       )}

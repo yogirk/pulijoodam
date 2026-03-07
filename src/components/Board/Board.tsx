@@ -94,8 +94,8 @@ export const Board = memo(function Board({
     <svg
       ref={svgRef}
       viewBox="0 0 600 380"
-      style={{ width: '100%', height: '100%', maxWidth: '600px' }}
-      role="img"
+      style={{ width: '100%', height: '100%', maxWidth: '600px', touchAction: 'none' }}
+      role="group"
       aria-label="Pulijoodam game board"
       data-testid="game-board"
       onPointerMove={handlers.onPointerMove}

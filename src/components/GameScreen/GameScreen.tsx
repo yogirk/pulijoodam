@@ -51,16 +51,18 @@ function GameBoard({
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-4"
+      className="min-h-screen-safe flex flex-col"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
-      {/* Top bar: Back to Menu + Settings */}
-      <div className="w-full max-w-lg flex items-center justify-between mb-2">
+      {/* Top bar: always full width */}
+      <div className="w-full max-w-3xl mx-auto flex items-center justify-between px-4 pt-2 pb-1">
         {onBackToMenu ? (
           <button
             onClick={onBackToMenu}
-            className="px-3 py-1 text-sm transition-colors"
+            className="px-3 py-1 text-sm rounded-lg transition-colors min-h-[44px]"
             style={{ color: 'var(--text-secondary)' }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
             data-testid="back-to-menu-btn"
           >
             &larr; Menu
@@ -71,94 +73,104 @@ function GameBoard({
         <SettingsDropdown onStartTutorial={onStartTutorial} />
       </div>
 
-      {/* Turn indicator */}
-      <TurnIndicator
-        currentTurn={gameState.currentTurn}
-        phase={gameState.phase}
-      />
+      {/* Main content: column in portrait, row in landscape */}
+      <div className="flex-1 flex flex-col game-main items-center justify-center gap-1 sm:gap-2 px-4 pb-4">
+        {/* Board */}
+        <div className="w-full max-w-lg game-board-wrap flex items-center justify-center">
+          <Board
+            gameState={gameState}
+            selectedNode={selectedNode}
+            legalMoves={legalMoves}
+            onNodeTap={inputDisabled ? () => {} : onNodeTap}
+            chainJumpInProgress={gameState.chainJumpInProgress}
+            animationState={animationState}
+            lastEvents={game.lastEvents}
+          />
+        </div>
 
-      {/* AI thinking indicator */}
-      {isAIThinking && (
-        <p
-          className="text-sm animate-pulse mt-1"
-          style={{ color: 'var(--accent)' }}
-          data-testid="ai-thinking"
-        >
-          AI is thinking...
-        </p>
-      )}
+        {/* Sidebar: status + controls — below board in portrait, beside in landscape */}
+        <div className="game-sidebar flex flex-col items-center gap-1">
+          {/* Turn indicator */}
+          <TurnIndicator
+            currentTurn={gameState.currentTurn}
+            phase={gameState.phase}
+          />
 
-      {/* Counters */}
-      <div className="flex gap-4 my-2">
-        <PoolCounter
-          label="Goats"
-          count={gameState.goatsInPool}
-          visible={gameState.phase === 'placement'}
-        />
-        <PoolCounter
-          label="Captured"
-          count={gameState.goatsCaptured}
-        />
-      </div>
+          {/* AI thinking indicator */}
+          {isAIThinking && (
+            <p
+              className="text-sm animate-pulse"
+              style={{ color: 'var(--accent)' }}
+              data-testid="ai-thinking"
+            >
+              AI is thinking...
+            </p>
+          )}
 
-      {/* Board */}
-      <div className="w-full max-w-lg flex-1 flex items-center justify-center">
-        <Board
-          gameState={gameState}
-          selectedNode={selectedNode}
-          legalMoves={legalMoves}
-          onNodeTap={inputDisabled ? () => {} : onNodeTap}
-          chainJumpInProgress={gameState.chainJumpInProgress}
-          animationState={animationState}
-          lastEvents={game.lastEvents}
-        />
+          {/* Counters */}
+          <div className="flex gap-4">
+            <PoolCounter
+              label="Goats"
+              count={gameState.goatsInPool}
+              visible={gameState.phase === 'placement'}
+            />
+            <PoolCounter
+              label="Captured"
+              count={gameState.goatsCaptured}
+            />
+          </div>
+
+          {/* Chain-hop: End Turn button */}
+          {gameState.chainJumpInProgress !== null && !inputDisabled && (
+            <button
+              onClick={onEndChain}
+              className="px-4 py-2 font-semibold rounded transition-colors min-h-[44px]"
+              style={{
+                backgroundColor: 'var(--accent)',
+                color: 'var(--text-primary)',
+              }}
+              data-testid="end-chain-button"
+            >
+              End Turn
+            </button>
+          )}
+
+          {/* Undo / Redo */}
+          <div className="flex gap-4">
+            <button
+              onClick={onUndo}
+              disabled={!canUndo || inputDisabled}
+              className="px-3 py-1 rounded transition-colors disabled:opacity-40 min-h-[44px] min-w-[44px]"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+              }}
+              onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.color = 'var(--text-primary)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+              data-testid="undo-button"
+            >
+              Undo
+            </button>
+            <button
+              onClick={onRedo}
+              disabled={!canRedo || inputDisabled}
+              className="px-3 py-1 rounded transition-colors disabled:opacity-40 min-h-[44px] min-w-[44px]"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+              }}
+              onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.color = 'var(--text-primary)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+              data-testid="redo-button"
+            >
+              Redo
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Screen reader announcements */}
       <ScreenReaderAnnouncer lastEvents={game.lastEvents} gameState={gameState} />
-
-      {/* Chain-hop: End Turn button */}
-      {gameState.chainJumpInProgress !== null && !inputDisabled && (
-        <button
-          onClick={onEndChain}
-          className="mt-2 px-4 py-2 font-semibold rounded transition-colors"
-          style={{
-            backgroundColor: 'var(--accent)',
-            color: 'var(--text-primary)',
-          }}
-          data-testid="end-chain-button"
-        >
-          End Turn
-        </button>
-      )}
-
-      {/* Undo / Redo */}
-      <div className="flex gap-4 mt-2">
-        <button
-          onClick={onUndo}
-          disabled={!canUndo || inputDisabled}
-          className="px-3 py-1 rounded disabled:opacity-40"
-          style={{
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-          }}
-          data-testid="undo-button"
-        >
-          Undo
-        </button>
-        <button
-          onClick={onRedo}
-          disabled={!canRedo || inputDisabled}
-          className="px-3 py-1 rounded disabled:opacity-40"
-          style={{
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-          }}
-          data-testid="redo-button"
-        >
-          Redo
-        </button>
-      </div>
 
       {/* Game over overlay -- only show after animation completes */}
       {status !== 'ongoing' && !animationState.isAnimating && (

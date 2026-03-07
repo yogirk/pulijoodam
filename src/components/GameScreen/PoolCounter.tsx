@@ -8,7 +8,7 @@ export function PoolCounter({ label, count, visible = true }: PoolCounterProps) 
   if (!visible) return null;
   return (
     <div
-      className="flex items-center gap-2 px-5 py-2 rounded-xl glass-panel font-semibold shadow-sm transition-all duration-300 hover:scale-[1.02]"
+      className="flex items-center gap-2 px-5 py-2 rounded-xl glass-panel font-semibold shadow-sm"
       style={{
         border: '1px solid color-mix(in srgb, var(--board-line) 30%, transparent)'
       }}

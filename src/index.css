@@ -28,8 +28,14 @@
   --bg-secondary: #1f2937;
   --text-primary: #f9fafb;
   --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
   --accent: #f59e0b;
   --accent-hover: #d97706;
+
+  /* Semantic status */
+  --status-success: #22c55e;
+  --status-warning: #eab308;
+  --status-error: #ef4444;
 }
 
 /* ── Theme: Modern (Cyber) ──────────────────────────────────── */
@@ -59,14 +65,86 @@
   --bg-secondary: #0f172a;
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
   --accent: #a855f7;
   --accent-hover: #9333ea;
+
+  /* Semantic status */
+  --status-success: #34d399;
+  --status-warning: #facc15;
+  --status-error: #f87171;
 }
 
 body {
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  /* Safe area insets for notched phones & PWA */
+  padding:
+    env(safe-area-inset-top)
+    env(safe-area-inset-right)
+    env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+/* ── Responsive utilities ────────────────────────────────────── */
+
+/* Use dvh where supported for accurate mobile viewport height */
+.min-h-screen-safe {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Landscape game layout: board + sidebar side by side */
+@media (orientation: landscape) and (max-height: 500px) {
+  .game-main {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1rem;
+    padding: 0.25rem 1rem !important;
+  }
+
+  .game-main .game-board-wrap {
+    flex: 0 1 auto;
+    max-width: none;
+    width: auto;
+    height: calc(100dvh - 3.5rem);
+    max-height: calc(100dvh - 3.5rem);
+  }
+
+  .game-main .game-board-wrap svg {
+    height: 100%;
+    width: auto;
+  }
+
+  .game-main .game-sidebar {
+    flex: 0 0 auto;
+    min-width: 120px;
+  }
+}
+
+/* ── Global focus indicator ───────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* SVG elements need a different approach (outline doesn't render) */
+svg :focus-visible {
+  outline: none;
+}
+
+/* ── Reduced motion ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Premium Utilities */

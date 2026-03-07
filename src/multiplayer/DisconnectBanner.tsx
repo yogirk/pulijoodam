@@ -20,7 +20,8 @@ export function DisconnectBanner({ onContinueVsAI, onEndGame }: DisconnectBanner
       <div className="flex gap-3 justify-center">
         <button
           onClick={onContinueVsAI}
-          className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg transition-colors text-sm"
+          className="px-4 py-2 font-semibold rounded-lg transition-colors text-sm"
+          style={{ backgroundColor: 'var(--legal-move-stroke)', color: '#ffffff' }}
           data-testid="continue-vs-ai-btn"
         >
           Continue vs AI

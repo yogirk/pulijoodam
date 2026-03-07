@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const STORAGE_KEY = 'pulijoodam_tutorial_seen';
 
@@ -24,7 +24,24 @@ function markTutorialSeen(): void {
 }
 
 export function FirstLaunchModal({ onStartTutorial, onSkip }: FirstLaunchModalProps) {
-  const [visible] = useState(() => !hasSeenTutorial());
+  const [visible, setVisible] = useState(() => !hasSeenTutorial());
+  const startRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (visible) startRef.current?.focus();
+  }, [visible]);
+
+  useEffect(() => {
+    if (!visible) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        markTutorialSeen();
+        onSkip();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [visible, onSkip]);
 
   if (!visible) return null;
 
@@ -35,12 +52,16 @@ export function FirstLaunchModal({ onStartTutorial, onSkip }: FirstLaunchModalPr
 
   const handleSkip = () => {
     markTutorialSeen();
+    setVisible(false);
     onSkip();
   };
 
   return (
     <div
       className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="first-launch-title"
       data-testid="first-launch-modal"
     >
       <div
@@ -48,6 +69,7 @@ export function FirstLaunchModal({ onStartTutorial, onSkip }: FirstLaunchModalPr
         style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
       >
         <h2
+          id="first-launch-title"
           className="text-xl font-bold mb-3"
           style={{ color: 'var(--accent)' }}
         >
@@ -59,6 +81,7 @@ export function FirstLaunchModal({ onStartTutorial, onSkip }: FirstLaunchModalPr
         </p>
         <div className="flex gap-3 justify-center">
           <button
+            ref={startRef}
             onClick={handleStart}
             className="px-5 py-2 font-semibold rounded-lg transition-colors"
             style={{ backgroundColor: 'var(--accent)', color: 'var(--text-primary)' }}

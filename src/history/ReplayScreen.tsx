@@ -86,17 +86,26 @@ export function ReplayScreen({ game, onBack }: ReplayScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-stone-900 flex flex-col items-center p-4">
+    <div
+      className="min-h-screen-safe flex flex-col items-center p-4"
+      style={{ backgroundColor: 'var(--bg-primary)' }}
+    >
       {/* Header */}
       <div className="w-full max-w-lg flex items-center mb-4">
         <button
           onClick={onBack}
-          className="px-3 py-1 text-stone-400 hover:text-stone-200 text-sm transition-colors"
+          className="px-3 py-1 text-sm rounded-lg transition-colors min-h-[44px]"
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
           data-testid="replay-back-btn"
         >
           &larr; Back
         </button>
-        <h1 className="flex-1 text-center text-xl font-bold text-amber-400">
+        <h1
+          className="flex-1 text-center text-xl font-bold"
+          style={{ color: 'var(--accent)' }}
+        >
           Game Replay
         </h1>
         <div className="w-16" />
@@ -115,13 +124,17 @@ export function ReplayScreen({ game, onBack }: ReplayScreenProps) {
 
       {/* Move info */}
       {moveIndex > 0 && moveIndex <= game.moveHistory.length && (
-        <p className="text-stone-400 text-sm mt-2">
+        <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
           {describeMoveAction(game.moveHistory[moveIndex - 1])}
         </p>
       )}
 
       {/* Move counter */}
-      <p className="text-stone-300 text-sm mt-2" data-testid="replay-move-counter">
+      <p
+        className="text-sm mt-2"
+        style={{ color: 'var(--text-primary)' }}
+        data-testid="replay-move-counter"
+      >
         Move {moveIndex} / {maxIndex}
       </p>
 
@@ -137,11 +150,12 @@ export function ReplayScreen({ game, onBack }: ReplayScreenProps) {
       />
 
       {/* Controls */}
-      <div className="flex gap-3 mt-4">
+      <div className="flex gap-2 sm:gap-3 mt-3 sm:mt-4">
         <button
           onClick={goToFirst}
           disabled={moveIndex === 0}
-          className="px-3 py-2 bg-stone-700 text-white rounded disabled:opacity-40"
+          className="min-w-[44px] min-h-[44px] px-3 py-2 rounded disabled:opacity-40 transition-colors"
+          style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
           data-testid="replay-first"
         >
           |&lt;
@@ -149,14 +163,16 @@ export function ReplayScreen({ game, onBack }: ReplayScreenProps) {
         <button
           onClick={goToPrev}
           disabled={moveIndex === 0}
-          className="px-3 py-2 bg-stone-700 text-white rounded disabled:opacity-40"
+          className="min-w-[44px] min-h-[44px] px-3 py-2 rounded disabled:opacity-40 transition-colors"
+          style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
           data-testid="replay-prev"
         >
           &lt;
         </button>
         <button
           onClick={togglePlay}
-          className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded transition-colors"
+          className="min-w-[44px] min-h-[44px] px-4 py-2 font-semibold rounded transition-colors"
+          style={{ backgroundColor: 'var(--accent)', color: '#ffffff' }}
           data-testid="replay-play"
         >
           {isPlaying ? 'Pause' : 'Play'}
@@ -164,7 +180,8 @@ export function ReplayScreen({ game, onBack }: ReplayScreenProps) {
         <button
           onClick={goToNext}
           disabled={moveIndex === maxIndex}
-          className="px-3 py-2 bg-stone-700 text-white rounded disabled:opacity-40"
+          className="min-w-[44px] min-h-[44px] px-3 py-2 rounded disabled:opacity-40 transition-colors"
+          style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
           data-testid="replay-next"
         >
           &gt;
@@ -172,7 +189,8 @@ export function ReplayScreen({ game, onBack }: ReplayScreenProps) {
         <button
           onClick={goToLast}
           disabled={moveIndex === maxIndex}
-          className="px-3 py-2 bg-stone-700 text-white rounded disabled:opacity-40"
+          className="min-w-[44px] min-h-[44px] px-3 py-2 rounded disabled:opacity-40 transition-colors"
+          style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
           data-testid="replay-last"
         >
           &gt;|

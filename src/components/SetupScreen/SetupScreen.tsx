@@ -22,7 +22,7 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden"
+      className="min-h-screen-safe flex flex-col items-center justify-center p-4 relative overflow-hidden"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
       {/* Decorative Background Orbs */}
@@ -36,12 +36,12 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
       />
 
       {/* Main Card */}
-      <div className="glass-panel rounded-3xl p-8 max-w-md w-full flex flex-col items-center relative z-10">
+      <div className="glass-panel rounded-3xl p-5 sm:p-8 max-w-md w-full flex flex-col items-center relative z-10">
 
         {/* Title */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-6 sm:mb-10">
           <h1
-            className="text-5xl font-extrabold mb-2 tracking-tight drop-shadow-lg"
+            className="text-3xl sm:text-5xl font-extrabold mb-2 tracking-tight drop-shadow-lg"
             style={{ color: 'var(--accent)' }}
           >
             Pulijoodam
@@ -55,7 +55,7 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
         </div>
 
         {/* Role selection */}
-        <div className="w-full mb-8">
+        <div className="w-full mb-5 sm:mb-8">
           <h2
             className="text-xs font-bold mb-3 uppercase tracking-widest text-center"
             style={{ color: 'var(--text-secondary)' }}
@@ -67,13 +67,14 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
               data-testid="role-goat"
               onClick={() => setHumanRole('goat')}
               className={`flex-1 min-h-[50px] rounded-xl font-bold transition-all duration-300 ${humanRole === 'goat'
-                  ? 'shadow-[0_0_15px_rgba(245,158,11,0.5)] scale-105'
+                  ? 'scale-105'
                   : 'hover:scale-105 opacity-70 hover:opacity-100'
                 }`}
               style={{
                 backgroundColor: humanRole === 'goat' ? 'var(--accent)' : 'var(--bg-secondary)',
                 color: humanRole === 'goat' ? '#ffffff' : 'var(--text-primary)',
-                border: `1px solid ${humanRole === 'goat' ? 'transparent' : 'var(--board-line)'}`
+                border: `1px solid ${humanRole === 'goat' ? 'transparent' : 'var(--board-line)'}`,
+                boxShadow: humanRole === 'goat' ? '0 0 15px color-mix(in srgb, var(--accent) 50%, transparent)' : 'none',
               }}
             >
               Goat
@@ -82,13 +83,14 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
               data-testid="role-tiger"
               onClick={() => setHumanRole('tiger')}
               className={`flex-1 min-h-[50px] rounded-xl font-bold transition-all duration-300 ${humanRole === 'tiger'
-                  ? 'shadow-[0_0_15px_rgba(245,158,11,0.5)] scale-105'
+                  ? 'scale-105'
                   : 'hover:scale-105 opacity-70 hover:opacity-100'
                 }`}
               style={{
                 backgroundColor: humanRole === 'tiger' ? 'var(--accent)' : 'var(--bg-secondary)',
                 color: humanRole === 'tiger' ? '#ffffff' : 'var(--text-primary)',
-                border: `1px solid ${humanRole === 'tiger' ? 'transparent' : 'var(--board-line)'}`
+                border: `1px solid ${humanRole === 'tiger' ? 'transparent' : 'var(--board-line)'}`,
+                boxShadow: humanRole === 'tiger' ? '0 0 15px color-mix(in srgb, var(--accent) 50%, transparent)' : 'none',
               }}
             >
               Tiger
@@ -97,7 +99,7 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
         </div>
 
         {/* Difficulty selection */}
-        <div className="w-full mb-10">
+        <div className="w-full mb-6 sm:mb-10">
           <h2
             className="text-xs font-bold mb-3 uppercase tracking-widest text-center"
             style={{ color: 'var(--text-secondary)' }}
@@ -111,13 +113,14 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
                 data-testid={`difficulty-${key}`}
                 onClick={() => setDifficulty(key)}
                 className={`sm:flex-1 min-h-[44px] px-2 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${difficulty === key
-                    ? 'shadow-[0_0_10px_rgba(245,158,11,0.4)] scale-[1.02]'
+                    ? 'scale-[1.02]'
                     : 'hover:scale-[1.02] opacity-70 hover:opacity-100'
                   }`}
                 style={{
                   backgroundColor: difficulty === key ? 'var(--accent)' : 'var(--bg-secondary)',
                   color: difficulty === key ? '#ffffff' : 'var(--text-primary)',
-                  border: `1px solid ${difficulty === key ? 'transparent' : 'var(--board-line)'}`
+                  border: `1px solid ${difficulty === key ? 'transparent' : 'var(--board-line)'}`,
+                  boxShadow: difficulty === key ? '0 0 10px color-mix(in srgb, var(--accent) 40%, transparent)' : 'none',
                 }}
               >
                 {label}
@@ -131,8 +134,12 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
           <button
             data-testid="start-game-btn"
             onClick={() => onStart({ humanRole, difficulty })}
-            className="w-full min-h-[56px] font-bold rounded-xl text-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]"
-            style={{ backgroundColor: 'var(--legal-move-stroke)', color: '#ffffff' }}
+            className="w-full min-h-[56px] font-bold rounded-xl text-lg transition-all duration-300 hover:scale-[1.02]"
+            style={{
+              backgroundColor: 'var(--legal-move-stroke)',
+              color: '#ffffff',
+              boxShadow: '0 0 20px color-mix(in srgb, var(--legal-move-stroke) 40%, transparent)',
+            }}
           >
             Start Single Player
           </button>
@@ -172,8 +179,10 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
             <button
               data-testid="history-btn"
               onClick={onViewHistory}
-              className="transition-colors hover:text-white"
+              className="transition-colors"
               style={{ color: 'var(--text-secondary)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
             >
               Game History
             </button>
@@ -182,8 +191,10 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
             <button
               data-testid="tutorial-btn"
               onClick={onStartTutorial}
-              className="transition-colors hover:text-white"
+              className="transition-colors"
               style={{ color: 'var(--text-secondary)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
             >
               Learn to Play
             </button>

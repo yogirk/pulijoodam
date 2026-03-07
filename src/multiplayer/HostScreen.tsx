@@ -64,7 +64,7 @@ export function HostScreen({ onConnected, onBack }: HostScreenProps) {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-4"
+      className="min-h-screen-safe flex flex-col items-center justify-center p-4"
       style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
     >
       <button
@@ -93,32 +93,22 @@ export function HostScreen({ onConnected, onBack }: HostScreenProps) {
             <div className="flex gap-3">
               <button
                 onClick={() => setHostRole('tiger')}
-                className={`min-w-[100px] min-h-[44px] px-5 py-2 rounded-lg font-semibold transition-colors ${
-                  hostRole === 'tiger'
-                    ? 'bg-amber-600 text-white'
-                    : ''
-                }`}
-                style={
-                  hostRole !== 'tiger'
-                    ? { backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }
-                    : undefined
-                }
+                className="min-w-[100px] min-h-[44px] px-5 py-2 rounded-lg font-semibold transition-colors"
+                style={{
+                  backgroundColor: hostRole === 'tiger' ? 'var(--accent)' : 'var(--bg-secondary)',
+                  color: hostRole === 'tiger' ? '#ffffff' : 'var(--text-primary)',
+                }}
                 data-testid="host-role-tiger"
               >
                 Tiger
               </button>
               <button
                 onClick={() => setHostRole('goat')}
-                className={`min-w-[100px] min-h-[44px] px-5 py-2 rounded-lg font-semibold transition-colors ${
-                  hostRole === 'goat'
-                    ? 'bg-amber-600 text-white'
-                    : ''
-                }`}
-                style={
-                  hostRole !== 'goat'
-                    ? { backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }
-                    : undefined
-                }
+                className="min-w-[100px] min-h-[44px] px-5 py-2 rounded-lg font-semibold transition-colors"
+                style={{
+                  backgroundColor: hostRole === 'goat' ? 'var(--accent)' : 'var(--bg-secondary)',
+                  color: hostRole === 'goat' ? '#ffffff' : 'var(--text-primary)',
+                }}
                 data-testid="host-role-goat"
               >
                 Goat
@@ -129,7 +119,8 @@ export function HostScreen({ onConnected, onBack }: HostScreenProps) {
           <button
             onClick={handleCreateGame}
             disabled={isGenerating}
-            className="min-h-[44px] px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg text-lg transition-colors disabled:opacity-50"
+            className="min-h-[44px] px-8 py-3 font-bold rounded-lg text-lg transition-colors disabled:opacity-50"
+            style={{ backgroundColor: 'var(--legal-move-stroke)', color: '#ffffff' }}
             data-testid="create-game-btn"
           >
             {isGenerating ? 'Generating invite code...' : 'Create Game'}
@@ -164,7 +155,7 @@ export function HostScreen({ onConnected, onBack }: HostScreenProps) {
             onClick={handleCopyCode}
             className="mt-2 px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
             style={{
-              backgroundColor: copied ? '#22c55e' : 'var(--bg-secondary)',
+              backgroundColor: copied ? 'var(--status-success)' : 'var(--bg-secondary)',
               color: 'var(--text-primary)',
             }}
             data-testid="copy-offer-btn"
@@ -191,7 +182,8 @@ export function HostScreen({ onConnected, onBack }: HostScreenProps) {
             <button
               onClick={handleConnect}
               disabled={!answerInput.trim() || isConnecting}
-              className="mt-2 min-h-[44px] px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors disabled:opacity-50"
+              className="mt-2 min-h-[44px] px-8 py-3 font-bold rounded-lg transition-colors disabled:opacity-50"
+              style={{ backgroundColor: 'var(--legal-move-stroke)', color: '#ffffff' }}
               data-testid="host-connect-btn"
             >
               {isConnecting ? 'Connecting...' : 'Connect'}
@@ -209,7 +201,7 @@ export function HostScreen({ onConnected, onBack }: HostScreenProps) {
       </p>
 
       {error && (
-        <p className="mt-3 text-sm text-red-400" data-testid="host-error">
+        <p className="mt-3 text-sm" style={{ color: 'var(--status-error)' }} data-testid="host-error">
           {error}
         </p>
       )}

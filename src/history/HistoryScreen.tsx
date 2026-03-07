@@ -42,9 +42,9 @@ function getResultLabel(record: GameRecord): string {
 
 function getResultColor(label: string): string {
   switch (label) {
-    case 'Won': return 'text-green-400';
-    case 'Lost': return 'text-red-400';
-    default: return 'text-yellow-400';
+    case 'Won': return 'var(--status-success)';
+    case 'Lost': return 'var(--status-error)';
+    default: return 'var(--status-warning)';
   }
 }
 
@@ -52,17 +52,26 @@ export function HistoryScreen({ onSelectGame, onBackToMenu }: HistoryScreenProps
   const history = loadHistory();
 
   return (
-    <div className="min-h-screen bg-stone-900 flex flex-col items-center p-4">
+    <div
+      className="min-h-screen-safe flex flex-col items-center p-4"
+      style={{ backgroundColor: 'var(--bg-primary)' }}
+    >
       {/* Header */}
       <div className="w-full max-w-lg flex items-center mb-6">
         <button
           onClick={onBackToMenu}
-          className="px-3 py-1 text-stone-400 hover:text-stone-200 text-sm transition-colors"
+          className="px-3 py-1 text-sm rounded-lg transition-colors min-h-[44px]"
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
           data-testid="history-back-btn"
         >
           &larr; Menu
         </button>
-        <h1 className="flex-1 text-center text-2xl font-bold text-amber-400">
+        <h1
+          className="flex-1 text-center text-2xl font-bold"
+          style={{ color: 'var(--accent)' }}
+        >
           Game History
         </h1>
         <div className="w-16" /> {/* Spacer for centering */}
@@ -70,7 +79,7 @@ export function HistoryScreen({ onSelectGame, onBackToMenu }: HistoryScreenProps
 
       {/* Content */}
       {history.length === 0 ? (
-        <p className="text-stone-400 mt-12">No games played yet</p>
+        <p className="mt-12" style={{ color: 'var(--text-secondary)' }}>No games played yet</p>
       ) : (
         <div className="w-full max-w-lg flex flex-col gap-2">
           {history.map((record, i) => {
@@ -80,23 +89,26 @@ export function HistoryScreen({ onSelectGame, onBackToMenu }: HistoryScreenProps
                 key={record.id}
                 data-testid={`history-entry-${i}`}
                 onClick={() => onSelectGame(record)}
-                className="w-full p-3 bg-stone-800 hover:bg-stone-700 rounded-lg text-left transition-colors"
+                className="w-full p-3 rounded-lg text-left transition-colors"
+                style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid transparent' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'transparent'; }}
               >
                 <div className="flex justify-between items-center">
-                  <span className="text-stone-300 text-sm">
+                  <span className="text-sm" style={{ color: 'var(--text-primary)' }}>
                     {formatDate(record.startedAt)}
                   </span>
-                  <span className={`font-semibold ${getResultColor(resultLabel)}`}>
+                  <span className="font-semibold" style={{ color: getResultColor(resultLabel) }}>
                     {resultLabel}
                   </span>
                 </div>
                 <div className="flex justify-between items-center mt-1">
-                  <span className="text-stone-400 text-sm">
+                  <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                     {getOpponentLabel(record)}
                     {' \u00B7 '}
                     Played as {record.humanRole === 'tiger' ? 'Tiger' : 'Goat'}
                   </span>
-                  <span className="text-stone-500 text-xs">
+                  <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
                     {formatDuration(record.duration)}
                   </span>
                 </div>

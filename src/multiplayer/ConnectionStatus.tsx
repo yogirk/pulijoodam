@@ -3,9 +3,9 @@ interface ConnectionStatusProps {
 }
 
 const STATUS_CONFIG = {
-  connected: { color: '#22c55e', label: 'Connected' },
-  reconnecting: { color: '#eab308', label: 'Reconnecting' },
-  disconnected: { color: '#ef4444', label: 'Disconnected' },
+  connected: { color: 'var(--status-success)', label: 'Connected' },
+  reconnecting: { color: 'var(--status-warning)', label: 'Reconnecting' },
+  disconnected: { color: 'var(--status-error)', label: 'Disconnected' },
 } as const;
 
 export function ConnectionStatus({ state }: ConnectionStatusProps) {

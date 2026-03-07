@@ -18,7 +18,7 @@ export function TurnIndicator({ currentTurn, phase }: TurnIndicatorProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center mb-6">
+    <div className="flex flex-col items-center justify-center">
       {/* Turn Pill */}
       <div
         className="glass-panel px-6 py-2 rounded-full flex items-center gap-4 transition-all duration-300"

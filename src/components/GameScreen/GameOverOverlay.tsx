@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { GameStatus } from '../../engine';
 
 interface GameOverOverlayProps {
@@ -21,9 +22,26 @@ function getResultText(status: GameStatus): string {
 }
 
 export function GameOverOverlay({ status, onNewGame }: GameOverOverlayProps) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    buttonRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onNewGame();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onNewGame]);
+
   return (
     <div
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Game over"
       data-testid="game-over-overlay"
     >
       <div
@@ -37,6 +55,7 @@ export function GameOverOverlay({ status, onNewGame }: GameOverOverlayProps) {
           {getResultText(status)}
         </div>
         <button
+          ref={buttonRef}
           onClick={onNewGame}
           className="px-6 py-3 font-semibold rounded-lg transition-colors"
           style={{
