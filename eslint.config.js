@@ -31,6 +31,28 @@ const browserGlobals = {
   Worker: 'readonly',
   performance: 'readonly',
   navigator: 'readonly',
+  localStorage: 'readonly',
+  AudioContext: 'readonly',
+  AudioBuffer: 'readonly',
+  SVGSVGElement: 'readonly',
+  HTMLDivElement: 'readonly',
+  HTMLInputElement: 'readonly',
+  HTMLTextAreaElement: 'readonly',
+  MouseEvent: 'readonly',
+  Node: 'readonly',
+  DOMPoint: 'readonly',
+  React: 'readonly',
+  Storage: 'readonly',
+  Event: 'readonly',
+  MessageEvent: 'readonly',
+  RTCPeerConnection: 'readonly',
+  RTCSessionDescription: 'readonly',
+  RTCIceServer: 'readonly',
+  RTCDataChannel: 'readonly',
+  atob: 'readonly',
+  btoa: 'readonly',
+  queueMicrotask: 'readonly',
+  Element: 'readonly',
 };
 
 export default [
@@ -56,10 +78,13 @@ export default [
     },
   },
   {
-    // Test files: add Vitest globals, suppress unused-vars for todo stubs
+    // Test files: add Vitest globals, relax rules for mocking patterns
     files: ['src/**/*.test.{ts,tsx}'],
     languageOptions: {
       globals: vitestGlobals,
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
   {
