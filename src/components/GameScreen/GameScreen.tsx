@@ -81,7 +81,7 @@ function GameBoard({
             gameState={gameState}
             selectedNode={selectedNode}
             legalMoves={legalMoves}
-            onNodeTap={inputDisabled ? () => {} : onNodeTap}
+            onNodeTap={inputDisabled ? () => { } : onNodeTap}
             chainJumpInProgress={gameState.chainJumpInProgress}
             animationState={animationState}
             lastEvents={game.lastEvents}
@@ -96,16 +96,18 @@ function GameBoard({
             phase={gameState.phase}
           />
 
-          {/* AI thinking indicator */}
-          {isAIThinking && (
-            <p
-              className="text-sm animate-pulse"
-              style={{ color: 'var(--accent)' }}
-              data-testid="ai-thinking"
-            >
-              AI is thinking...
-            </p>
-          )}
+          {/* AI thinking indicator (Wrapped in fixed height to prevent layout shift) */}
+          <div className="h-6 flex items-center justify-center">
+            {isAIThinking && (
+              <p
+                className="text-sm animate-pulse tracking-wide font-medium"
+                style={{ color: 'var(--accent)' }}
+                data-testid="ai-thinking"
+              >
+                AI is thinking...
+              </p>
+            )}
+          </div>
 
           {/* Counters */}
           <div className="flex gap-4">

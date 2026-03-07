@@ -65,24 +65,15 @@ export const BoardNode = memo(function BoardNode({ node, piece, isSelected, isLe
       <circle r={10} fill="rgba(0,0,0,0.3)" transform="translate(0, 2)" />
       {/* Inner socket base */}
       <circle r={9} fill="var(--board-line)" opacity={0.5} />
-      {/* Inner active/empty fill */}
+      {/* Inner active/empty fill with subtle glow for legal moves */}
       <circle
         r={7}
-        fill={isSelected ? 'var(--node-selected)' : 'var(--node-fill)'}
+        fill={isSelected ? 'var(--node-selected)' : isLegalMove ? 'rgba(0, 180, 160, 0.4)' : 'var(--node-fill)'}
+        className={isLegalMove && !isSelected ? 'animate-pulse' : ''}
+        style={{ transition: 'fill 300ms ease, opacity 300ms ease' }}
       />
       {/* Highlight ring for depth */}
       <circle r={6} fill="transparent" stroke="rgba(255,255,255,0.1)" strokeWidth={1} />
-
-      {/* Legal move highlight ring */}
-      {isLegalMove && (
-        <circle
-          r={16}
-          fill="none"
-          stroke="var(--legal-move-stroke)"
-          strokeWidth={2.5}
-          opacity={0.9}
-        />
-      )}
 
       {/* MANDATORY 44x44 hit area -- MUST be last (top z-order) to capture clicks */}
       <rect

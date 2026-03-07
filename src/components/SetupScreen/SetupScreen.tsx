@@ -7,6 +7,9 @@ interface SetupScreenProps {
   onViewHistory?: () => void;
   onStartTutorial?: () => void;
   onPlayOnline?: () => void;
+  savedGame?: { opponent: string; moves: number } | null;
+  onResume?: () => void;
+  onDismissResume?: () => void;
 }
 
 const DIFFICULTIES: { key: AIDifficulty; label: string }[] = [
@@ -16,7 +19,15 @@ const DIFFICULTIES: { key: AIDifficulty; label: string }[] = [
   { key: 'expert', label: 'Expert' },
 ];
 
-export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnline }: SetupScreenProps) {
+export function SetupScreen({
+  onStart,
+  onViewHistory,
+  onStartTutorial,
+  onPlayOnline,
+  savedGame,
+  onResume,
+  onDismissResume
+}: SetupScreenProps) {
   const [humanRole, setHumanRole] = useState<Role>('goat');
   const [difficulty, setDifficulty] = useState<AIDifficulty>('medium');
 
@@ -67,8 +78,8 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
               data-testid="role-goat"
               onClick={() => setHumanRole('goat')}
               className={`flex-1 min-h-[50px] rounded-xl font-bold transition-all duration-300 ${humanRole === 'goat'
-                  ? 'scale-105'
-                  : 'hover:scale-105 opacity-70 hover:opacity-100'
+                ? 'scale-105'
+                : 'hover:scale-105 opacity-70 hover:opacity-100'
                 }`}
               style={{
                 backgroundColor: humanRole === 'goat' ? 'var(--accent)' : 'var(--bg-secondary)',
@@ -83,8 +94,8 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
               data-testid="role-tiger"
               onClick={() => setHumanRole('tiger')}
               className={`flex-1 min-h-[50px] rounded-xl font-bold transition-all duration-300 ${humanRole === 'tiger'
-                  ? 'scale-105'
-                  : 'hover:scale-105 opacity-70 hover:opacity-100'
+                ? 'scale-105'
+                : 'hover:scale-105 opacity-70 hover:opacity-100'
                 }`}
               style={{
                 backgroundColor: humanRole === 'tiger' ? 'var(--accent)' : 'var(--bg-secondary)',
@@ -113,8 +124,8 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
                 data-testid={`difficulty-${key}`}
                 onClick={() => setDifficulty(key)}
                 className={`sm:flex-1 min-h-[44px] px-2 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${difficulty === key
-                    ? 'scale-[1.02]'
-                    : 'hover:scale-[1.02] opacity-70 hover:opacity-100'
+                  ? 'scale-[1.02]'
+                  : 'hover:scale-[1.02] opacity-70 hover:opacity-100'
                   }`}
                 style={{
                   backgroundColor: difficulty === key ? 'var(--accent)' : 'var(--bg-secondary)',
@@ -130,19 +141,54 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
         </div>
 
         {/* Action Buttons */}
-        <div className="w-full flex flex-col gap-3">
-          <button
-            data-testid="start-game-btn"
-            onClick={() => onStart({ humanRole, difficulty })}
-            className="w-full min-h-[56px] font-bold rounded-xl text-lg transition-all duration-300 hover:scale-[1.02]"
-            style={{
-              backgroundColor: 'var(--legal-move-stroke)',
-              color: '#ffffff',
-              boxShadow: '0 0 20px color-mix(in srgb, var(--legal-move-stroke) 40%, transparent)',
-            }}
-          >
-            Start Single Player
-          </button>
+        <div className="w-full flex flex-col gap-3 relative">
+
+          {savedGame && (
+            <div
+              className="w-full p-4 mb-2 rounded-xl flex flex-col items-center border"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                borderColor: 'var(--accent)',
+                boxShadow: '0 0 15px color-mix(in srgb, var(--accent) 20%, transparent)'
+              }}
+            >
+              <h3 className="font-bold mb-1" style={{ color: 'var(--accent)' }}>Resume Game?</h3>
+              <p className="text-xs mb-4 text-center" style={{ color: 'var(--text-secondary)' }}>
+                You have an unfinished {savedGame.opponent === 'ai' ? 'AI' : 'local'} game with {savedGame.moves} moves.
+              </p>
+              <div className="flex w-full gap-2">
+                <button
+                  onClick={onResume}
+                  className="flex-1 min-h-[44px] font-bold rounded-lg text-sm transition-transform hover:scale-105"
+                  style={{ backgroundColor: 'var(--legal-move-stroke)', color: '#ffffff' }}
+                >
+                  Resume
+                </button>
+                <button
+                  onClick={onDismissResume}
+                  className="flex-1 min-h-[44px] font-bold rounded-lg text-sm transition-colors hover:bg-black/20"
+                  style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+                >
+                  New Game
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!savedGame && (
+            <button
+              data-testid="start-game-btn"
+              onClick={() => onStart({ humanRole, difficulty })}
+              className="w-full min-h-[56px] font-bold rounded-xl text-lg transition-all duration-300 hover:scale-[1.02]"
+              style={{
+                backgroundColor: 'var(--legal-move-stroke)',
+                color: '#ffffff',
+                boxShadow: '0 0 20px color-mix(in srgb, var(--legal-move-stroke) 40%, transparent)',
+              }}
+            >
+              Start Single Player
+            </button>
+          )}
 
           <button
             data-testid="local-2p-btn"

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
+import { useState, useCallback, lazy, Suspense } from 'react';
 import { GameScreen } from './components/GameScreen/GameScreen';
 import { SetupScreen } from './components/SetupScreen/SetupScreen';
 import { useGameResume } from './history/useGameHistory';
@@ -39,81 +39,13 @@ interface AIConfig {
   difficulty: AIDifficulty;
 }
 
-function ResumeModal({
-  savedGame,
-  onResume,
-  onDismiss,
-}: {
-  savedGame: { opponent: string; moveHistory: Move[] };
-  onResume: () => void;
-  onDismiss: () => void;
-}) {
-  const resumeRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    resumeRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onDismiss();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onDismiss]);
-
-  return (
-    <div
-      className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="resume-title"
-    >
-      <div
-        className="rounded-xl p-6 mx-4 max-w-sm w-full text-center"
-        style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
-      >
-        <h2
-          id="resume-title"
-          className="text-lg font-bold mb-2"
-          style={{ color: 'var(--accent)' }}
-        >
-          Resume Game?
-        </h2>
-        <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-          You have an unfinished {savedGame.opponent === 'ai' ? 'AI' : 'local'} game
-          with {savedGame.moveHistory.length} moves.
-        </p>
-        <div className="flex gap-3 justify-center">
-          <button
-            ref={resumeRef}
-            onClick={onResume}
-            className="px-5 py-2 font-semibold rounded-lg transition-colors"
-            style={{ backgroundColor: 'var(--legal-move-stroke)', color: '#ffffff' }}
-            data-testid="resume-yes-btn"
-          >
-            Resume
-          </button>
-          <button
-            onClick={onDismiss}
-            className="px-5 py-2 rounded-lg transition-colors"
-            style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
-            data-testid="resume-no-btn"
-          >
-            New Game
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('setup');
   const [aiConfig, setAiConfig] = useState<AIConfig | null>(null);
   const [replayGame, setReplayGame] = useState<GameRecord | null>(null);
   const { savedGame, clearSavedGame } = useGameResume();
-  const [showResume, setShowResume] = useState(savedGame !== null);
 
   // P2P state
   const [p2pConnection, setP2PConnection] = useState<P2PConnection | null>(null);
@@ -121,7 +53,6 @@ export default function App() {
 
   const handleStart = (config: AIConfig | null) => {
     setAiConfig(config);
-    setShowResume(false);
     setScreen('game');
   };
 
@@ -135,13 +66,11 @@ export default function App() {
     } else {
       setAiConfig(null);
     }
-    setShowResume(false);
     setScreen('game');
   };
 
   const handleDismissResume = useCallback(() => {
     clearSavedGame();
-    setShowResume(false);
   }, [clearSavedGame]);
 
   const handleBackToMenu = () => {
@@ -324,20 +253,15 @@ export default function App() {
         onViewHistory={() => setScreen('history')}
         onStartTutorial={() => setScreen('tutorial')}
         onPlayOnline={() => setScreen('online-menu')}
+        savedGame={savedGame ? { opponent: savedGame.opponent, moves: savedGame.moveHistory.length } : null}
+        onResume={handleResume}
+        onDismissResume={handleDismissResume}
       />
       {/* First-launch tutorial prompt */}
       <FirstLaunchModal
         onStartTutorial={() => setScreen('tutorial')}
-        onSkip={() => {}}
+        onSkip={() => { }}
       />
-      {/* Resume modal */}
-      {showResume && savedGame && (
-        <ResumeModal
-          savedGame={savedGame}
-          onResume={handleResume}
-          onDismiss={handleDismissResume}
-        />
-      )}
       {/* PWA install prompt */}
       <InstallPrompt />
     </>
