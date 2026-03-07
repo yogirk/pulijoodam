@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Engine + Board** - Rules-correct engine and playable local hot-seat game (completed 2026-03-04)
 - [x] **Phase 2: AI Opponent** - Solo play against 4-difficulty AI in a Web Worker (completed 2026-03-06)
 - [x] **Phase 3: Experience** - Animations, sound, tutorial, and game history/replay (completed 2026-03-06)
-- [ ] **Phase 4: Multiplayer + PWA** - P2P online play and production hardening
+- [x] **Phase 4: Multiplayer + PWA** - P2P online play and production hardening (completed 2026-03-07)
 
 ## Phase Details
 
@@ -99,4 +99,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Engine + Board | 4/4 | Complete    | 2026-03-04 |
 | 2. AI Opponent | 3/3 | Complete | 2026-03-06 |
 | 3. Experience | 4/4 | Complete   | 2026-03-06 |
-| 4. Multiplayer + PWA | 0/3 | Not started | - |
+| 4. Multiplayer + PWA | 3/3 | Complete   | 2026-03-07 |

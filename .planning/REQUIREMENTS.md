@@ -94,16 +94,16 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Production
 
-- [ ] **PROD-01**: Service worker for full offline support
+- [x] **PROD-01**: Service worker for full offline support
 - [x] **PROD-02**: Drag-to-move interaction in addition to tap-tap
 - [x] **PROD-03**: Accessibility: screen reader move announcements
 - [x] **PROD-04**: Accessibility: color-blind safe piece design
 - [x] **PROD-05**: Accessibility: ARIA labels on interactive elements
-- [ ] **PROD-06**: Performance: memoization and lazy loading where beneficial
-- [ ] **PROD-07**: Responsive design audit across device sizes
-- [ ] **PROD-08**: PWA manifest for mobile installability
-- [ ] **PROD-09**: GitHub Pages deployment via GitHub Actions CI
-- [ ] **PROD-10**: Total bundle size < 1MB (JS + assets)
+- [x] **PROD-06**: Performance: memoization and lazy loading where beneficial
+- [x] **PROD-07**: Responsive design audit across device sizes
+- [x] **PROD-08**: PWA manifest for mobile installability
+- [x] **PROD-09**: GitHub Pages deployment via GitHub Actions CI
+- [x] **PROD-10**: Total bundle size < 1MB (JS + assets)
 
 ## v2 Requirements
 
@@ -212,16 +212,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MP-06 | Phase 4 | Complete |
 | MP-07 | Phase 4 | Complete |
 | MP-08 | Phase 4 | Complete |
-| PROD-01 | Phase 4 | Pending |
+| PROD-01 | Phase 4 | Complete |
 | PROD-02 | Phase 4 | Complete |
 | PROD-03 | Phase 4 | Complete |
 | PROD-04 | Phase 4 | Complete |
 | PROD-05 | Phase 4 | Complete |
-| PROD-06 | Phase 4 | Pending |
-| PROD-07 | Phase 4 | Pending |
-| PROD-08 | Phase 4 | Pending |
-| PROD-09 | Phase 4 | Pending |
-| PROD-10 | Phase 4 | Pending |
+| PROD-06 | Phase 4 | Complete |
+| PROD-07 | Phase 4 | Complete |
+| PROD-08 | Phase 4 | Complete |
+| PROD-09 | Phase 4 | Complete |
+| PROD-10 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 74 total
