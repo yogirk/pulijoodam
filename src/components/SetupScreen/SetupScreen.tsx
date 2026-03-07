@@ -6,6 +6,7 @@ interface SetupScreenProps {
   onStart: (config: { humanRole: Role; difficulty: AIDifficulty } | null) => void;
   onViewHistory?: () => void;
   onStartTutorial?: () => void;
+  onPlayOnline?: () => void;
 }
 
 const DIFFICULTIES: { key: AIDifficulty; label: string }[] = [
@@ -15,7 +16,7 @@ const DIFFICULTIES: { key: AIDifficulty; label: string }[] = [
   { key: 'expert', label: 'Expert' },
 ];
 
-export function SetupScreen({ onStart, onViewHistory, onStartTutorial }: SetupScreenProps) {
+export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnline }: SetupScreenProps) {
   const [humanRole, setHumanRole] = useState<Role>('goat');
   const [difficulty, setDifficulty] = useState<AIDifficulty>('medium');
 
@@ -87,6 +88,22 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial }: SetupSc
       >
         Start Game
       </button>
+
+      {/* Play Online */}
+      {onPlayOnline && (
+        <button
+          data-testid="play-online-btn"
+          onClick={onPlayOnline}
+          className="min-h-[44px] px-6 py-2 rounded-lg font-semibold text-sm transition-colors mb-2"
+          style={{
+            backgroundColor: 'var(--bg-secondary, #44403c)',
+            color: 'var(--text-primary, #e7e5e4)',
+            border: '1px solid var(--accent, #d97706)',
+          }}
+        >
+          Play Online
+        </button>
+      )}
 
       {/* Local 2-Player */}
       <button

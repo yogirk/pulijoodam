@@ -6,11 +6,24 @@ import { ReplayScreen } from './history/ReplayScreen';
 import { useGameResume } from './history/useGameHistory';
 import { TutorialScreen } from './tutorial/TutorialScreen';
 import { FirstLaunchModal } from './tutorial/FirstLaunchModal';
-import type { Role } from './engine';
+import { HostScreen } from './multiplayer/HostScreen';
+import { JoinScreen } from './multiplayer/JoinScreen';
+import { P2PGameScreen } from './multiplayer/P2PGameScreen';
+import type { Role, Move } from './engine';
 import type { AIDifficulty } from './engine/ai/types';
 import type { GameRecord } from './history/types';
+import type { P2PConnection } from './multiplayer/webrtc';
 
-type Screen = 'setup' | 'game' | 'history' | 'replay' | 'tutorial';
+type Screen =
+  | 'setup'
+  | 'game'
+  | 'history'
+  | 'replay'
+  | 'tutorial'
+  | 'online-menu'
+  | 'host'
+  | 'join'
+  | 'p2p-game';
 
 interface AIConfig {
   humanRole: Role;
@@ -24,6 +37,10 @@ export default function App() {
   const { savedGame, clearSavedGame } = useGameResume();
   const [showResume, setShowResume] = useState(savedGame !== null);
 
+  // P2P state
+  const [p2pConnection, setP2PConnection] = useState<P2PConnection | null>(null);
+  const [p2pLocalRole, setP2PLocalRole] = useState<Role>('goat');
+
   const handleStart = (config: AIConfig | null) => {
     setAiConfig(config);
     setShowResume(false);
@@ -32,7 +49,6 @@ export default function App() {
 
   const handleResume = () => {
     if (!savedGame) return;
-    // Resume with stored config
     if (savedGame.opponent === 'ai' && savedGame.difficulty) {
       setAiConfig({
         humanRole: savedGame.humanRole,
@@ -52,13 +68,28 @@ export default function App() {
 
   const handleBackToMenu = () => {
     setAiConfig(null);
+    setP2PConnection(null);
     setScreen('setup');
   };
 
+  const handleContinueVsAI = (_moveHistory: Move[]) => {
+    // Switch to AI game with the opponent's role as AI
+    // Use medium difficulty as default for continue-vs-AI
+    setAiConfig({
+      humanRole: p2pLocalRole,
+      difficulty: 'medium',
+    });
+    if (p2pConnection) {
+      p2pConnection.close();
+    }
+    setP2PConnection(null);
+    setScreen('game');
+  };
+
+  // ── Screen routing ─────────────────────────────────────────────────────────
+
   if (screen === 'tutorial') {
-    return (
-      <TutorialScreen onBackToMenu={handleBackToMenu} />
-    );
+    return <TutorialScreen onBackToMenu={handleBackToMenu} />;
   }
 
   if (screen === 'replay' && replayGame) {
@@ -95,12 +126,99 @@ export default function App() {
     );
   }
 
+  if (screen === 'online-menu') {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center p-4"
+        style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+      >
+        <button
+          onClick={() => setScreen('setup')}
+          className="self-start mb-4 px-3 py-1 text-sm"
+          style={{ color: 'var(--text-secondary)' }}
+          data-testid="online-back-btn"
+        >
+          &larr; Back
+        </button>
+
+        <h1 className="text-2xl font-bold mb-8" style={{ color: 'var(--accent)' }}>
+          Play Online
+        </h1>
+
+        <button
+          onClick={() => setScreen('host')}
+          className="min-h-[44px] px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg text-lg transition-colors mb-4"
+          data-testid="host-game-btn"
+        >
+          Host Game
+        </button>
+
+        <button
+          onClick={() => setScreen('join')}
+          className="min-h-[44px] px-8 py-3 rounded-lg font-bold text-lg transition-colors"
+          style={{
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--accent)',
+          }}
+          data-testid="join-game-btn"
+        >
+          Join Game
+        </button>
+      </div>
+    );
+  }
+
+  if (screen === 'host') {
+    return (
+      <HostScreen
+        onConnected={(connection, hostRole) => {
+          setP2PConnection(connection);
+          setP2PLocalRole(hostRole);
+          setScreen('p2p-game');
+        }}
+        onBack={() => setScreen('online-menu')}
+      />
+    );
+  }
+
+  if (screen === 'join') {
+    return (
+      <JoinScreen
+        onConnected={(connection) => {
+          setP2PConnection(connection);
+          // Guest gets the opposite role -- host already picked
+          // The guest role will be determined by the host's choice
+          // For now, guest defaults to goat (host typically picks tiger)
+          // In practice, the host's role choice could be sent as a message
+          setP2PLocalRole('goat');
+          setScreen('p2p-game');
+        }}
+        onBack={() => setScreen('online-menu')}
+      />
+    );
+  }
+
+  if (screen === 'p2p-game' && p2pConnection) {
+    return (
+      <P2PGameScreen
+        connection={p2pConnection}
+        localRole={p2pLocalRole}
+        onContinueVsAI={handleContinueVsAI}
+        onEndGame={handleBackToMenu}
+      />
+    );
+  }
+
+  // ── Setup screen (default) ─────────────────────────────────────────────────
+
   return (
     <>
       <SetupScreen
         onStart={handleStart}
         onViewHistory={() => setScreen('history')}
         onStartTutorial={() => setScreen('tutorial')}
+        onPlayOnline={() => setScreen('online-menu')}
       />
       {/* First-launch tutorial prompt */}
       <FirstLaunchModal
