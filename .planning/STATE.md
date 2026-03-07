@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-03-07T08:54:21.685Z"
-last_activity: "2026-03-07 — 04-01 complete: drag-to-move hook, screen reader announcer, color-blind markers, 20 new tests, 224 total passing"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-03-07T08:55:06Z"
+last_activity: "2026-03-07 — 04-02 complete: P2P multiplayer via WebRTC with manual SDP exchange, 16 new tests, 227 total passing"
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 13
   percent: 100
 ---
 
@@ -26,18 +26,18 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 4 of 4 (Multiplayer + PWA)
-Plan: 1 of 3 in current phase (04-01 complete)
+Plan: 2 of 3 in current phase (04-02 complete)
 Status: Executing phase 4
-Last activity: 2026-03-07 — 04-01 complete: drag-to-move hook, screen reader announcer, color-blind markers, 20 new tests, 224 total passing
+Last activity: 2026-03-07 — 04-02 complete: P2P multiplayer via WebRTC with manual SDP exchange, 16 new tests, 227 total passing
 
 Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: 9 min
-- Total execution time: 84 min
+- Total execution time: 93 min
 
 **By Phase:**
 
@@ -60,6 +60,7 @@ Progress: [██████████] 100%
 | Phase 03-experience P02 | 7 | 2 tasks | 7 files |
 | Phase 03-experience P03 | 13 | 2 tasks | 13 files |
 | Phase 04-multiplayer-pwa P01 | 7 | 2 tasks | 9 files |
+| Phase 04-multiplayer-pwa P02 | 9 | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -111,6 +112,12 @@ Recent decisions affecting current work:
 - [Phase 04-multiplayer-pwa]: useDrag reuses tap-tap flow via onNodeTap(from) then onNodeTap(to) for move execution
 - [Phase 04-multiplayer-pwa]: Piece components wrapped in <g> for pointer event handling while inner SVG shapes remain pointer-events:none
 - [Phase 04-multiplayer-pwa]: Color-blind markers: inner dot for goats, inner cross for tigers -- shape differentiation without color
+- [Phase 04-multiplayer-pwa]: Manual SDP exchange via Base64 copy-paste codes -- zero server dependency
+- [Phase 04-multiplayer-pwa]: STUN-only with Google servers -- no TURN relay (documented limitation ~20-30% symmetric NAT)
+- [Phase 04-multiplayer-pwa]: ondatachannel registered before setRemoteDescription to avoid WebRTC race condition
+- [Phase 04-multiplayer-pwa]: useP2PGame uses refs for gameState in callbacks to prevent stale closures
+- [Phase 04-multiplayer-pwa]: canUndo/canRedo always false in P2P mode (MP-08)
+- [Phase 04-multiplayer-pwa]: Continue vs AI uses medium difficulty on disconnect
 
 ### Pending Todos
 
@@ -123,6 +130,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07T08:54:21.683Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-03-07T08:55:06Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None

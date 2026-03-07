@@ -83,14 +83,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Multiplayer
 
-- [ ] **MP-01**: WebRTC data channel integration for P2P connection
-- [ ] **MP-02**: Invite code generation (Base64-encoded SDP offer)
-- [ ] **MP-03**: Join flow: paste offer, generate answer, copy back
-- [ ] **MP-04**: Two-code exchange UX with copy buttons and paste fields
-- [ ] **MP-05**: Game synchronization via command relay over data channel
-- [ ] **MP-06**: Connection status indicator
-- [ ] **MP-07**: Disconnect handling (offer "Continue vs AI" or "End game")
-- [ ] **MP-08**: Undo disabled in P2P games
+- [x] **MP-01**: WebRTC data channel integration for P2P connection
+- [x] **MP-02**: Invite code generation (Base64-encoded SDP offer)
+- [x] **MP-03**: Join flow: paste offer, generate answer, copy back
+- [x] **MP-04**: Two-code exchange UX with copy buttons and paste fields
+- [x] **MP-05**: Game synchronization via command relay over data channel
+- [x] **MP-06**: Connection status indicator
+- [x] **MP-07**: Disconnect handling (offer "Continue vs AI" or "End game")
+- [x] **MP-08**: Undo disabled in P2P games
 
 ### Production
 
@@ -204,14 +204,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HIST-04 | Phase 3 | Complete |
 | HIST-05 | Phase 3 | Complete |
 | HIST-06 | Phase 3 | Complete |
-| MP-01 | Phase 4 | Pending |
-| MP-02 | Phase 4 | Pending |
-| MP-03 | Phase 4 | Pending |
-| MP-04 | Phase 4 | Pending |
-| MP-05 | Phase 4 | Pending |
-| MP-06 | Phase 4 | Pending |
-| MP-07 | Phase 4 | Pending |
-| MP-08 | Phase 4 | Pending |
+| MP-01 | Phase 4 | Complete |
+| MP-02 | Phase 4 | Complete |
+| MP-03 | Phase 4 | Complete |
+| MP-04 | Phase 4 | Complete |
+| MP-05 | Phase 4 | Complete |
+| MP-06 | Phase 4 | Complete |
+| MP-07 | Phase 4 | Complete |
+| MP-08 | Phase 4 | Complete |
 | PROD-01 | Phase 4 | Pending |
 | PROD-02 | Phase 4 | Complete |
 | PROD-03 | Phase 4 | Complete |
