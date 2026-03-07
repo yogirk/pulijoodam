@@ -124,15 +124,14 @@ describe('webrtc', () => {
       expect(typeof result.applyAnswer).toBe('function');
     });
 
-    it('offerCode is Base64 encoded', async () => {
+    it('offerCode is Base64 encoded and roundtrips through joinWithOffer', async () => {
       const result = await createOffer();
       // Should be valid base64 -- decoding should not throw
       const decoded = atob(result.offerCode);
       expect(decoded.length).toBeGreaterThan(0);
-      // Decoded should be valid JSON containing SDP
-      const parsed = JSON.parse(decoded);
-      expect(parsed.type).toBe('offer');
-      expect(typeof parsed.sdp).toBe('string');
+      // Roundtrip: joinWithOffer should accept the offerCode without error
+      const joinResult = await joinWithOffer(result.offerCode);
+      expect(joinResult.answerCode.length).toBeGreaterThan(0);
     });
   });
 
