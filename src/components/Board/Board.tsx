@@ -1,6 +1,8 @@
+import { useRef } from 'react';
 import { NODES, EDGES } from '../../engine/board';
-import type { GameState, LegalMove } from '../../engine';
+import type { GameState, LegalMove, GameEvent } from '../../engine';
 import type { AnimationState } from '../../hooks/useAnimationQueue';
+import { useDrag } from '../../hooks/useDrag';
 import { BoardEdge } from './BoardEdge';
 import { BoardNode } from './BoardNode';
 import { TigerPiece } from './TigerPiece';
@@ -13,6 +15,7 @@ interface BoardProps {
   onNodeTap: (id: number) => void;
   chainJumpInProgress: number | null;
   animationState?: AnimationState;
+  lastEvents?: GameEvent[];
 }
 
 export function Board({
@@ -23,6 +26,21 @@ export function Board({
   chainJumpInProgress,
   animationState,
 }: BoardProps) {
+  const svgRef = useRef<SVGSVGElement | null>(null);
+
+  const isAnimating = animationState?.isAnimating ?? false;
+
+  // Drag-to-move hook
+  const { isDragging, dragPieceId, dragPos, handlers } = useDrag({
+    svgRef,
+    board: gameState.board,
+    phase: gameState.phase,
+    currentTurn: gameState.currentTurn,
+    legalMoves,
+    onNodeTap,
+    disabled: isAnimating,
+  });
+
   // Build a fast lookup set of legal move destination node IDs
   const legalMoveTo = new Set(
     legalMoves
@@ -60,15 +78,29 @@ export function Board({
     }
   }
 
-  const isAnimating = animationState?.isAnimating ?? false;
+  // Determine which pieces are draggable (movement phase, own turn, has legal moves)
+  const canDragPiece = (nodeId: number): boolean => {
+    if (isAnimating) return false;
+    const piece = gameState.board[nodeId];
+    if (!piece) return false;
+    // Goat placement is tap-only
+    if (gameState.phase === 'placement' && gameState.currentTurn === 'goat') return false;
+    // Only current turn's pieces
+    if (piece !== gameState.currentTurn) return false;
+    // Must have legal moves from this node
+    return legalMoves.some(lm => lm.from === nodeId);
+  };
 
   return (
     <svg
+      ref={svgRef}
       viewBox="0 0 600 380"
       style={{ width: '100%', height: '100%', maxWidth: '600px' }}
       role="img"
       aria-label="Pulijoodam game board"
       data-testid="game-board"
+      onPointerMove={handlers.onPointerMove}
+      onPointerUp={handlers.onPointerUp}
     >
       {/* Layer 1: edges */}
       <g className="edges">
@@ -87,6 +119,7 @@ export function Board({
           <BoardNode
             key={`node-${node.id}`}
             node={node}
+            piece={gameState.board[node.id]}
             isSelected={selectedNode === node.id}
             isLegalMove={highlightedNodes.has(node.id)}
             onClick={() => onNodeTap(node.id)}
@@ -102,8 +135,13 @@ export function Board({
 
           // Check if this piece has an animation override position
           const animEntry = animationState?.animatingPieces.get(nodeId);
-          const pieceX = animEntry ? animEntry.toX : node.x;
-          const pieceY = animEntry ? animEntry.toY : node.y;
+
+          // If this piece is being dragged, use drag position
+          const isBeingDragged = isDragging && dragPieceId === nodeId && dragPos;
+          const pieceX = isBeingDragged ? dragPos.x : animEntry ? animEntry.toX : node.x;
+          const pieceY = isBeingDragged ? dragPos.y : animEntry ? animEntry.toY : node.y;
+
+          const draggable = canDragPiece(nodeId);
 
           if (piece === 'tiger') {
             const tigerGlowing =
@@ -115,6 +153,9 @@ export function Board({
                 y={pieceY}
                 isSelected={selectedNode === nodeId}
                 isGlowing={tigerGlowing}
+                draggable={draggable}
+                isBeingDragged={!!isBeingDragged}
+                onPointerDown={draggable ? (e: React.PointerEvent) => handlers.onPointerDown(nodeId, e) : undefined}
               />
             );
           }
@@ -127,6 +168,9 @@ export function Board({
               isFading={animationState?.fadingGoat === nodeId}
               isPlacing={animationState?.placingGoat === nodeId}
               isGlowing={animationState?.gameOverGlow === 'goat-wins'}
+              draggable={draggable}
+              isBeingDragged={!!isBeingDragged}
+              onPointerDown={draggable ? (e: React.PointerEvent) => handlers.onPointerDown(nodeId, e) : undefined}
             />
           );
         })}

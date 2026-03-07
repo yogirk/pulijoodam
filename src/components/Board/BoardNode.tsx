@@ -1,18 +1,46 @@
+import type { Piece } from '../../engine/types';
+
 interface BoardNodeProps {
   node: { id: number; x: number; y: number };
+  piece?: Piece | null;
   isSelected: boolean;
   isLegalMove: boolean;
   onClick: () => void;
 }
 
-export function BoardNode({ node, isSelected, isLegalMove, onClick }: BoardNodeProps) {
+function buildAriaLabel(
+  nodeId: number,
+  piece: Piece | null | undefined,
+  isSelected: boolean,
+  isLegalMove: boolean,
+): string {
+  const parts: string[] = [`Node ${nodeId}`];
+
+  if (piece) {
+    parts.push(piece);
+  } else {
+    parts.push('empty');
+  }
+
+  if (isSelected) {
+    parts.push('selected');
+  }
+
+  if (isLegalMove) {
+    parts.push('legal move');
+  }
+
+  return parts.join(', ');
+}
+
+export function BoardNode({ node, piece, isSelected, isLegalMove, onClick }: BoardNodeProps) {
   return (
     <g
       transform={`translate(${node.x}, ${node.y})`}
       onClick={onClick}
       style={{ cursor: 'pointer' }}
       role="button"
-      aria-label={`Node ${node.id}`}
+      aria-label={buildAriaLabel(node.id, piece, isSelected, isLegalMove)}
     >
       {/* Visual node circle */}
       <circle
