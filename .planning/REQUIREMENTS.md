@@ -95,10 +95,10 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Production
 
 - [ ] **PROD-01**: Service worker for full offline support
-- [ ] **PROD-02**: Drag-to-move interaction in addition to tap-tap
-- [ ] **PROD-03**: Accessibility: screen reader move announcements
-- [ ] **PROD-04**: Accessibility: color-blind safe piece design
-- [ ] **PROD-05**: Accessibility: ARIA labels on interactive elements
+- [x] **PROD-02**: Drag-to-move interaction in addition to tap-tap
+- [x] **PROD-03**: Accessibility: screen reader move announcements
+- [x] **PROD-04**: Accessibility: color-blind safe piece design
+- [x] **PROD-05**: Accessibility: ARIA labels on interactive elements
 - [ ] **PROD-06**: Performance: memoization and lazy loading where beneficial
 - [ ] **PROD-07**: Responsive design audit across device sizes
 - [ ] **PROD-08**: PWA manifest for mobile installability
@@ -213,10 +213,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MP-07 | Phase 4 | Pending |
 | MP-08 | Phase 4 | Pending |
 | PROD-01 | Phase 4 | Pending |
-| PROD-02 | Phase 4 | Pending |
-| PROD-03 | Phase 4 | Pending |
-| PROD-04 | Phase 4 | Pending |
-| PROD-05 | Phase 4 | Pending |
+| PROD-02 | Phase 4 | Complete |
+| PROD-03 | Phase 4 | Complete |
+| PROD-04 | Phase 4 | Complete |
+| PROD-05 | Phase 4 | Complete |
 | PROD-06 | Phase 4 | Pending |
 | PROD-07 | Phase 4 | Pending |
 | PROD-08 | Phase 4 | Pending |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 4 context gathered
-last_updated: "2026-03-07T08:24:43.567Z"
-last_activity: "2026-03-07 — 03-03 complete: interactive tutorial with 3 lessons, first-launch modal, 18 new tests, 191 total passing"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-03-07T08:54:21.685Z"
+last_activity: "2026-03-07 — 04-01 complete: drag-to-move hook, screen reader announcer, color-blind markers, 20 new tests, 224 total passing"
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 14
+  completed_plans: 12
   percent: 100
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 
 ## Current Position
 
-Phase: 3 of 4 (Experience Layer)
-Plan: 3 of 4 in current phase (03-03 complete)
-Status: Executing phase 3
-Last activity: 2026-03-07 — 03-03 complete: interactive tutorial with 3 lessons, first-launch modal, 18 new tests, 191 total passing
+Phase: 4 of 4 (Multiplayer + PWA)
+Plan: 1 of 3 in current phase (04-01 complete)
+Status: Executing phase 4
+Last activity: 2026-03-07 — 04-01 complete: drag-to-move hook, screen reader announcer, color-blind markers, 20 new tests, 224 total passing
 
 Progress: [██████████] 100%
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100%
 | Phase 03-experience P04 | 10 | 2 tasks | 12 files |
 | Phase 03-experience P02 | 7 | 2 tasks | 7 files |
 | Phase 03-experience P03 | 13 | 2 tasks | 13 files |
+| Phase 04-multiplayer-pwa P01 | 7 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,9 @@ Recent decisions affecting current work:
 - [Phase 03-experience]: Tutorial states built via engine move replay (replayMoves) to avoid invariant violations
 - [Phase 03-experience]: Tutorial accessible from three entry points: first-launch modal, setup screen button, settings dropdown
 - [Phase 03-experience]: TutorialContext manages lesson/step/gameState; flexible guidance accepts any valid move
+- [Phase 04-multiplayer-pwa]: useDrag reuses tap-tap flow via onNodeTap(from) then onNodeTap(to) for move execution
+- [Phase 04-multiplayer-pwa]: Piece components wrapped in <g> for pointer event handling while inner SVG shapes remain pointer-events:none
+- [Phase 04-multiplayer-pwa]: Color-blind markers: inner dot for goats, inner cross for tigers -- shape differentiation without color
 
 ### Pending Todos
 
@@ -119,6 +123,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07T08:24:43.565Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-multiplayer-pwa/04-CONTEXT.md
+Last session: 2026-03-07T08:54:21.683Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: None
