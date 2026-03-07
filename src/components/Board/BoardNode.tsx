@@ -43,11 +43,17 @@ export const BoardNode = memo(function BoardNode({ node, piece, isSelected, isLe
       role="button"
       aria-label={buildAriaLabel(node.id, piece, isSelected, isLegalMove)}
     >
-      {/* Visual node circle */}
+      {/* Visual node socket: Outer shadow/rim */}
+      <circle r={10} fill="rgba(0,0,0,0.3)" transform="translate(0, 2)" />
+      {/* Inner socket base */}
+      <circle r={9} fill="var(--board-line)" opacity={0.5} />
+      {/* Inner active/empty fill */}
       <circle
-        r={8}
+        r={7}
         fill={isSelected ? 'var(--node-selected)' : 'var(--node-fill)'}
       />
+      {/* Highlight ring for depth */}
+      <circle r={6} fill="transparent" stroke="rgba(255,255,255,0.1)" strokeWidth={1} />
 
       {/* Legal move highlight ring */}
       {isLegalMove && (

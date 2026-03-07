@@ -18,21 +18,42 @@ export function TurnIndicator({ currentTurn, phase }: TurnIndicatorProps) {
   }
 
   return (
-    <div className="text-center mb-2">
+    <div className="flex flex-col items-center justify-center mb-6">
+      {/* Turn Pill */}
       <div
-        className="text-xl font-bold"
-        style={{ color: 'var(--text-primary)' }}
+        className="glass-panel px-6 py-2 rounded-full flex items-center gap-4 transition-all duration-300"
         data-testid="turn-indicator"
       >
-        {isTiger ? 'Tiger' : 'Goat'}'s Turn
-      </div>
-      {action && (
         <div
-          className="text-sm mt-0.5"
+          className={`w-3 h-3 rounded-full transition-all duration-300 ${isTiger ? 'scale-125' : 'scale-75 opacity-30'}`}
+          style={{
+            backgroundColor: 'var(--tiger-fill)',
+            boxShadow: isTiger ? '0 0 12px var(--tiger-fill)' : 'none'
+          }}
+        />
+        <span
+          className="text-lg font-bold tracking-widest uppercase"
+          style={{ color: isTiger ? 'var(--tiger-fill)' : 'var(--goat-fill)' }}
+        >
+          {isTiger ? 'Tiger' : 'Goat'}'s Turn
+        </span>
+        <div
+          className={`w-3 h-3 rounded-full transition-all duration-300 ${!isTiger ? 'scale-125' : 'scale-75 opacity-30'}`}
+          style={{
+            backgroundColor: 'var(--goat-fill)',
+            boxShadow: !isTiger ? '0 0 12px var(--goat-fill)' : 'none'
+          }}
+        />
+      </div>
+
+      {/* Sub-action text */}
+      {action && (
+        <span
+          className="text-xs mt-3 uppercase tracking-[0.2em] font-medium"
           style={{ color: 'var(--text-secondary)' }}
         >
           {action}
-        </div>
+        </span>
       )}
     </div>
   );
