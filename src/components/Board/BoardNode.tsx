@@ -61,19 +61,22 @@ export const BoardNode = memo(function BoardNode({ node, piece, isSelected, isLe
       {isFocusVisible && (
         <circle r={20} fill="none" stroke="var(--accent)" strokeWidth={2} opacity={0.9} />
       )}
-      {/* Visual node socket: Outer shadow/rim */}
-      <circle r={10} fill="rgba(0,0,0,0.3)" transform="translate(0, 2)" />
-      {/* Inner socket base */}
-      <circle r={9} fill="var(--board-line)" opacity={0.5} />
+      {/* Visual node socket: Bevel / indent edge */}
+      <circle r={14} fill="rgba(255,255,255,0.03)" transform="translate(0, 1)" />
+      <circle r={13} fill="rgba(0,0,0,0.5)" />
+
+      {/* Deep pocket (inner shadow illusion) */}
+      <circle r={11} fill="var(--bg-primary)" stroke="rgba(0,0,0,0.8)" strokeWidth={2} />
+
       {/* Inner active/empty fill with subtle glow for legal moves */}
       <circle
-        r={7}
-        fill={isSelected ? 'var(--node-selected)' : isLegalMove ? 'rgba(0, 180, 160, 0.4)' : 'var(--node-fill)'}
+        r={8}
+        fill={isSelected ? 'var(--node-selected)' : isLegalMove ? 'rgba(0, 180, 160, 0.6)' : 'rgba(0,0,0,0.4)'}
         className={isLegalMove && !isSelected ? 'animate-pulse' : ''}
         style={{ transition: 'fill 300ms ease, opacity 300ms ease' }}
       />
-      {/* Highlight ring for depth */}
-      <circle r={6} fill="transparent" stroke="rgba(255,255,255,0.1)" strokeWidth={1} />
+      {/* Inner Highlight for Depth */}
+      <circle r={7} fill="transparent" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
 
       {/* MANDATORY 44x44 hit area -- MUST be last (top z-order) to capture clicks */}
       <rect

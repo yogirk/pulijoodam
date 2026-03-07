@@ -76,7 +76,7 @@
 }
 
 body {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Google Sans Flex', 'Google Sans', sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   /* Safe area insets for notched phones & PWA */
