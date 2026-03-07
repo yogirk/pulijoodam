@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { Piece } from '../../engine/types';
 
 interface BoardNodeProps {
@@ -33,7 +34,7 @@ function buildAriaLabel(
   return parts.join(', ');
 }
 
-export function BoardNode({ node, piece, isSelected, isLegalMove, onClick }: BoardNodeProps) {
+export const BoardNode = memo(function BoardNode({ node, piece, isSelected, isLegalMove, onClick }: BoardNodeProps) {
   return (
     <g
       transform={`translate(${node.x}, ${node.y})`}
@@ -70,4 +71,4 @@ export function BoardNode({ node, piece, isSelected, isLegalMove, onClick }: Boa
       />
     </g>
   );
-}
+});

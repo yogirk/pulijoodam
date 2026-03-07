@@ -13,7 +13,7 @@ export function JoinScreen({ onConnected, onBack }: JoinScreenProps) {
   const [isJoining, setIsJoining] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
-  const [connection, setConnection] = useState<P2PConnection | null>(null);
+  const [_connection, setConnection] = useState<P2PConnection | null>(null);
 
   const handleJoin = async () => {
     if (!offerInput.trim()) return;

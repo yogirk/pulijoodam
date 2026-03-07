@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 interface TigerPieceProps {
   x: number;
   y: number;
@@ -8,7 +10,7 @@ interface TigerPieceProps {
   onPointerDown?: (e: React.PointerEvent) => void;
 }
 
-export function TigerPiece({
+export const TigerPiece = memo(function TigerPiece({
   x,
   y,
   isSelected,
@@ -71,4 +73,4 @@ export function TigerPiece({
       />
     </g>
   );
-}
+});

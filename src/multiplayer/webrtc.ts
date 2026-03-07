@@ -27,7 +27,7 @@ export interface P2PConnection {
 
 /** Wait for ICE gathering to complete, with a timeout. */
 function waitForICE(pc: RTCPeerConnection): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<void>((resolve, _reject) => {
     if (pc.iceGatheringState === 'complete') {
       resolve();
       return;

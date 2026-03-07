@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { NodeDef } from '../../engine/board';
 
 interface BoardEdgeProps {
@@ -5,7 +6,7 @@ interface BoardEdgeProps {
   to: NodeDef;
 }
 
-export function BoardEdge({ from, to }: BoardEdgeProps) {
+export const BoardEdge = memo(function BoardEdge({ from, to }: BoardEdgeProps) {
   return (
     <line
       x1={from.x}
@@ -16,4 +17,4 @@ export function BoardEdge({ from, to }: BoardEdgeProps) {
       strokeWidth="var(--board-line-width)"
     />
   );
-}
+});

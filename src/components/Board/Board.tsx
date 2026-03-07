@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useMemo, memo } from 'react';
 import { NODES, EDGES } from '../../engine/board';
 import type { GameState, LegalMove, GameEvent } from '../../engine';
 import type { AnimationState } from '../../hooks/useAnimationQueue';
@@ -18,7 +18,7 @@ interface BoardProps {
   lastEvents?: GameEvent[];
 }
 
-export function Board({
+export const Board = memo(function Board({
   gameState,
   selectedNode,
   legalMoves,
@@ -41,42 +41,41 @@ export function Board({
     disabled: isAnimating,
   });
 
-  // Build a fast lookup set of legal move destination node IDs
-  const legalMoveTo = new Set(
-    legalMoves
-      .filter(lm => lm.to !== undefined)
-      .map(lm => lm.to as number)
-  );
+  // Memoize the highlighted nodes set to prevent unnecessary recomputation
+  const highlightedNodes = useMemo(() => {
+    const set = new Set<number>();
 
-  // When a piece is selected, only highlight destinations reachable from it
-  // (not all legal move destinations across the board)
-  const highlightedNodes = new Set<number>();
-  if (selectedNode !== null) {
-    for (const lm of legalMoves) {
-      if (lm.from === selectedNode && lm.to !== undefined) {
-        highlightedNodes.add(lm.to);
+    if (selectedNode !== null) {
+      for (const lm of legalMoves) {
+        if (lm.from === selectedNode && lm.to !== undefined) {
+          set.add(lm.to);
+        }
+      }
+    } else if (chainJumpInProgress !== null) {
+      // Mid chain-hop: highlight all capture destinations
+      for (const lm of legalMoves) {
+        if (lm.move.type === 'CAPTURE' && lm.to !== undefined) {
+          set.add(lm.to);
+        }
       }
     }
-  } else if (chainJumpInProgress !== null) {
-    // Mid chain-hop: highlight all capture destinations
-    for (const lm of legalMoves) {
-      if (lm.move.type === 'CAPTURE' && lm.to !== undefined) {
-        highlightedNodes.add(lm.to);
+
+    // During placement, highlight all valid placement spots for goat
+    const showPlacementHints =
+      gameState.phase === 'placement' &&
+      selectedNode === null &&
+      gameState.currentTurn === 'goat';
+
+    if (showPlacementHints) {
+      for (const lm of legalMoves) {
+        if (lm.to !== undefined) {
+          set.add(lm.to);
+        }
       }
     }
-  }
 
-  // During placement, highlight all valid placement spots for goat
-  const showPlacementHints =
-    gameState.phase === 'placement' &&
-    selectedNode === null &&
-    gameState.currentTurn === 'goat';
-
-  if (showPlacementHints) {
-    for (const nodeId of legalMoveTo) {
-      highlightedNodes.add(nodeId);
-    }
-  }
+    return set;
+  }, [selectedNode, chainJumpInProgress, legalMoves, gameState.phase, gameState.currentTurn]);
 
   // Determine which pieces are draggable (movement phase, own turn, has legal moves)
   const canDragPiece = (nodeId: number): boolean => {
@@ -177,4 +176,4 @@ export function Board({
       </g>
     </svg>
   );
-}
+});

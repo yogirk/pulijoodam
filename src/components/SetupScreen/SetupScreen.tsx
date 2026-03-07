@@ -62,7 +62,7 @@ export function SetupScreen({ onStart, onViewHistory, onStartTutorial, onPlayOnl
         <h2 className="text-stone-300 text-center text-sm font-semibold mb-2 uppercase tracking-wider">
           Difficulty
         </h2>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-center gap-2">
           {DIFFICULTIES.map(({ key, label }) => (
             <button
               key={key}

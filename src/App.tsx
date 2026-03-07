@@ -1,11 +1,9 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { GameScreen } from './components/GameScreen/GameScreen';
 import { SetupScreen } from './components/SetupScreen/SetupScreen';
-import { HistoryScreen } from './history/HistoryScreen';
-import { ReplayScreen } from './history/ReplayScreen';
 import { useGameResume } from './history/useGameHistory';
-import { TutorialScreen } from './tutorial/TutorialScreen';
 import { FirstLaunchModal } from './tutorial/FirstLaunchModal';
+import { InstallPrompt } from './pwa/InstallPrompt';
 import { HostScreen } from './multiplayer/HostScreen';
 import { JoinScreen } from './multiplayer/JoinScreen';
 import { P2PGameScreen } from './multiplayer/P2PGameScreen';
@@ -13,6 +11,17 @@ import type { Role, Move } from './engine';
 import type { AIDifficulty } from './engine/ai/types';
 import type { GameRecord } from './history/types';
 import type { P2PConnection } from './multiplayer/webrtc';
+
+// Lazy-loaded screens (not in initial bundle)
+const HistoryScreen = lazy(() =>
+  import('./history/HistoryScreen').then(m => ({ default: m.HistoryScreen }))
+);
+const ReplayScreen = lazy(() =>
+  import('./history/ReplayScreen').then(m => ({ default: m.ReplayScreen }))
+);
+const TutorialScreen = lazy(() =>
+  import('./tutorial/TutorialScreen').then(m => ({ default: m.TutorialScreen }))
+);
 
 type Screen =
   | 'setup'
@@ -89,124 +98,150 @@ export default function App() {
   // ── Screen routing ─────────────────────────────────────────────────────────
 
   if (screen === 'tutorial') {
-    return <TutorialScreen onBackToMenu={handleBackToMenu} />;
+    return (
+      <Suspense fallback={null}>
+        <TutorialScreen onBackToMenu={handleBackToMenu} />
+        <InstallPrompt />
+      </Suspense>
+    );
   }
 
   if (screen === 'replay' && replayGame) {
     return (
-      <ReplayScreen
-        game={replayGame}
-        onBack={() => {
-          setReplayGame(null);
-          setScreen('history');
-        }}
-      />
+      <Suspense fallback={null}>
+        <ReplayScreen
+          game={replayGame}
+          onBack={() => {
+            setReplayGame(null);
+            setScreen('history');
+          }}
+        />
+        <InstallPrompt />
+      </Suspense>
     );
   }
 
   if (screen === 'history') {
     return (
-      <HistoryScreen
-        onSelectGame={(record) => {
-          setReplayGame(record);
-          setScreen('replay');
-        }}
-        onBackToMenu={handleBackToMenu}
-      />
+      <Suspense fallback={null}>
+        <HistoryScreen
+          onSelectGame={(record) => {
+            setReplayGame(record);
+            setScreen('replay');
+          }}
+          onBackToMenu={handleBackToMenu}
+        />
+        <InstallPrompt />
+      </Suspense>
     );
   }
 
   if (screen === 'game') {
     return (
-      <GameScreen
-        aiConfig={aiConfig}
-        onBackToMenu={handleBackToMenu}
-        onStartTutorial={() => setScreen('tutorial')}
-      />
+      <>
+        <GameScreen
+          aiConfig={aiConfig}
+          onBackToMenu={handleBackToMenu}
+          onStartTutorial={() => setScreen('tutorial')}
+        />
+        <InstallPrompt />
+      </>
     );
   }
 
   if (screen === 'online-menu') {
     return (
-      <div
-        className="min-h-screen flex flex-col items-center justify-center p-4"
-        style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
-      >
-        <button
-          onClick={() => setScreen('setup')}
-          className="self-start mb-4 px-3 py-1 text-sm"
-          style={{ color: 'var(--text-secondary)' }}
-          data-testid="online-back-btn"
+      <>
+        <div
+          className="min-h-screen flex flex-col items-center justify-center p-4"
+          style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
         >
-          &larr; Back
-        </button>
+          <button
+            onClick={() => setScreen('setup')}
+            className="self-start mb-4 px-3 py-1 text-sm"
+            style={{ color: 'var(--text-secondary)' }}
+            data-testid="online-back-btn"
+          >
+            &larr; Back
+          </button>
 
-        <h1 className="text-2xl font-bold mb-8" style={{ color: 'var(--accent)' }}>
-          Play Online
-        </h1>
+          <h1 className="text-2xl font-bold mb-8" style={{ color: 'var(--accent)' }}>
+            Play Online
+          </h1>
 
-        <button
-          onClick={() => setScreen('host')}
-          className="min-h-[44px] px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg text-lg transition-colors mb-4"
-          data-testid="host-game-btn"
-        >
-          Host Game
-        </button>
+          <button
+            onClick={() => setScreen('host')}
+            className="min-h-[44px] px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg text-lg transition-colors mb-4"
+            data-testid="host-game-btn"
+          >
+            Host Game
+          </button>
 
-        <button
-          onClick={() => setScreen('join')}
-          className="min-h-[44px] px-8 py-3 rounded-lg font-bold text-lg transition-colors"
-          style={{
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-            border: '1px solid var(--accent)',
-          }}
-          data-testid="join-game-btn"
-        >
-          Join Game
-        </button>
-      </div>
+          <button
+            onClick={() => setScreen('join')}
+            className="min-h-[44px] px-8 py-3 rounded-lg font-bold text-lg transition-colors"
+            style={{
+              backgroundColor: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--accent)',
+            }}
+            data-testid="join-game-btn"
+          >
+            Join Game
+          </button>
+        </div>
+        <InstallPrompt />
+      </>
     );
   }
 
   if (screen === 'host') {
     return (
-      <HostScreen
-        onConnected={(connection, hostRole) => {
-          setP2PConnection(connection);
-          setP2PLocalRole(hostRole);
-          setScreen('p2p-game');
-        }}
-        onBack={() => setScreen('online-menu')}
-      />
+      <>
+        <HostScreen
+          onConnected={(connection, hostRole) => {
+            setP2PConnection(connection);
+            setP2PLocalRole(hostRole);
+            setScreen('p2p-game');
+          }}
+          onBack={() => setScreen('online-menu')}
+        />
+        <InstallPrompt />
+      </>
     );
   }
 
   if (screen === 'join') {
     return (
-      <JoinScreen
-        onConnected={(connection) => {
-          setP2PConnection(connection);
-          // Guest gets the opposite role -- host already picked
-          // The guest role will be determined by the host's choice
-          // For now, guest defaults to goat (host typically picks tiger)
-          // In practice, the host's role choice could be sent as a message
-          setP2PLocalRole('goat');
-          setScreen('p2p-game');
-        }}
-        onBack={() => setScreen('online-menu')}
-      />
+      <>
+        <JoinScreen
+          onConnected={(connection) => {
+            setP2PConnection(connection);
+            // Guest gets the opposite role -- host already picked
+            // The guest role will be determined by the host's choice
+            // For now, guest defaults to goat (host typically picks tiger)
+            // In practice, the host's role choice could be sent as a message
+            setP2PLocalRole('goat');
+            setScreen('p2p-game');
+          }}
+          onBack={() => setScreen('online-menu')}
+        />
+        <InstallPrompt />
+      </>
     );
   }
 
   if (screen === 'p2p-game' && p2pConnection) {
     return (
-      <P2PGameScreen
-        connection={p2pConnection}
-        localRole={p2pLocalRole}
-        onContinueVsAI={handleContinueVsAI}
-        onEndGame={handleBackToMenu}
-      />
+      <>
+        <P2PGameScreen
+          connection={p2pConnection}
+          localRole={p2pLocalRole}
+          onContinueVsAI={handleContinueVsAI}
+          onEndGame={handleBackToMenu}
+        />
+        <InstallPrompt />
+      </>
     );
   }
 
@@ -262,6 +297,8 @@ export default function App() {
           </div>
         </div>
       )}
+      {/* PWA install prompt */}
+      <InstallPrompt />
     </>
   );
 }

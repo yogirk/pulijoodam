@@ -5,10 +5,9 @@ import {
   getLegalMoves,
   getGameStatus,
 } from '../engine';
-import type { GameState, Move, LegalMove, GameEvent, GameStatus, Role } from '../engine';
+import type { GameState, LegalMove, GameEvent, GameStatus, Role } from '../engine';
 import { decodeMessage } from './protocol';
 import type { P2PConnection } from './webrtc';
-import type { P2PMessage } from './protocol';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -57,8 +56,6 @@ export function useP2PGame({ localRole, connection }: UseP2PGameOpts): P2PGameRe
   // Derived values
   const legalMoves = getLegalMoves(gameState);
   const status = getGameStatus(gameState);
-  const isMyTurn = gameState.currentTurn === localRole;
-
   // ── Listen for opponent messages ─────────────────────────────────────────
 
   useEffect(() => {

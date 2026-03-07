@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 interface GoatPieceProps {
   x: number;
   y: number;
@@ -10,7 +12,7 @@ interface GoatPieceProps {
   onPointerDown?: (e: React.PointerEvent) => void;
 }
 
-export function GoatPiece({
+export const GoatPiece = memo(function GoatPiece({
   x,
   y,
   isSelected,
@@ -73,4 +75,4 @@ export function GoatPiece({
       />
     </g>
   );
-}
+});
