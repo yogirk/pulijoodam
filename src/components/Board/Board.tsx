@@ -8,6 +8,78 @@ import { BoardNode } from './BoardNode';
 import { TigerPiece } from './TigerPiece';
 import { GoatPiece } from './GoatPiece';
 
+interface StablePiece {
+  id: string;
+  type: 'tiger' | 'goat';
+  nodeId: number;
+}
+
+function useStablePieces(board: (('tiger' | 'goat') | null)[]) {
+  const piecesRef = useRef<StablePiece[]>([]);
+  const nextGoatId = useRef(1);
+  const nextTigerId = useRef(1);
+  const prevBoard = useRef<(('tiger' | 'goat') | null)[]>([]);
+
+  if (prevBoard.current !== board) {
+    const pBoard = prevBoard.current;
+
+    // First setup or complete reset
+    if (pBoard.length === 0 || piecesRef.current.length === 0) {
+      const initialPieces: StablePiece[] = [];
+      board.forEach((p, idx) => {
+        if (p === 'tiger') initialPieces.push({ id: `tiger-${nextTigerId.current++}`, type: 'tiger', nodeId: idx });
+        else if (p === 'goat') initialPieces.push({ id: `goat-${nextGoatId.current++}`, type: 'goat', nodeId: idx });
+      });
+      piecesRef.current = initialPieces;
+    } else {
+      const missingNodes: { nodeId: number; type: 'tiger' | 'goat' }[] = [];
+      const addedNodes: { nodeId: number; type: 'tiger' | 'goat' }[] = [];
+
+      for (let i = 0; i < board.length; i++) {
+        if (pBoard[i] !== board[i]) {
+          if (pBoard[i]) missingNodes.push({ nodeId: i, type: pBoard[i] as 'tiger' | 'goat' });
+          if (board[i]) addedNodes.push({ nodeId: i, type: board[i] as 'tiger' | 'goat' });
+        }
+      }
+
+      const newPieces = [...piecesRef.current];
+
+      missingNodes.forEach(missing => {
+        const addedIdx = addedNodes.findIndex(a => a.type === missing.type);
+        if (addedIdx !== -1) {
+          // Move
+          const added = addedNodes[addedIdx];
+          const pIdx = newPieces.findIndex(p => p.nodeId === missing.nodeId && p.type === missing.type);
+          if (pIdx !== -1) {
+            newPieces[pIdx] = { ...newPieces[pIdx], nodeId: added.nodeId };
+          }
+          addedNodes.splice(addedIdx, 1);
+        } else {
+          // Capture / Removal
+          const pIdx = newPieces.findIndex(p => p.nodeId === missing.nodeId && p.type === missing.type);
+          if (pIdx !== -1) {
+            newPieces.splice(pIdx, 1);
+          }
+        }
+      });
+
+      // Placements / Undo capture back to life
+      addedNodes.forEach(added => {
+        if (added.type === 'goat') {
+          newPieces.push({ id: `goat-${nextGoatId.current++}`, type: 'goat', nodeId: added.nodeId });
+        } else if (added.type === 'tiger') {
+          newPieces.push({ id: `tiger-${nextTigerId.current++}`, type: 'tiger', nodeId: added.nodeId });
+        }
+      });
+
+      piecesRef.current = newPieces;
+    }
+    prevBoard.current = board;
+  }
+
+  return piecesRef.current;
+}
+
 interface BoardProps {
   gameState: GameState;
   selectedNode: number | null;
@@ -90,6 +162,9 @@ export const Board = memo(function Board({
     return legalMoves.some(lm => lm.from === nodeId);
   };
 
+  // Track pieces stably across renders to enable smooth CSS slide animations
+  const stablePieces = useStablePieces(gameState.board);
+
   return (
     <svg
       ref={svgRef}
@@ -126,10 +201,10 @@ export const Board = memo(function Board({
         ))}
       </g>
 
-      {/* Layer 3: pieces (rendered on top of nodes) */}
+      {/* Layer 3: pieces (rendered on top of nodes, using stable IDs so they glide) */}
       <g className="pieces" style={isAnimating ? { pointerEvents: 'none' } : undefined}>
-        {gameState.board.map((piece, nodeId) => {
-          if (piece === null) return null;
+        {stablePieces.map((piece) => {
+          const nodeId = piece.nodeId;
           const node = NODES[nodeId];
 
           // Check if this piece has an animation override position
@@ -142,12 +217,11 @@ export const Board = memo(function Board({
 
           const draggable = canDragPiece(nodeId);
 
-          if (piece === 'tiger') {
-            const tigerGlowing =
-              animationState?.gameOverGlow === 'tiger-wins';
+          if (piece.type === 'tiger') {
+            const tigerGlowing = animationState?.gameOverGlow === 'tiger-wins';
             return (
               <TigerPiece
-                key={`tiger-${nodeId}`}
+                key={piece.id}
                 x={pieceX}
                 y={pieceY}
                 isSelected={selectedNode === nodeId}
@@ -160,7 +234,7 @@ export const Board = memo(function Board({
           }
           return (
             <GoatPiece
-              key={`goat-${nodeId}`}
+              key={piece.id}
               x={pieceX}
               y={pieceY}
               isSelected={selectedNode === nodeId}
