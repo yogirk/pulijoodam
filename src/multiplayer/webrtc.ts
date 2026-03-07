@@ -44,6 +44,13 @@ function waitForICE(pc: RTCPeerConnection): Promise<void> {
       resolve();
     }, ICE_GATHER_TIMEOUT_MS);
 
+    pc.onicecandidate = (event) => {
+      if (event.candidate === null) {
+        clearTimeout(timer);
+        resolve();
+      }
+    };
+
     pc.onicegatheringstatechange = () => {
       if (pc.iceGatheringState === 'complete') {
         clearTimeout(timer);
