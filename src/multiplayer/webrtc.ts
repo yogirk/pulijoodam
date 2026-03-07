@@ -135,15 +135,24 @@ export interface JoinResult {
 export async function joinWithOffer(offerCode: string): Promise<JoinResult> {
   const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
 
-  // CRITICAL: Register ondatachannel BEFORE setRemoteDescription
-  // to avoid race condition (Pitfall 2 from research)
-  let resolveChannel: (ch: RTCDataChannel) => void;
-  const channelPromise = new Promise<RTCDataChannel>((resolve) => {
-    resolveChannel = resolve;
-  });
+  // Build connection wrapper that wires up the data channel when it arrives.
+  // ondatachannel only fires after ICE connectivity is established (i.e. after
+  // the host applies our answer), so we must NOT await it here — otherwise
+  // the answer code never gets returned and both sides deadlock.
+  const messageCallbacks: ((data: string) => void)[] = [];
+  const stateCallbacks: ((state: string) => void)[] = [];
+  let channel: RTCDataChannel | null = null;
 
   pc.ondatachannel = (event) => {
-    resolveChannel!(event.channel);
+    channel = event.channel;
+    channel.onmessage = (e: MessageEvent) => {
+      const data = typeof e.data === 'string' ? e.data : String(e.data);
+      for (const cb of messageCallbacks) cb(data);
+    };
+  };
+
+  pc.onconnectionstatechange = () => {
+    for (const cb of stateCallbacks) cb(pc.connectionState);
   };
 
   const offerDesc = JSON.parse(atob(offerCode));
@@ -156,8 +165,29 @@ export async function joinWithOffer(offerCode: string): Promise<JoinResult> {
   const localDesc = pc.localDescription!;
   const answerCode = btoa(JSON.stringify({ type: localDesc.type, sdp: localDesc.sdp }));
 
-  const channel = await channelPromise;
-  const connection = wrapChannel(pc, channel);
+  const connection: P2PConnection = {
+    send(msg: P2PMessage) {
+      if (channel && channel.readyState === 'open') {
+        channel.send(encodeMessage(msg));
+      }
+    },
+    close() {
+      if (channel) channel.close();
+      pc.close();
+    },
+    onMessage(cb: (data: string) => void) {
+      messageCallbacks.push(cb);
+    },
+    onStateChange(cb: (state: string) => void) {
+      stateCallbacks.push(cb);
+    },
+    _testTriggerMessage(data: string) {
+      for (const cb of messageCallbacks) cb(data);
+    },
+    _testTriggerStateChange(state: string) {
+      for (const cb of stateCallbacks) cb(state);
+    },
+  };
 
   return { answerCode, connection };
 }
