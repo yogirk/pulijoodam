@@ -10,4 +10,9 @@ coverage/
 .vscode/
 .idea/
 .claude/
+.planning/
 specs/
+playground.html
+test_ai*.ts
+test_expert*.ts
+CLAUDE.md
