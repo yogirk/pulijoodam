@@ -53,6 +53,8 @@ const browserGlobals = {
   btoa: 'readonly',
   queueMicrotask: 'readonly',
   Element: 'readonly',
+  HTMLButtonElement: 'readonly',
+  KeyboardEvent: 'readonly',
 };
 
 export default [
