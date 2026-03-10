@@ -1,11 +1,11 @@
 // Move notation for Pulijoodam: algebraic representation of game moves.
 // PLACE: "c2"  |  MOVE: "c3-d3"  |  CAPTURE: "c1×c5"  |  END_CHAIN: "."
 
-import type { Move, GameState } from '../engine/types';
+import type { Move } from '../engine/types';
 import { NODES } from '../engine/board';
 import { nodeToName, nameToNode } from './nodeNames';
 
-const CAPTURE_SYMBOL = '\u00D7'; // × (multiplication sign)
+export const CAPTURE_SYMBOL = '\u00D7'; // × (multiplication sign)
 
 /** Convert an engine Move to its algebraic notation string. */
 export function moveToAlgebraic(move: Move): string {
@@ -40,10 +40,8 @@ function findMiddleNode(from: number, to: number): number {
 /**
  * Parse an algebraic notation string back to an engine Move.
  * For CAPTURE moves, the `over` node is derived from the board topology.
- * The gameState is used to disambiguate PLACE vs MOVE for single-node notations
- * (PLACE only happens during placement phase).
  */
-export function algebraicToMove(notation: string, _gameState: GameState): Move {
+export function algebraicToMove(notation: string): Move {
   const trimmed = notation.trim();
 
   if (trimmed === '.') {
@@ -70,15 +68,11 @@ export function algebraicToMove(notation: string, _gameState: GameState): Move {
 }
 
 /**
- * Format a full move list into numbered pairs.
- * Goat moves are on the left, tiger moves on the right.
- * Chain captures (consecutive CAPTURE moves from the same player) are merged:
- * e.g., CAPTURE c1→c5 + CAPTURE c5→e5 becomes "c1×c5×e5".
- * An END_CHAIN appends "." to the preceding capture sequence.
+ * Tokenize a flat move list into per-turn notation strings.
+ * Chain captures are merged (e.g., CAPTURE c1→c5 + CAPTURE c5→e5 → "c1×c5×e5").
+ * END_CHAIN appends "." to the preceding capture sequence.
  */
-export function movesToAlgebraic(moves: Move[]): string {
-  // First, build a sequence of "turn tokens" — each token is the notation for
-  // one player's action in a single turn. Chain captures are merged.
+export function movesToTurnTokens(moves: Move[]): string[] {
   const tokens: string[] = [];
   let i = 0;
 
@@ -86,7 +80,6 @@ export function movesToAlgebraic(moves: Move[]): string {
     const move = moves[i];
 
     if (move.type === 'CAPTURE') {
-      // Merge consecutive captures into a chain
       let chain = nodeToName(move.from) + CAPTURE_SYMBOL + nodeToName(move.to);
       let lastTo = move.to;
       i++;
@@ -108,8 +101,6 @@ export function movesToAlgebraic(moves: Move[]): string {
 
       tokens.push(chain);
     } else if (move.type === 'END_CHAIN') {
-      // Standalone END_CHAIN (shouldn't normally occur without preceding capture,
-      // but handle gracefully)
       if (tokens.length > 0) {
         tokens[tokens.length - 1] += '.';
       }
@@ -120,8 +111,16 @@ export function movesToAlgebraic(moves: Move[]): string {
     }
   }
 
-  // Pair tokens: odd-indexed tokens are goat (left), even-indexed are tiger (right).
-  // In Pulijoodam, goat always moves first.
+  return tokens;
+}
+
+/**
+ * Format a full move list into numbered pairs.
+ * Goat moves are on the left, tiger moves on the right.
+ */
+export function movesToAlgebraic(moves: Move[]): string {
+  const tokens = movesToTurnTokens(moves);
+
   const lines: string[] = [];
   for (let t = 0; t < tokens.length; t += 2) {
     const moveNum = Math.floor(t / 2) + 1;

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { NODES } from '../../engine/board';
 import type { Move, GameState, Piece, GameConfig } from '../../engine/types';
+
 import {
   NODE_TO_NAME,
   NAME_TO_NODE,
@@ -13,7 +14,7 @@ import {
   positionStringToPartial,
 } from '../index';
 
-// Helper to create a minimal GameState for testing algebraicToMove
+// Helper to create a minimal GameState for testing positionString
 function makeState(overrides: Partial<GameState> = {}): GameState {
   const config: GameConfig = { andhra: false };
   return {
@@ -128,59 +129,53 @@ describe('moveToAlgebraic', () => {
 });
 
 describe('algebraicToMove', () => {
-  const state = makeState();
-
   it('parses PLACE notation', () => {
     const name = nodeToName(5);
-    const move = algebraicToMove(name, state);
+    const move = algebraicToMove(name);
     expect(move).toEqual({ type: 'PLACE', to: 5 });
   });
 
   it('parses MOVE notation', () => {
     const notation = `${nodeToName(9)}-${nodeToName(10)}`;
-    const move = algebraicToMove(notation, state);
+    const move = algebraicToMove(notation);
     expect(move).toEqual({ type: 'MOVE', from: 9, to: 10 });
   });
 
   it('parses CAPTURE notation and derives over node', () => {
     // From LINES: [1,2,3,4,5,6] — jumping from 1 over 2 lands on 3
     const notation = `${nodeToName(1)}\u00D7${nodeToName(3)}`;
-    const move = algebraicToMove(notation, state);
+    const move = algebraicToMove(notation);
     expect(move).toEqual({ type: 'CAPTURE', from: 1, over: 2, to: 3 });
   });
 
   it('parses END_CHAIN', () => {
-    const move = algebraicToMove('.', state);
+    const move = algebraicToMove('.');
     expect(move).toEqual({ type: 'END_CHAIN' });
   });
 
   it('round-trips PLACE', () => {
     const original: Move = { type: 'PLACE', to: 14 };
     const notation = moveToAlgebraic(original);
-    const parsed = algebraicToMove(notation, state);
-    expect(parsed).toEqual(original);
+    expect(algebraicToMove(notation)).toEqual(original);
   });
 
   it('round-trips MOVE', () => {
     const original: Move = { type: 'MOVE', from: 15, to: 16 };
     const notation = moveToAlgebraic(original);
-    const parsed = algebraicToMove(notation, state);
-    expect(parsed).toEqual(original);
+    expect(algebraicToMove(notation)).toEqual(original);
   });
 
   it('round-trips CAPTURE', () => {
     // Slant S2: [0,3,9,15,20] — jumping from 0 over 3 lands on 9
     const original: Move = { type: 'CAPTURE', from: 0, over: 3, to: 9 };
     const notation = moveToAlgebraic(original);
-    const parsed = algebraicToMove(notation, state);
-    expect(parsed).toEqual(original);
+    expect(algebraicToMove(notation)).toEqual(original);
   });
 
   it('round-trips END_CHAIN', () => {
     const original: Move = { type: 'END_CHAIN' };
     const notation = moveToAlgebraic(original);
-    const parsed = algebraicToMove(notation, state);
-    expect(parsed).toEqual(original);
+    expect(algebraicToMove(notation)).toEqual(original);
   });
 });
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Role } from '../../engine';
 import type { AIDifficulty } from '../../engine/ai/types';
 import { useGame } from '../../hooks/useGame';
+import { IDLE_ANIMATION } from '../../hooks/useAnimationQueue';
 import { Board } from '../Board/Board';
 
 interface SetupScreenProps {
@@ -53,7 +54,7 @@ export function SetupScreen({
             legalMoves={[]}
             onNodeTap={() => { }}
             chainJumpInProgress={null}
-            animationState={{ isAnimating: false, animatingPieces: new Map(), fadingGoat: null, placingGoat: null, gameOverGlow: null, shaking: false }}
+            animationState={IDLE_ANIMATION}
             lastEvents={[]}
           />
         </div>

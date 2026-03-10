@@ -5,11 +5,14 @@ export {
   NAME_TO_NODE,
   nodeToName,
   nameToNode,
+  getNodeRows,
 } from './nodeNames';
 
 export {
+  CAPTURE_SYMBOL,
   moveToAlgebraic,
   algebraicToMove,
+  movesToTurnTokens,
   movesToAlgebraic,
 } from './moveNotation';
 

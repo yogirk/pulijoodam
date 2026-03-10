@@ -5,8 +5,8 @@
 
 import { NODES } from '../engine/board';
 
-function buildMappings(): { nodeToName: string[]; nameToNode: Record<string, number> } {
-  // Group nodes by Y coordinate (rows)
+/** Group board nodes into rows sorted by Y then X. Shared by nodeNames and positionString. */
+export function getNodeRows(): number[][] {
   const rowMap = new Map<number, number[]>();
   for (const node of NODES) {
     const ids = rowMap.get(node.y) ?? [];
@@ -14,18 +14,23 @@ function buildMappings(): { nodeToName: string[]; nameToNode: Record<string, num
     rowMap.set(node.y, ids);
   }
 
-  // Sort rows by Y (ascending = top to bottom in SVG coordinates where smaller Y is higher)
   const sortedYs = [...rowMap.keys()].sort((a, b) => a - b);
+  return sortedYs.map(y => {
+    const ids = rowMap.get(y)!;
+    ids.sort((a, b) => NODES[a].x - NODES[b].x);
+    return ids;
+  });
+}
 
+const NODE_ROWS = getNodeRows();
+
+function buildMappings(): { nodeToName: string[]; nameToNode: Record<string, number> } {
   const nodeToName: string[] = new Array(NODES.length).fill('');
   const nameToNode: Record<string, number> = {};
 
-  for (let rowIdx = 0; rowIdx < sortedYs.length; rowIdx++) {
+  for (let rowIdx = 0; rowIdx < NODE_ROWS.length; rowIdx++) {
     const rowLetter = String.fromCharCode(97 + rowIdx); // 'a', 'b', 'c', ...
-    const y = sortedYs[rowIdx];
-    const nodeIds = rowMap.get(y)!;
-    // Sort nodes within row by X coordinate (left to right)
-    nodeIds.sort((a, b) => NODES[a].x - NODES[b].x);
+    const nodeIds = NODE_ROWS[rowIdx];
 
     for (let colIdx = 0; colIdx < nodeIds.length; colIdx++) {
       const id = nodeIds[colIdx];

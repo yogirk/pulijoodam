@@ -5,25 +5,9 @@
 
 import type { Piece, Phase, Role, GameState } from '../engine/types';
 import { NODES } from '../engine/board';
+import { getNodeRows } from './nodeNames';
 
-/** Compute row groupings from NODES, sorted by Y then X. */
-function getRows(): number[][] {
-  const rowMap = new Map<number, number[]>();
-  for (const node of NODES) {
-    const ids = rowMap.get(node.y) ?? [];
-    ids.push(node.id);
-    rowMap.set(node.y, ids);
-  }
-
-  const sortedYs = [...rowMap.keys()].sort((a, b) => a - b);
-  return sortedYs.map(y => {
-    const ids = rowMap.get(y)!;
-    ids.sort((a, b) => NODES[a].x - NODES[b].x);
-    return ids;
-  });
-}
-
-const ROWS = getRows();
+const ROWS = getNodeRows();
 
 function pieceToChar(piece: Piece | null): string {
   if (piece === 'tiger') return 'T';

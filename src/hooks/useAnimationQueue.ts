@@ -39,7 +39,7 @@ const CHAIN_PAUSE_MS = 150;
 
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
-const EMPTY_STATE: AnimationState = {
+export const IDLE_ANIMATION: AnimationState = {
   isAnimating: false,
   animatingPieces: new Map(),
   fadingGoat: null,
@@ -53,7 +53,7 @@ export function useAnimationQueue(
   soundEnabled: boolean,
   theme: ThemeName
 ): AnimationState {
-  const [state, setState] = useState<AnimationState>(EMPTY_STATE);
+  const [state, setState] = useState<AnimationState>(IDLE_ANIMATION);
   const processedRef = useRef<GameEvent[]>([]);
   const cancelledRef = useRef(false);
 
@@ -191,7 +191,7 @@ export function useAnimationQueue(
       }
 
       if (!cancelledRef.current) {
-        setState(EMPTY_STATE);
+        setState(IDLE_ANIMATION);
       }
     };
 
