@@ -1,15 +1,20 @@
 // @vitest-environment jsdom
 import { render, screen, fireEvent } from '@testing-library/react';
+import { SettingsProvider } from '../../hooks/useSettings';
 import { SetupScreen } from './SetupScreen';
+
+function renderWithProviders(ui: React.ReactElement) {
+  return render(<SettingsProvider>{ui}</SettingsProvider>);
+}
 
 describe('SetupScreen', () => {
   it('renders without crashing', () => {
-    render(<SetupScreen onStart={() => {}} />);
+    renderWithProviders(<SetupScreen onStart={() => {}} />);
     expect(screen.getByText('Pulijoodam')).toBeTruthy();
   });
 
   it('defaults to Goat role and Medium difficulty', () => {
-    render(<SetupScreen onStart={() => {}} />);
+    renderWithProviders(<SetupScreen onStart={() => {}} />);
 
     const goatBtn = screen.getByTestId('role-goat');
     const mediumBtn = screen.getByTestId('difficulty-medium');
@@ -20,7 +25,7 @@ describe('SetupScreen', () => {
   });
 
   it('switches role when tiger is clicked', () => {
-    render(<SetupScreen onStart={() => {}} />);
+    renderWithProviders(<SetupScreen onStart={() => {}} />);
 
     const tigerBtn = screen.getByTestId('role-tiger');
     const goatBtn = screen.getByTestId('role-goat');
@@ -33,7 +38,7 @@ describe('SetupScreen', () => {
 
   it('calls onStart with correct config when Start Game is clicked', () => {
     const onStart = vi.fn();
-    render(<SetupScreen onStart={onStart} />);
+    renderWithProviders(<SetupScreen onStart={onStart} />);
 
     // Select tiger + hard
     fireEvent.click(screen.getByTestId('role-tiger'));
@@ -48,7 +53,7 @@ describe('SetupScreen', () => {
 
   it('calls onStart with null for local 2-player', () => {
     const onStart = vi.fn();
-    render(<SetupScreen onStart={onStart} />);
+    renderWithProviders(<SetupScreen onStart={onStart} />);
 
     fireEvent.click(screen.getByTestId('local-2p-btn'));
 
@@ -56,7 +61,7 @@ describe('SetupScreen', () => {
   });
 
   it('renders all four difficulty buttons', () => {
-    render(<SetupScreen onStart={() => {}} />);
+    renderWithProviders(<SetupScreen onStart={() => {}} />);
 
     expect(screen.getByTestId('difficulty-easy')).toBeTruthy();
     expect(screen.getByTestId('difficulty-medium')).toBeTruthy();
@@ -65,7 +70,7 @@ describe('SetupScreen', () => {
   });
 
   it('switches difficulty when clicked', () => {
-    render(<SetupScreen onStart={() => {}} />);
+    renderWithProviders(<SetupScreen onStart={() => {}} />);
 
     const expertBtn = screen.getByTestId('difficulty-expert');
     fireEvent.click(expertBtn);

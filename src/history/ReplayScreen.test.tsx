@@ -1,9 +1,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import { SettingsProvider } from '../hooks/useSettings';
 import { ReplayScreen } from './ReplayScreen';
 import type { GameRecord } from './types';
 import type { Move } from '../engine';
+
+function renderWithProviders(ui: React.ReactElement) {
+  return render(<SettingsProvider>{ui}</SettingsProvider>);
+}
 
 // Build a small valid game sequence:
 // Tigers start at [0, 3, 4]. Goat places first, then tiger moves.
@@ -37,7 +42,7 @@ describe('ReplayScreen', () => {
   });
 
   it('renders board at initial state (moveIndex 0)', () => {
-    render(
+    renderWithProviders(
       <ReplayScreen game={makeReplayRecord()} onBack={() => {}} />
     );
     // Should show move counter at 0
@@ -45,7 +50,7 @@ describe('ReplayScreen', () => {
   });
 
   it('step forward advances to next state', () => {
-    render(
+    renderWithProviders(
       <ReplayScreen game={makeReplayRecord()} onBack={() => {}} />
     );
     const nextBtn = screen.getByTestId('replay-next');
@@ -54,7 +59,7 @@ describe('ReplayScreen', () => {
   });
 
   it('step backward goes to previous state', () => {
-    render(
+    renderWithProviders(
       <ReplayScreen game={makeReplayRecord()} onBack={() => {}} />
     );
     const nextBtn = screen.getByTestId('replay-next');
@@ -67,7 +72,7 @@ describe('ReplayScreen', () => {
   });
 
   it('scrubber sets moveIndex directly', () => {
-    render(
+    renderWithProviders(
       <ReplayScreen game={makeReplayRecord()} onBack={() => {}} />
     );
     const scrubber = screen.getByTestId('replay-scrubber') as HTMLInputElement;
@@ -76,7 +81,7 @@ describe('ReplayScreen', () => {
   });
 
   it('auto-play increments moveIndex at 1s intervals', () => {
-    render(
+    renderWithProviders(
       <ReplayScreen game={makeReplayRecord()} onBack={() => {}} />
     );
     const playBtn = screen.getByTestId('replay-play');
@@ -90,7 +95,7 @@ describe('ReplayScreen', () => {
   });
 
   it('auto-play stops at last move', () => {
-    render(
+    renderWithProviders(
       <ReplayScreen game={makeReplayRecord()} onBack={() => {}} />
     );
     const playBtn = screen.getByTestId('replay-play');
@@ -105,7 +110,7 @@ describe('ReplayScreen', () => {
   });
 
   it('play/pause toggle works', () => {
-    render(
+    renderWithProviders(
       <ReplayScreen game={makeReplayRecord()} onBack={() => {}} />
     );
     const playBtn = screen.getByTestId('replay-play');

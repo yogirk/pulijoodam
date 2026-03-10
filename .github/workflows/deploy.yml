@@ -15,7 +15,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  test:
+    runs-on: ubuntu-latest
+    # Tests run in parallel but do NOT block deploy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx vitest run --exclude='src/engine/ai/__tests__/selfplay.test.ts'
+
+  deploy:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -27,8 +40,6 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run lint
-      - run: npx vitest run --exclude='src/engine/ai/__tests__/selfplay.test.ts'
       - run: npm run build
       - uses: actions/upload-pages-artifact@v4
         with:
