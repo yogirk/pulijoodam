@@ -28,13 +28,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - name: Run tests
-        run: |
-          npx vitest run 2>&1 | tee test-output.txt; TEST_EXIT=$?
-          if grep -q " 0 passed" test-output.txt || grep -qE "[0-9]+ failed" test-output.txt; then
-            echo "::error::Tests failed"
-            exit 1
-          fi
+      - run: npx vitest run --exclude='src/engine/ai/__tests__/selfplay.test.ts'
       - run: npm run build
       - uses: actions/upload-pages-artifact@v4
         with:

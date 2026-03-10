@@ -53,7 +53,7 @@ export function SetupScreen({
             legalMoves={[]}
             onNodeTap={() => { }}
             chainJumpInProgress={null}
-            animationState={{ isAnimating: false, animatingPieces: new Map(), fadingGoat: null, placingGoat: null, gameOverGlow: null }}
+            animationState={{ isAnimating: false, animatingPieces: new Map(), fadingGoat: null, placingGoat: null, gameOverGlow: null, shaking: false }}
             lastEvents={[]}
           />
         </div>

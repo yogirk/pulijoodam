@@ -43,7 +43,7 @@ function findMiddleNode(from: number, to: number): number {
  * The gameState is used to disambiguate PLACE vs MOVE for single-node notations
  * (PLACE only happens during placement phase).
  */
-export function algebraicToMove(notation: string, gameState: GameState): Move {
+export function algebraicToMove(notation: string, _gameState: GameState): Move {
   const trimmed = notation.trim();
 
   if (trimmed === '.') {
