@@ -78,12 +78,14 @@ export const BoardNode = memo(function BoardNode({ node, piece, isSelected, isLe
       {/* Inner Highlight for Depth */}
       <circle r={7} fill="transparent" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
 
-      {/* MANDATORY 44x44 hit area -- MUST be last (top z-order) to capture clicks */}
+      {/* MANDATORY touch target -- 80x80 SVG units ≈ 44px on a 375px mobile screen
+         (viewBox 720 wide → scale ~0.52 → 80 × 0.52 ≈ 42px, meeting WCAG AA).
+         Desktop gets generous padding for comfort. */}
       <rect
-        x={-22}
-        y={-22}
-        width={44}
-        height={44}
+        x={-40}
+        y={-40}
+        width={80}
+        height={80}
         fill="transparent"
         data-testid={`node-hitarea-${node.id}`}
       />

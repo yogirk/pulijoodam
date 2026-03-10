@@ -79,6 +79,37 @@ function GameBoard({
         </div>
       </header>
 
+      {/* Mobile match status bar — replaces sidebar info on small screens */}
+      <div
+        className="flex lg:hidden items-center justify-center gap-3 px-4 py-1.5 border-b flex-none"
+        style={{ borderColor: 'var(--board-line)', backgroundColor: 'var(--bg-secondary)' }}
+      >
+        {gameState.phase === 'placement' && (
+          <div
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold"
+            style={{ backgroundColor: 'rgba(0,0,0,0.25)', color: 'var(--text-primary)' }}
+          >
+            <span className="uppercase tracking-wider text-[10px]" style={{ color: 'var(--text-secondary)' }}>Pool</span>
+            <span>{gameState.goatsInPool}</span>
+          </div>
+        )}
+        <div
+          className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold"
+          style={{
+            backgroundColor: 'rgba(0,0,0,0.25)',
+            color: gameState.goatsCaptured > 0 ? 'var(--status-error)' : 'var(--text-primary)',
+            outline: gameState.goatsCaptured > 0 ? '1px solid rgba(255,100,100,0.3)' : 'none',
+            animation: gameState.goatsCaptured >= 3 ? 'danger-pulse 2s ease-in-out infinite' : 'none',
+          }}
+        >
+          <span className="uppercase tracking-wider text-[10px]" style={{ color: 'var(--text-secondary)' }}>Captured</span>
+          <span>{gameState.goatsCaptured} / 5</span>
+        </div>
+        {isAIThinking && (
+          <span className="text-xs font-bold tracking-wider animate-pulse" style={{ color: 'var(--accent)' }}>AI Thinking...</span>
+        )}
+      </div>
+
       {/* 2. Main Middle Section: Sidebars + Hero Board */}
       <main className="flex-1 min-h-0 flex relative">
 
@@ -178,11 +209,7 @@ function GameBoard({
           {isAIThinking && <span className="text-sm font-bold tracking-wider animate-pulse" style={{ color: 'var(--accent)' }}>AI Thinking...</span>}
         </div>
 
-        {/* Mobile counter display (since sidebars are hidden) */}
-        <div className="flex lg:hidden flex-col items-center justify-center gap-1 min-w-0">
-          {gameState.phase === 'placement' && <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Pool: {gameState.goatsInPool}</span>}
-          <span className="text-xs font-bold" style={{ color: 'var(--status-danger)' }}>Lost: {gameState.goatsCaptured}/5</span>
-        </div>
+        {/* Center slot: AI thinking on desktop (mobile shows it in status bar above) */}
 
         <div className="flex-1 flex items-center justify-end gap-2 lg:gap-4 min-w-0">
           {gameState.chainJumpInProgress !== null && !inputDisabled && (
