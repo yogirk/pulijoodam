@@ -6,13 +6,15 @@ import {
   type ReactNode,
 } from 'react';
 import { DEFAULT_SETTINGS, SETTINGS_KEY } from '../theme/theme';
-import type { ThemeName, Settings } from '../theme/theme';
+import type { ThemeName, PieceStyle, Settings } from '../theme/theme';
 
 interface SettingsContextValue {
   theme: ThemeName;
   soundEnabled: boolean;
+  pieceStyle: PieceStyle;
   setTheme: (theme: ThemeName) => void;
   setSoundEnabled: (enabled: boolean) => void;
+  setPieceStyle: (style: PieceStyle) => void;
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -23,7 +25,10 @@ function loadSettings(): Settings {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed.theme === 'string' && typeof parsed.soundEnabled === 'boolean') {
-        return parsed as Settings;
+        return {
+          ...DEFAULT_SETTINGS,
+          ...parsed,
+        };
       }
     }
   } catch {
@@ -69,12 +74,22 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const setPieceStyle = useCallback((pieceStyle: PieceStyle) => {
+    setSettings(prev => {
+      const next = { ...prev, pieceStyle };
+      persistSettings(next);
+      return next;
+    });
+  }, []);
+
   return (
     <SettingsContext.Provider value={{
       theme: settings.theme,
       soundEnabled: settings.soundEnabled,
+      pieceStyle: settings.pieceStyle,
       setTheme,
       setSoundEnabled,
+      setPieceStyle,
     }}>
       {children}
     </SettingsContext.Provider>

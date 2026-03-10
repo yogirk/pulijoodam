@@ -46,7 +46,7 @@ describe('useSettings', () => {
 
   describe('localStorage read', () => {
     it('reads saved theme from localStorage on mount', () => {
-      const saved: Settings = { theme: 'modern', soundEnabled: false };
+      const saved: Settings = { theme: 'modern', soundEnabled: false, pieceStyle: 'classic' };
       lsMock.setItem(SETTINGS_KEY, JSON.stringify(saved));
 
       const { result } = renderHook(() => useSettings(), { wrapper });

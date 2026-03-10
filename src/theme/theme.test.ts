@@ -23,7 +23,7 @@ describe('theme constants', () => {
   });
 
   it('Settings interface matches expected shape', () => {
-    const s: Settings = { theme: 'modern', soundEnabled: false };
-    expect(s).toEqual({ theme: 'modern', soundEnabled: false });
+    const s: Settings = { theme: 'modern', soundEnabled: false, pieceStyle: 'classic' };
+    expect(s).toEqual({ theme: 'modern', soundEnabled: false, pieceStyle: 'classic' });
   });
 });

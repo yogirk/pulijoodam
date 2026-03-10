@@ -26,7 +26,7 @@ interface SettingsDropdownProps {
 
 export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, soundEnabled, setTheme, setSoundEnabled } = useSettings();
+  const { theme, soundEnabled, pieceStyle, setTheme, setSoundEnabled, setPieceStyle } = useSettings();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click or Escape key
@@ -96,6 +96,27 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               data-testid="theme-toggle-btn"
             >
               {theme === 'traditional' ? 'Traditional' : 'Modern'}
+            </button>
+          </div>
+
+          {/* Pieces toggle */}
+          <div className="flex items-center justify-between mb-3">
+            <span
+              className="text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Pieces
+            </span>
+            <button
+              onClick={() => setPieceStyle(pieceStyle === 'character' ? 'classic' : 'character')}
+              className="px-2 py-1 text-xs rounded font-medium transition-colors"
+              style={{
+                backgroundColor: 'var(--accent)',
+                color: 'var(--text-primary)',
+              }}
+              data-testid="piece-style-toggle-btn"
+            >
+              {pieceStyle === 'character' ? 'Character' : 'Classic'}
             </button>
           </div>
 
