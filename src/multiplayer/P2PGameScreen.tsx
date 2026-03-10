@@ -8,6 +8,7 @@ import { TurnIndicator } from '../components/GameScreen/TurnIndicator';
 import { GameOverOverlay } from '../components/GameScreen/GameOverOverlay';
 import { SettingsDropdown } from '../components/Settings/SettingsDropdown';
 import { ScreenReaderAnnouncer } from '../components/Board/ScreenReaderAnnouncer';
+import { MoveHistory } from '../components/GameScreen/MoveHistory';
 import type { P2PConnection } from './webrtc';
 import type { Role } from '../engine';
 
@@ -211,8 +212,8 @@ export function P2PGameScreen({
               <div className="w-full h-px opacity-30 mb-8" style={{ backgroundColor: 'var(--board-line)' }} />
 
               <h3 className="text-xs font-bold uppercase tracking-widest text-center mb-4" style={{ color: 'var(--text-secondary)' }}>Move History</h3>
-              <div className="flex-1 flex flex-col gap-2 p-4 rounded-xl" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
-                <p className="text-xs text-center opacity-50 italic mt-8" style={{ color: 'var(--text-secondary)' }}>History tracking coming soon...</p>
+              <div className="flex-1 flex flex-col p-2 rounded-xl min-h-0" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                <MoveHistory moveHistory={gameState.moveHistory} />
               </div>
             </div>
           ) : (

@@ -9,6 +9,7 @@ import { TurnIndicator } from './TurnIndicator';
 import { GameOverOverlay } from './GameOverOverlay';
 import { SettingsDropdown } from '../Settings/SettingsDropdown';
 import type { Role } from '../../engine';
+import { MoveHistory } from './MoveHistory';
 import type { AIDifficulty } from '../../engine/ai/types';
 
 interface GameScreenProps {
@@ -185,8 +186,8 @@ function GameBoard({
               <div className="w-full h-px opacity-30 mb-8" style={{ backgroundColor: 'var(--board-line)' }} />
 
               <h3 className="text-xs font-bold uppercase tracking-widest text-center mb-4" style={{ color: 'var(--text-secondary)' }}>Move History</h3>
-              <div className="flex-1 flex flex-col gap-2 p-4 rounded-xl" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
-                <p className="text-xs text-center opacity-50 italic mt-8" style={{ color: 'var(--text-secondary)' }}>History tracking coming soon...</p>
+              <div className="flex-1 flex flex-col p-2 rounded-xl min-h-0" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                <MoveHistory moveHistory={gameState.moveHistory} />
               </div>
             </div>
           ) : (
