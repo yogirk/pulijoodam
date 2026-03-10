@@ -113,7 +113,7 @@ function GameBoard({
 
         {/* Center Hero Board */}
         <section className="flex-1 h-full min-w-0 flex items-center justify-center p-2 lg:p-8 relative">
-          <div className="w-full h-full max-h-[85vh] flex items-center justify-center fade-in">
+          <div className="w-full h-full max-h-[85vh] flex items-center justify-center fade-in" style={{ animation: animationState.shaking ? 'board-shake 200ms ease-out' : 'none' }}>
             <Board
               gameState={gameState}
               selectedNode={selectedNode}
@@ -145,7 +145,7 @@ function GameBoard({
                   <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Goats to Place</span>
                   <span className="text-xl font-bold" style={{ color: '#ffffff' }}>{gameState.goatsInPool}</span>
                 </div>
-                <div className="flex justify-between items-center p-4 rounded-xl shadow-inner" style={{ backgroundColor: 'rgba(0,0,0,0.2)', outline: gameState.goatsCaptured > 0 ? '1px solid rgba(255,100,100,0.3)' : 'none' }}>
+                <div className="flex justify-between items-center p-4 rounded-xl shadow-inner" style={{ backgroundColor: 'rgba(0,0,0,0.2)', outline: gameState.goatsCaptured > 0 ? '1px solid rgba(255,100,100,0.3)' : 'none', animation: gameState.goatsCaptured >= 3 ? 'danger-pulse 2s ease-in-out infinite' : 'none' }}>
                   <span className="text-sm font-semibold" style={{ color: 'var(--status-danger)' }}>Captured Goats</span>
                   <span className="text-xl font-bold" style={{ color: gameState.goatsCaptured > 0 ? 'var(--status-danger)' : '#ffffff' }}>{gameState.goatsCaptured} / 5</span>
                 </div>
@@ -171,7 +171,7 @@ function GameBoard({
       {/* 3. Dedicated Bottom Dashboard */}
       <footer className="h-20 lg:h-24 flex-none px-4 lg:px-8 flex items-center justify-between border-t shadow-[0_-4px_20px_rgba(0,0,0,0.2)] z-10" style={{ borderColor: 'var(--board-line)', backgroundColor: 'var(--bg-secondary)' }}>
         <div className="flex-1 flex items-center justify-start min-w-0">
-          <TurnIndicator currentTurn={gameState.currentTurn} phase={gameState.phase} />
+          <TurnIndicator currentTurn={gameState.currentTurn} phase={gameState.phase} chainJumpInProgress={gameState.chainJumpInProgress !== null} />
         </div>
 
         <div className="hidden lg:flex flex-1 flex-col items-center justify-center gap-1 min-w-0">
@@ -186,7 +186,7 @@ function GameBoard({
 
         <div className="flex-1 flex items-center justify-end gap-2 lg:gap-4 min-w-0">
           {gameState.chainJumpInProgress !== null && !inputDisabled && (
-            <button onClick={onEndChain} className="px-3 lg:px-6 py-2 font-bold rounded-xl transition-transform hover:scale-[1.02] text-sm lg:text-base whitespace-nowrap" style={{ backgroundColor: 'var(--accent)', color: '#000000', boxShadow: '0 0 10px color-mix(in srgb, var(--accent) 40%, transparent)' }}>End Turn</button>
+            <button onClick={onEndChain} className="px-3 lg:px-6 py-2 font-bold rounded-xl transition-transform hover:scale-[1.02] text-sm lg:text-base whitespace-nowrap animate-pulse" style={{ backgroundColor: 'var(--accent)', color: '#000000', boxShadow: '0 0 14px color-mix(in srgb, var(--accent) 50%, transparent)' }}>End Turn</button>
           )}
           <button onClick={onUndo} disabled={!canUndo || inputDisabled} className="px-4 lg:px-6 py-2 font-semibold rounded-xl transition-all hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent text-sm lg:text-base" style={{ backgroundColor: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)' }}>Undo</button>
           <button onClick={onRedo} disabled={!canRedo || inputDisabled} className="px-4 lg:px-6 py-2 font-semibold rounded-xl transition-all hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent text-sm lg:text-base hidden sm:block" style={{ backgroundColor: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)' }}>Redo</button>

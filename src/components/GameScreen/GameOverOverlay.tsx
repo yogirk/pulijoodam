@@ -39,6 +39,7 @@ export function GameOverOverlay({ status, onNewGame }: GameOverOverlayProps) {
   return (
     <div
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+      style={{ animation: 'overlay-backdrop-enter 300ms ease-out' }}
       role="dialog"
       aria-modal="true"
       aria-label="Game over"
@@ -49,6 +50,7 @@ export function GameOverOverlay({ status, onNewGame }: GameOverOverlayProps) {
         style={{
           backgroundColor: 'var(--bg-secondary)',
           color: 'var(--text-primary)',
+          animation: 'overlay-card-enter 400ms cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
         <div className="text-2xl font-bold mb-4" data-testid="game-over-text">

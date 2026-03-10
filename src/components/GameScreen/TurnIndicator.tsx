@@ -3,13 +3,18 @@ import type { Role, Phase } from '../../engine';
 interface TurnIndicatorProps {
   currentTurn: Role;
   phase: Phase;
+  chainJumpInProgress?: boolean;
 }
 
-export function TurnIndicator({ currentTurn, phase }: TurnIndicatorProps) {
+export function TurnIndicator({ currentTurn, phase, chainJumpInProgress }: TurnIndicatorProps) {
   const isTiger = currentTurn === 'tiger';
 
   let action = '';
-  if (phase === 'placement') {
+  let actionHighlight = false;
+  if (chainJumpInProgress) {
+    action = 'Continue capture or end turn';
+    actionHighlight = true;
+  } else if (phase === 'placement') {
     if (isTiger) {
       action = 'Move or Capture';
     } else {
@@ -49,8 +54,8 @@ export function TurnIndicator({ currentTurn, phase }: TurnIndicatorProps) {
       {/* Sub-action text */}
       {action && (
         <span
-          className="text-xs mt-3 uppercase tracking-[0.2em] font-medium"
-          style={{ color: 'var(--text-secondary)' }}
+          className={`text-xs mt-3 uppercase tracking-[0.2em] font-medium${actionHighlight ? ' animate-pulse' : ''}`}
+          style={{ color: actionHighlight ? 'var(--accent)' : 'var(--text-secondary)' }}
         >
           {action}
         </span>

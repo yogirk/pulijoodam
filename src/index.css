@@ -182,3 +182,44 @@ svg :focus-visible {
     transform: scale(1);
   }
 }
+
+/* ── Delight: Impact & celebration ───────────────────────────── */
+
+@keyframes board-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-2px, 0); }
+  40% { transform: translate(3px, -1px); }
+  60% { transform: translate(-1px, 1px); }
+  80% { transform: translate(1px, -1px); }
+}
+
+@keyframes capture-flash {
+  0% { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(3); }
+}
+
+@keyframes placement-ripple {
+  0% { opacity: 0.45; transform: scale(0.6); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+
+@keyframes victory-ring {
+  0% { opacity: 0.45; transform: scale(0); }
+  50% { opacity: 0.2; }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes overlay-backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes overlay-card-enter {
+  from { opacity: 0; transform: scale(0.9) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes danger-pulse {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent, 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 8px rgba(239, 68, 68, 0.15), 0 0 12px 2px rgba(239, 68, 68, 0.25); }
+}

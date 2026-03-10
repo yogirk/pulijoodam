@@ -227,6 +227,38 @@ export const Board = memo(function Board({
         ))}
       </g>
 
+      {/* Layer 2.5: Effects (capture flash, placement ripple) */}
+      <g className="effects" style={{ pointerEvents: 'none' }}>
+        {animationState?.fadingGoat != null && (() => {
+          const n = NODES[animationState.fadingGoat];
+          return (
+            <g transform={`translate(${n.x}, ${n.y})`}>
+              <circle
+                key={`flash-${animationState.fadingGoat}`}
+                r={10}
+                fill="var(--tiger-fill)"
+                style={{ animation: 'capture-flash 250ms ease-out forwards' }}
+              />
+            </g>
+          );
+        })()}
+        {animationState?.placingGoat != null && (() => {
+          const n = NODES[animationState.placingGoat];
+          return (
+            <g transform={`translate(${n.x}, ${n.y})`}>
+              <circle
+                key={`ripple-${animationState.placingGoat}`}
+                r={14}
+                fill="none"
+                stroke="rgba(255,255,255,0.6)"
+                strokeWidth={1.5}
+                style={{ animation: 'placement-ripple 300ms ease-out forwards' }}
+              />
+            </g>
+          );
+        })()}
+      </g>
+
       {/* Layer 3: pieces (rendered on top of nodes, using stable IDs so they glide) */}
       <g className="pieces" style={isAnimating ? { pointerEvents: 'none' } : undefined}>
         {stablePieces.map((piece) => {
@@ -250,7 +282,7 @@ export const Board = memo(function Board({
                 key={piece.id}
                 x={pieceX}
                 y={pieceY}
-                isSelected={selectedNode === nodeId}
+                isSelected={selectedNode === nodeId || chainJumpInProgress === nodeId}
                 isGlowing={tigerGlowing}
                 draggable={draggable}
                 isBeingDragged={!!isBeingDragged}
@@ -274,6 +306,23 @@ export const Board = memo(function Board({
           );
         })}
       </g>
+
+      {/* Layer 4: Victory celebration rings */}
+      {animationState?.gameOverGlow && (animationState.gameOverGlow === 'tiger-wins' || animationState.gameOverGlow === 'goat-wins') && (
+        <g className="victory-effects" style={{ pointerEvents: 'none' }}>
+          {[0, 1, 2].map(i => (
+            <g key={`vr-${i}`} transform="translate(300, 210)">
+              <circle
+                r={180}
+                fill="none"
+                stroke="var(--accent)"
+                strokeWidth={1.5}
+                style={{ animation: `victory-ring 450ms ease-out ${i * 80}ms forwards` }}
+              />
+            </g>
+          ))}
+        </g>
+      )}
     </svg>
   );
 });

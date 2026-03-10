@@ -19,6 +19,7 @@ export interface AnimationState {
   fadingGoat: number | null;
   placingGoat: number | null;
   gameOverGlow: GameStatus | null;
+  shaking: boolean;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -44,6 +45,7 @@ const EMPTY_STATE: AnimationState = {
   fadingGoat: null,
   placingGoat: null,
   gameOverGlow: null,
+  shaking: false,
 };
 
 export function useAnimationQueue(
@@ -145,13 +147,14 @@ export function useAnimationQueue(
             setState(prev => {
               const newPieces = new Map(prev.animatingPieces);
               newPieces.delete(event.landedAt);
-              return { ...prev, animatingPieces: newPieces, fadingGoat: event.over };
+              return { ...prev, animatingPieces: newPieces, fadingGoat: event.over, shaking: true };
             });
             await delay(FADE_MS);
             if (cancelledRef.current) return;
             setState(prev => ({
               ...prev,
               fadingGoat: null,
+              shaking: false,
             }));
             chainIndex++;
 
