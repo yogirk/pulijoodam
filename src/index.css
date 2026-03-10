@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Google Sans Flex', 'Google Sans', sans-serif;
+}
+
 /* ── Theme: Traditional (Heritage default) ──────────────────── */
 :root,
 [data-theme="traditional"] {
