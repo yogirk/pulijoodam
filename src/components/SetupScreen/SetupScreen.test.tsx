@@ -8,56 +8,42 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 describe('SetupScreen', () => {
-  it('renders without crashing', () => {
+  it('renders the brand wordmark', () => {
     renderWithProviders(<SetupScreen onStart={() => {}} />);
-    expect(screen.getByText('Pulijoodam')).toBeTruthy();
+    // EN brand splits into "Puli" + italic "joodam"
+    expect(screen.getByText('Puli')).toBeTruthy();
+    expect(screen.getByText('joodam')).toBeTruthy();
   });
 
-  it('defaults to Goat role and Medium difficulty', () => {
+  it('defaults to vs AI mode, Goat role, Medium difficulty', () => {
     renderWithProviders(<SetupScreen onStart={() => {}} />);
 
-    const goatBtn = screen.getByTestId('role-goat');
-    const mediumBtn = screen.getByTestId('difficulty-medium');
+    expect(screen.getByTestId('mode-ai').getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByTestId('mode-local').getAttribute('aria-pressed')).toBe('false');
 
-    // Check selected state (scale class for selected buttons)
-    expect(goatBtn.className).toContain('scale-105');
-    expect(mediumBtn.className).toContain('scale-[1.02]');
+    expect(screen.getByTestId('role-goat').getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByTestId('role-tiger').getAttribute('aria-pressed')).toBe('false');
+
+    expect(screen.getByTestId('difficulty-medium').getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByTestId('difficulty-easy').getAttribute('aria-pressed')).toBe('false');
   });
 
   it('switches role when tiger is clicked', () => {
     renderWithProviders(<SetupScreen onStart={() => {}} />);
 
-    const tigerBtn = screen.getByTestId('role-tiger');
-    const goatBtn = screen.getByTestId('role-goat');
-
-    fireEvent.click(tigerBtn);
-
-    expect(tigerBtn.className).toContain('scale-105');
-    expect(goatBtn.className).toContain('opacity-70');
-  });
-
-  it('calls onStart with correct config when Start Game is clicked', () => {
-    const onStart = vi.fn();
-    renderWithProviders(<SetupScreen onStart={onStart} />);
-
-    // Select tiger + hard
     fireEvent.click(screen.getByTestId('role-tiger'));
-    fireEvent.click(screen.getByTestId('difficulty-hard'));
-    fireEvent.click(screen.getByTestId('start-game-btn'));
 
-    expect(onStart).toHaveBeenCalledWith({
-      humanRole: 'tiger',
-      difficulty: 'hard',
-    });
+    expect(screen.getByTestId('role-tiger').getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByTestId('role-goat').getAttribute('aria-pressed')).toBe('false');
   });
 
-  it('calls onStart with null for local 2-player', () => {
-    const onStart = vi.fn();
-    renderWithProviders(<SetupScreen onStart={onStart} />);
+  it('switches difficulty when expert is clicked', () => {
+    renderWithProviders(<SetupScreen onStart={() => {}} />);
 
-    fireEvent.click(screen.getByTestId('local-2p-btn'));
+    fireEvent.click(screen.getByTestId('difficulty-expert'));
 
-    expect(onStart).toHaveBeenCalledWith(null);
+    expect(screen.getByTestId('difficulty-expert').getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByTestId('difficulty-medium').getAttribute('aria-pressed')).toBe('false');
   });
 
   it('renders all four difficulty buttons', () => {
@@ -69,14 +55,74 @@ describe('SetupScreen', () => {
     expect(screen.getByTestId('difficulty-expert')).toBeTruthy();
   });
 
-  it('switches difficulty when clicked', () => {
+  it('Begin starts an AI match with chosen role and difficulty', () => {
+    const onStart = vi.fn();
+    renderWithProviders(<SetupScreen onStart={onStart} />);
+
+    fireEvent.click(screen.getByTestId('role-tiger'));
+    fireEvent.click(screen.getByTestId('difficulty-hard'));
+    fireEvent.click(screen.getByTestId('begin-btn'));
+
+    expect(onStart).toHaveBeenCalledWith({ humanRole: 'tiger', difficulty: 'hard' });
+  });
+
+  it('Begin starts a local match (null config) when local mode is selected', () => {
+    const onStart = vi.fn();
+    renderWithProviders(<SetupScreen onStart={onStart} />);
+
+    fireEvent.click(screen.getByTestId('mode-local'));
+    fireEvent.click(screen.getByTestId('begin-btn'));
+
+    expect(onStart).toHaveBeenCalledWith(null);
+  });
+
+  it('Begin invokes onPlayOnline when online mode is selected', () => {
+    const onStart = vi.fn();
+    const onPlayOnline = vi.fn();
+    renderWithProviders(<SetupScreen onStart={onStart} onPlayOnline={onPlayOnline} />);
+
+    fireEvent.click(screen.getByTestId('mode-online'));
+    fireEvent.click(screen.getByTestId('begin-btn'));
+
+    expect(onPlayOnline).toHaveBeenCalledOnce();
+    expect(onStart).not.toHaveBeenCalled();
+  });
+
+  it('hides the online mode option when onPlayOnline is not provided', () => {
+    renderWithProviders(<SetupScreen onStart={() => {}} />);
+    expect(screen.queryByTestId('mode-online')).toBeNull();
+  });
+
+  it('disables difficulty buttons when not in AI mode', () => {
     renderWithProviders(<SetupScreen onStart={() => {}} />);
 
-    const expertBtn = screen.getByTestId('difficulty-expert');
-    fireEvent.click(expertBtn);
-    expect(expertBtn.className).toContain('scale-[1.02]');
+    fireEvent.click(screen.getByTestId('mode-local'));
 
-    const mediumBtn = screen.getByTestId('difficulty-medium');
-    expect(mediumBtn.className).toContain('opacity-70');
+    const easy = screen.getByTestId('difficulty-easy') as HTMLButtonElement;
+    expect(easy.disabled).toBe(true);
+  });
+
+  it('shows the resume banner when a saved game is present', () => {
+    const onResume = vi.fn();
+    renderWithProviders(
+      <SetupScreen
+        onStart={() => {}}
+        savedGame={{ opponent: 'ai', moves: 12 }}
+        onResume={onResume}
+        onDismissResume={() => {}}
+      />,
+    );
+
+    expect(screen.getByTestId('resume-banner')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('resume-btn'));
+    expect(onResume).toHaveBeenCalledOnce();
+  });
+
+  it('renders history and tutorial footer links when callbacks are provided', () => {
+    renderWithProviders(
+      <SetupScreen onStart={() => {}} onViewHistory={() => {}} onStartTutorial={() => {}} />,
+    );
+    expect(screen.getByTestId('history-btn')).toBeTruthy();
+    expect(screen.getByTestId('tutorial-btn')).toBeTruthy();
   });
 });
