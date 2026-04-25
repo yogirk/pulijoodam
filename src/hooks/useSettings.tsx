@@ -3,18 +3,23 @@ import {
   useContext,
   useState,
   useCallback,
+  useMemo,
   type ReactNode,
 } from 'react';
 import { DEFAULT_SETTINGS, SETTINGS_KEY, normalizeThemeName } from '../theme/theme';
 import type { ThemeName, PieceStyle, Settings } from '../theme/theme';
+import { DICTIONARIES, normalizeLang, type Dictionary, type Lang } from '../i18n';
 
 interface SettingsContextValue {
   theme: ThemeName;
   soundEnabled: boolean;
   pieceStyle: PieceStyle;
+  lang: Lang;
+  t: Dictionary;
   setTheme: (theme: ThemeName) => void;
   setSoundEnabled: (enabled: boolean) => void;
   setPieceStyle: (style: PieceStyle) => void;
+  setLang: (lang: Lang) => void;
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -28,8 +33,8 @@ function loadSettings(): Settings {
         return {
           ...DEFAULT_SETTINGS,
           ...parsed,
-          // Migrate legacy theme names (traditional/modern) → light default
           theme: normalizeThemeName(parsed.theme),
+          lang: normalizeLang(parsed.lang),
         };
       }
     }
@@ -51,11 +56,15 @@ function applyThemeToDOM(theme: ThemeName): void {
   document.documentElement.dataset.theme = theme;
 }
 
+function applyLangToDOM(lang: Lang): void {
+  document.documentElement.lang = lang;
+}
+
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(() => {
     const loaded = loadSettings();
-    // Apply theme to DOM immediately on mount (synchronous with first render)
     applyThemeToDOM(loaded.theme);
+    applyLangToDOM(loaded.lang);
     return loaded;
   });
 
@@ -84,15 +93,29 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const setLang = useCallback((lang: Lang) => {
+    setSettings(prev => {
+      const next = { ...prev, lang };
+      persistSettings(next);
+      applyLangToDOM(lang);
+      return next;
+    });
+  }, []);
+
+  const value = useMemo<SettingsContextValue>(() => ({
+    theme: settings.theme,
+    soundEnabled: settings.soundEnabled,
+    pieceStyle: settings.pieceStyle,
+    lang: settings.lang,
+    t: DICTIONARIES[settings.lang],
+    setTheme,
+    setSoundEnabled,
+    setPieceStyle,
+    setLang,
+  }), [settings, setTheme, setSoundEnabled, setPieceStyle, setLang]);
+
   return (
-    <SettingsContext.Provider value={{
-      theme: settings.theme,
-      soundEnabled: settings.soundEnabled,
-      pieceStyle: settings.pieceStyle,
-      setTheme,
-      setSoundEnabled,
-      setPieceStyle,
-    }}>
+    <SettingsContext.Provider value={value}>
       {children}
     </SettingsContext.Provider>
   );
@@ -104,6 +127,14 @@ export function useSettings(): SettingsContextValue {
     throw new Error('useSettings must be used within a SettingsProvider');
   }
   return ctx;
+}
+
+/**
+ * Convenience hook returning just the active language dictionary.
+ * Equivalent to `useSettings().t`.
+ */
+export function useT(): Dictionary {
+  return useSettings().t;
 }
 
 export type { Settings };

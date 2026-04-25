@@ -26,7 +26,7 @@ interface SettingsDropdownProps {
 
 export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, soundEnabled, pieceStyle, setTheme, setSoundEnabled, setPieceStyle } = useSettings();
+  const { theme, soundEnabled, pieceStyle, lang, t, setTheme, setSoundEnabled, setPieceStyle, setLang } = useSettings();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click or Escape key
@@ -84,7 +84,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               className="text-sm font-medium"
               style={{ color: 'var(--text-primary)' }}
             >
-              Theme
+              {t.settings.theme}
             </span>
             <button
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
@@ -95,7 +95,28 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               }}
               data-testid="theme-toggle-btn"
             >
-              {theme === 'light' ? 'Light' : 'Dark'}
+              {theme === 'light' ? t.settings.themeLight : t.settings.themeDark}
+            </button>
+          </div>
+
+          {/* Language toggle */}
+          <div className="flex items-center justify-between mb-3">
+            <span
+              className="text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              {t.settings.language}
+            </span>
+            <button
+              onClick={() => setLang(lang === 'en' ? 'te' : 'en')}
+              className="px-2 py-1 text-xs rounded font-medium transition-colors"
+              style={{
+                backgroundColor: 'var(--accent)',
+                color: 'var(--text-primary)',
+              }}
+              data-testid="lang-toggle-btn"
+            >
+              {lang === 'en' ? t.settings.langEn : t.settings.langTe}
             </button>
           </div>
 
@@ -105,7 +126,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               className="text-sm font-medium"
               style={{ color: 'var(--text-primary)' }}
             >
-              Pieces
+              {t.settings.pieces}
             </span>
             <button
               onClick={() => setPieceStyle(pieceStyle === 'character' ? 'classic' : 'character')}
@@ -116,7 +137,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               }}
               data-testid="piece-style-toggle-btn"
             >
-              {pieceStyle === 'character' ? 'Character' : 'Classic'}
+              {pieceStyle === 'character' ? t.settings.pieceCharacter : t.settings.pieceClassic}
             </button>
           </div>
 
@@ -126,7 +147,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               className="text-sm font-medium"
               style={{ color: 'var(--text-primary)' }}
             >
-              Sound
+              {t.settings.sound}
             </span>
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}
@@ -138,7 +159,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               }}
               data-testid="sound-toggle-btn"
             >
-              {soundEnabled ? 'On' : 'Off'}
+              {soundEnabled ? t.settings.soundOn : t.settings.soundOff}
             </button>
           </div>
 
@@ -154,7 +175,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
                 style={{ color: 'var(--accent)' }}
                 data-testid="tutorial-link-btn"
               >
-                Learn to Play
+                {t.settings.learnToPlay}
               </button>
             </div>
           )}

@@ -23,8 +23,8 @@ describe('theme constants', () => {
   });
 
   it('Settings interface matches expected shape', () => {
-    const s: Settings = { theme: 'dark', soundEnabled: false, pieceStyle: 'classic' };
-    expect(s).toEqual({ theme: 'dark', soundEnabled: false, pieceStyle: 'classic' });
+    const s: Settings = { theme: 'dark', soundEnabled: false, pieceStyle: 'classic', lang: 'en' };
+    expect(s).toEqual({ theme: 'dark', soundEnabled: false, pieceStyle: 'classic', lang: 'en' });
   });
 
   describe('normalizeThemeName', () => {

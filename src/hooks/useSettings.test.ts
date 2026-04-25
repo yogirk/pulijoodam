@@ -46,7 +46,7 @@ describe('useSettings', () => {
 
   describe('localStorage read', () => {
     it('reads saved theme from localStorage on mount', () => {
-      const saved: Settings = { theme: 'dark', soundEnabled: false, pieceStyle: 'classic' };
+      const saved: Settings = { theme: 'dark', soundEnabled: false, pieceStyle: 'classic', lang: 'en' };
       lsMock.setItem(SETTINGS_KEY, JSON.stringify(saved));
 
       const { result } = renderHook(() => useSettings(), { wrapper });
@@ -141,6 +141,65 @@ describe('useSettings', () => {
 
       const stored = JSON.parse(lsMock.getItem(SETTINGS_KEY)!);
       expect(stored.soundEnabled).toBe(false);
+    });
+  });
+
+  describe('language', () => {
+    it('defaults to English', () => {
+      const { result } = renderHook(() => useSettings(), { wrapper });
+      expect(result.current.lang).toBe('en');
+      expect(result.current.t.app.name).toBe('Pulijoodam');
+    });
+
+    it('reads saved Telugu lang from localStorage', () => {
+      lsMock.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({ theme: 'light', soundEnabled: true, pieceStyle: 'character', lang: 'te' }),
+      );
+      const { result } = renderHook(() => useSettings(), { wrapper });
+      expect(result.current.lang).toBe('te');
+      expect(result.current.t.app.name).toBe('పులిజూదం');
+    });
+
+    it('setLang updates language and dictionary', () => {
+      const { result } = renderHook(() => useSettings(), { wrapper });
+
+      act(() => {
+        result.current.setLang('te');
+      });
+
+      expect(result.current.lang).toBe('te');
+      expect(result.current.t.app.name).toBe('పులిజూదం');
+    });
+
+    it('setLang persists to localStorage', () => {
+      const { result } = renderHook(() => useSettings(), { wrapper });
+
+      act(() => {
+        result.current.setLang('te');
+      });
+
+      const stored = JSON.parse(lsMock.getItem(SETTINGS_KEY)!);
+      expect(stored.lang).toBe('te');
+    });
+
+    it('setLang updates document.documentElement.lang', () => {
+      const { result } = renderHook(() => useSettings(), { wrapper });
+
+      act(() => {
+        result.current.setLang('te');
+      });
+
+      expect(document.documentElement.lang).toBe('te');
+    });
+
+    it('falls back unknown lang values to English', () => {
+      lsMock.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({ theme: 'light', soundEnabled: true, pieceStyle: 'character', lang: 'fr' }),
+      );
+      const { result } = renderHook(() => useSettings(), { wrapper });
+      expect(result.current.lang).toBe('en');
     });
   });
 });
