@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DEFAULT_SETTINGS, SETTINGS_KEY, normalizeThemeName } from './theme';
+import { DEFAULT_SETTINGS, SETTINGS_KEY, normalizeThemeName, normalizePieceStyle } from './theme';
 import type { ThemeName, Settings } from './theme';
 
 describe('theme constants', () => {
@@ -23,8 +23,16 @@ describe('theme constants', () => {
   });
 
   it('Settings interface matches expected shape', () => {
-    const s: Settings = { theme: 'dark', soundEnabled: false, pieceStyle: 'classic', lang: 'en' };
-    expect(s).toEqual({ theme: 'dark', soundEnabled: false, pieceStyle: 'classic', lang: 'en' });
+    const s: Settings = { theme: 'dark', soundEnabled: false, pieceStyle: 'heads', lang: 'en' };
+    expect(s).toEqual({ theme: 'dark', soundEnabled: false, pieceStyle: 'heads', lang: 'en' });
+  });
+
+  it('DEFAULT_SETTINGS has stone piece style', () => {
+    expect(DEFAULT_SETTINGS.pieceStyle).toBe('stone');
+  });
+
+  it('DEFAULT_SETTINGS has English language', () => {
+    expect(DEFAULT_SETTINGS.lang).toBe('en');
   });
 
   describe('normalizeThemeName', () => {
@@ -44,6 +52,26 @@ describe('theme constants', () => {
       expect(normalizeThemeName('cyberpunk')).toBe('light');
       expect(normalizeThemeName(undefined)).toBe('light');
       expect(normalizeThemeName(null)).toBe('light');
+    });
+  });
+
+  describe('normalizePieceStyle', () => {
+    it('passes through "stone"', () => {
+      expect(normalizePieceStyle('stone')).toBe('stone');
+    });
+    it('passes through "heads"', () => {
+      expect(normalizePieceStyle('heads')).toBe('heads');
+    });
+    it('migrates legacy "classic" to stone', () => {
+      expect(normalizePieceStyle('classic')).toBe('stone');
+    });
+    it('migrates legacy "character" to stone', () => {
+      expect(normalizePieceStyle('character')).toBe('stone');
+    });
+    it('falls back unknown values to stone', () => {
+      expect(normalizePieceStyle(undefined)).toBe('stone');
+      expect(normalizePieceStyle(null)).toBe('stone');
+      expect(normalizePieceStyle(42)).toBe('stone');
     });
   });
 });

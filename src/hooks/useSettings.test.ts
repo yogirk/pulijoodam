@@ -46,7 +46,7 @@ describe('useSettings', () => {
 
   describe('localStorage read', () => {
     it('reads saved theme from localStorage on mount', () => {
-      const saved: Settings = { theme: 'dark', soundEnabled: false, pieceStyle: 'classic', lang: 'en' };
+      const saved: Settings = { theme: 'dark', soundEnabled: false, pieceStyle: 'heads', lang: 'en' };
       lsMock.setItem(SETTINGS_KEY, JSON.stringify(saved));
 
       const { result } = renderHook(() => useSettings(), { wrapper });
@@ -85,6 +85,24 @@ describe('useSettings', () => {
     it('falls back to defaults when localStorage is empty', () => {
       const { result } = renderHook(() => useSettings(), { wrapper });
       expect(result.current.theme).toBe('light');
+    });
+
+    it('migrates legacy "character" pieceStyle to stone', () => {
+      lsMock.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({ theme: 'light', soundEnabled: true, pieceStyle: 'character', lang: 'en' }),
+      );
+      const { result } = renderHook(() => useSettings(), { wrapper });
+      expect(result.current.pieceStyle).toBe('stone');
+    });
+
+    it('migrates legacy "classic" pieceStyle to stone', () => {
+      lsMock.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({ theme: 'light', soundEnabled: true, pieceStyle: 'classic', lang: 'en' }),
+      );
+      const { result } = renderHook(() => useSettings(), { wrapper });
+      expect(result.current.pieceStyle).toBe('stone');
     });
   });
 

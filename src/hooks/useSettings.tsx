@@ -6,7 +6,7 @@ import {
   useMemo,
   type ReactNode,
 } from 'react';
-import { DEFAULT_SETTINGS, SETTINGS_KEY, normalizeThemeName } from '../theme/theme';
+import { DEFAULT_SETTINGS, SETTINGS_KEY, normalizeThemeName, normalizePieceStyle } from '../theme/theme';
 import type { ThemeName, PieceStyle, Settings } from '../theme/theme';
 import { DICTIONARIES, normalizeLang, type Dictionary, type Lang } from '../i18n';
 
@@ -35,6 +35,7 @@ function loadSettings(): Settings {
           ...parsed,
           theme: normalizeThemeName(parsed.theme),
           lang: normalizeLang(parsed.lang),
+          pieceStyle: normalizePieceStyle(parsed.pieceStyle),
         };
       }
     }

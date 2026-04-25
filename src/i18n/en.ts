@@ -112,8 +112,8 @@ export const en = {
     soundOn: 'On',
     soundOff: 'Off',
     pieces: 'Pieces',
-    pieceClassic: 'Classic',
-    pieceCharacter: 'Character',
+    pieceStone: 'Carved Stone',
+    pieceHeads: 'Animal Heads',
     learnToPlay: 'Learn to play',
   },
 

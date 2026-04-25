@@ -115,8 +115,8 @@ export const te: Dictionary = {
     soundOn: 'ఆన్',
     soundOff: 'ఆఫ్',
     pieces: 'కాయలు',
-    pieceClassic: 'సాంప్రదాయం',
-    pieceCharacter: 'పాత్రలు', // TODO: TE confirm
+    pieceStone: 'రాతిబిళ్ళలు', // TODO: TE confirm — "stone discs"
+    pieceHeads: 'జంతువుల తలలు', // TODO: TE confirm — "animal heads"
     learnToPlay: 'ఆడడం నేర్చుకో',
   },
 
