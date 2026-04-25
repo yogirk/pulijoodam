@@ -87,7 +87,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               Theme
             </span>
             <button
-              onClick={() => setTheme(theme === 'traditional' ? 'modern' : 'traditional')}
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
               className="px-2 py-1 text-xs rounded font-medium transition-colors"
               style={{
                 backgroundColor: 'var(--accent)',
@@ -95,7 +95,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               }}
               data-testid="theme-toggle-btn"
             >
-              {theme === 'traditional' ? 'Traditional' : 'Modern'}
+              {theme === 'light' ? 'Light' : 'Dark'}
             </button>
           </div>
 

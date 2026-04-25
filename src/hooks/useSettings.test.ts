@@ -33,9 +33,9 @@ function wrapper({ children }: { children: ReactNode }) {
 
 describe('useSettings', () => {
   describe('defaults', () => {
-    it('returns traditional theme by default', () => {
+    it('returns light theme by default', () => {
       const { result } = renderHook(() => useSettings(), { wrapper });
-      expect(result.current.theme).toBe('traditional');
+      expect(result.current.theme).toBe('light');
     });
 
     it('returns soundEnabled true by default', () => {
@@ -46,25 +46,45 @@ describe('useSettings', () => {
 
   describe('localStorage read', () => {
     it('reads saved theme from localStorage on mount', () => {
-      const saved: Settings = { theme: 'modern', soundEnabled: false, pieceStyle: 'classic' };
+      const saved: Settings = { theme: 'dark', soundEnabled: false, pieceStyle: 'classic' };
       lsMock.setItem(SETTINGS_KEY, JSON.stringify(saved));
 
       const { result } = renderHook(() => useSettings(), { wrapper });
-      expect(result.current.theme).toBe('modern');
+      expect(result.current.theme).toBe('dark');
       expect(result.current.soundEnabled).toBe(false);
+    });
+
+    it('migrates legacy "traditional" theme to light', () => {
+      lsMock.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({ theme: 'traditional', soundEnabled: true, pieceStyle: 'character' }),
+      );
+
+      const { result } = renderHook(() => useSettings(), { wrapper });
+      expect(result.current.theme).toBe('light');
+    });
+
+    it('migrates legacy "modern" theme to light', () => {
+      lsMock.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({ theme: 'modern', soundEnabled: true, pieceStyle: 'character' }),
+      );
+
+      const { result } = renderHook(() => useSettings(), { wrapper });
+      expect(result.current.theme).toBe('light');
     });
 
     it('falls back to defaults on invalid JSON', () => {
       lsMock.setItem(SETTINGS_KEY, 'not-json');
 
       const { result } = renderHook(() => useSettings(), { wrapper });
-      expect(result.current.theme).toBe('traditional');
+      expect(result.current.theme).toBe('light');
       expect(result.current.soundEnabled).toBe(true);
     });
 
     it('falls back to defaults when localStorage is empty', () => {
       const { result } = renderHook(() => useSettings(), { wrapper });
-      expect(result.current.theme).toBe('traditional');
+      expect(result.current.theme).toBe('light');
     });
   });
 
@@ -73,31 +93,31 @@ describe('useSettings', () => {
       const { result } = renderHook(() => useSettings(), { wrapper });
 
       act(() => {
-        result.current.setTheme('modern');
+        result.current.setTheme('dark');
       });
 
-      expect(result.current.theme).toBe('modern');
+      expect(result.current.theme).toBe('dark');
     });
 
     it('setTheme persists to localStorage', () => {
       const { result } = renderHook(() => useSettings(), { wrapper });
 
       act(() => {
-        result.current.setTheme('modern');
+        result.current.setTheme('dark');
       });
 
       const stored = JSON.parse(lsMock.getItem(SETTINGS_KEY)!);
-      expect(stored.theme).toBe('modern');
+      expect(stored.theme).toBe('dark');
     });
 
     it('setTheme updates document.documentElement.dataset.theme', () => {
       const { result } = renderHook(() => useSettings(), { wrapper });
 
       act(() => {
-        result.current.setTheme('modern');
+        result.current.setTheme('dark');
       });
 
-      expect(document.documentElement.dataset.theme).toBe('modern');
+      expect(document.documentElement.dataset.theme).toBe('dark');
     });
   });
 
