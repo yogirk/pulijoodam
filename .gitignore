@@ -16,3 +16,4 @@ playground.html
 test_ai*.ts
 test_expert*.ts
 CLAUDE.md
+.gstack/

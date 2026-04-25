@@ -1,13 +1,14 @@
 import type { GameState, GameStatus } from './types';
 import { NODES, JUMP_MAP } from './board';
 
+export const WIN_CAPTURES = 10;
+
 /**
  * Determine current game status.
  * Priority: tiger-wins > goat-wins > draw-repetition > draw-50moves > ongoing
  */
 export function getGameStatus(state: GameState): GameStatus {
-  // Tiger wins: 10 goats captured (v1 Andhra preset)
-  if (state.goatsCaptured >= 10) return 'tiger-wins';
+  if (state.goatsCaptured >= WIN_CAPTURES) return 'tiger-wins';
 
   // Goat wins: all tigers on board are immobilized
   if (!hasTigerMoves(state)) return 'goat-wins';

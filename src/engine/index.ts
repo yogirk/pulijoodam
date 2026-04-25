@@ -16,6 +16,6 @@ export type {
 
 export { createGame } from './state';
 export { applyMove, getLegalMoves } from './moves';
-export { getGameStatus } from './rules';
+export { getGameStatus, WIN_CAPTURES } from './rules';
 export { undo, redo } from './history';
 export { NODES, EDGES, LINES, JUMP_MAP, TIGER_START_NODES } from './board';

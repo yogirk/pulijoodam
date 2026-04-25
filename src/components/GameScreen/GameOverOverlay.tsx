@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { GameStatus } from '../../engine';
+import { WIN_CAPTURES, type GameStatus } from '../../engine';
 
 interface GameOverOverlayProps {
   status: GameStatus;
@@ -9,7 +9,7 @@ interface GameOverOverlayProps {
 function getResultText(status: GameStatus): string {
   switch (status) {
     case 'tiger-wins':
-      return 'Tigers Win! 10 goats captured.';
+      return `Tigers Win! ${WIN_CAPTURES} goats captured.`;
     case 'goat-wins':
       return 'Goats Win! All tigers trapped.';
     case 'draw-repetition':

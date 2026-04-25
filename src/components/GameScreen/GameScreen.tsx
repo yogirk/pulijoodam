@@ -8,7 +8,7 @@ import { ScreenReaderAnnouncer } from '../Board/ScreenReaderAnnouncer';
 import { TurnIndicator } from './TurnIndicator';
 import { GameOverOverlay } from './GameOverOverlay';
 import { SettingsDropdown } from '../Settings/SettingsDropdown';
-import type { Role } from '../../engine';
+import { WIN_CAPTURES, type Role } from '../../engine';
 import { MoveHistory } from './MoveHistory';
 import type { AIDifficulty } from '../../engine/ai/types';
 
@@ -100,11 +100,11 @@ function GameBoard({
             backgroundColor: 'rgba(0,0,0,0.25)',
             color: gameState.goatsCaptured > 0 ? 'var(--status-error)' : 'var(--text-primary)',
             outline: gameState.goatsCaptured > 0 ? '1px solid rgba(255,100,100,0.3)' : 'none',
-            animation: gameState.goatsCaptured >= 3 ? 'danger-pulse 2s ease-in-out infinite' : 'none',
+            animation: gameState.goatsCaptured >= WIN_CAPTURES - 3 ? 'danger-pulse 2s ease-in-out infinite' : 'none',
           }}
         >
           <span className="uppercase tracking-wider text-[10px]" style={{ color: 'var(--text-secondary)' }}>Captured</span>
-          <span>{gameState.goatsCaptured} / 5</span>
+          <span>{gameState.goatsCaptured} / {WIN_CAPTURES}</span>
         </div>
         {isAIThinking && (
           <span className="text-xs font-bold tracking-wider animate-pulse" style={{ color: 'var(--accent)' }}>AI Thinking...</span>
@@ -128,7 +128,7 @@ function GameBoard({
                 </button>
               </div>
               <div className="flex flex-col gap-6 text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-                <p><strong>Goal:</strong> The Tigers must hunt and capture 5 Goats. The Goats must trap the Tigers so they cannot move.</p>
+                <p><strong>Goal:</strong> The Tigers must hunt and capture {WIN_CAPTURES} Goats. The Goats must trap the Tigers so they cannot move.</p>
                 <div className="w-full h-px opacity-30" style={{ backgroundColor: 'var(--board-line)' }} />
                 <p><strong>Placement:</strong> Goats are placed one by one onto the board intersections. Tigers can move along the lines.</p>
                 <div className="w-full h-px opacity-30" style={{ backgroundColor: 'var(--board-line)' }} />
@@ -177,9 +177,9 @@ function GameBoard({
                   <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Goats to Place</span>
                   <span className="text-xl font-bold" style={{ color: '#ffffff' }}>{gameState.goatsInPool}</span>
                 </div>
-                <div className="flex justify-between items-center p-4 rounded-xl shadow-inner" style={{ backgroundColor: 'rgba(0,0,0,0.2)', outline: gameState.goatsCaptured > 0 ? '1px solid rgba(255,100,100,0.3)' : 'none', animation: gameState.goatsCaptured >= 3 ? 'danger-pulse 2s ease-in-out infinite' : 'none' }}>
+                <div className="flex justify-between items-center p-4 rounded-xl shadow-inner" style={{ backgroundColor: 'rgba(0,0,0,0.2)', outline: gameState.goatsCaptured > 0 ? '1px solid rgba(255,100,100,0.3)' : 'none', animation: gameState.goatsCaptured >= WIN_CAPTURES - 3 ? 'danger-pulse 2s ease-in-out infinite' : 'none' }}>
                   <span className="text-sm font-semibold" style={{ color: 'var(--status-danger)' }}>Captured Goats</span>
-                  <span className="text-xl font-bold" style={{ color: gameState.goatsCaptured > 0 ? 'var(--status-danger)' : '#ffffff' }}>{gameState.goatsCaptured} / 5</span>
+                  <span className="text-xl font-bold" style={{ color: gameState.goatsCaptured > 0 ? 'var(--status-danger)' : '#ffffff' }}>{gameState.goatsCaptured} / {WIN_CAPTURES}</span>
                 </div>
               </div>
 
