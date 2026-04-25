@@ -5,6 +5,8 @@ import { useSettings } from '../../hooks/useSettings';
 import { Board } from '../Board/Board';
 import { ScreenReaderAnnouncer } from '../Board/ScreenReaderAnnouncer';
 import { GameOverOverlay } from './GameOverOverlay';
+import { MoveHistory } from './MoveHistory';
+import { SidePanel, RailDetails } from './SidePanel';
 import { SettingsDropdown } from '../Settings/SettingsDropdown';
 import { Brand } from '../atoms/Brand';
 import { CornerOrnament } from '../atoms/CornerOrnament';
@@ -25,11 +27,14 @@ interface GameScreenProps {
 function GameBoard({
   game,
   isAIThinking,
+  humanRole,
   onBackToMenu,
   onStartTutorial,
 }: {
   game: ReturnType<typeof useGame>;
   isAIThinking: boolean;
+  /** When set, the rail for this role is labelled "You". Undefined for local 2P. */
+  humanRole?: Role;
   onBackToMenu?: () => void;
   onStartTutorial?: () => void;
 }) {
@@ -146,22 +151,32 @@ function GameBoard({
         className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-4 lg:gap-6 p-4 lg:px-8 lg:py-6"
       >
 
-        {/* Left rail — placeholder (commit B: SidePanel for tigers) */}
-        <aside
-          className="hidden lg:flex card flex-col"
-          data-testid="left-rail"
-          style={{ padding: 20, alignSelf: 'stretch' }}
-          aria-label={t.common.tigers}
-        >
-          <div className="t-eyebrow">{t.common.tigers}</div>
-          <div className="t-display" style={{ fontSize: 22, color: 'var(--ink)', marginTop: 6 }}>
-            {gameState.currentTurn === 'tiger' ? t.turn.yours : t.turn.theirs}
-          </div>
-          <div className="rule-h-solid" style={{ margin: '14px 0' }} />
-          <div style={{ fontSize: 12, color: 'var(--ink-mute)', fontStyle: 'italic' }}>
-            (rail · commit B fills this in)
-          </div>
-        </aside>
+        {/* Left rail — Tigers: identity, capture progress, Ancient Hunt accordion */}
+        <div className="hidden lg:block">
+          <SidePanel
+            side="tiger"
+            isTurn={gameState.currentTurn === 'tiger'}
+            isYou={humanRole === undefined ? undefined : humanRole === 'tiger'}
+            testId="left-rail"
+            stats={[
+              {
+                label: t.common.captured,
+                value: `${gameState.goatsCaptured} / ${WIN_CAPTURES}`,
+                warning: gameState.goatsCaptured > 0,
+                testId: 'tiger-captured-stat',
+              },
+            ]}
+          >
+            <RailDetails summary={t.game.aboutTheHunt}>
+              <p
+                className={lang === 'te' ? 't-telugu' : 't-display-italic'}
+                style={{ fontSize: 14, color: 'var(--ink-soft)', lineHeight: 1.5 }}
+              >
+                {t.game.aboutTheHuntBody}
+              </p>
+            </RailDetails>
+          </SidePanel>
+        </div>
 
         {/* Board — card-elev with stipple texture and four corner ornaments */}
         <section
@@ -196,50 +211,33 @@ function GameBoard({
           </div>
         </section>
 
-        {/* Right rail — placeholder (commit B: SidePanel for goats + move history) */}
-        <aside
-          className="hidden lg:flex card flex-col"
-          data-testid="right-rail"
-          style={{ padding: 20, alignSelf: 'stretch' }}
-          aria-label={t.common.goats}
-        >
-          <div className="t-eyebrow">{t.common.goats}</div>
-          <div className="t-display" style={{ fontSize: 22, color: 'var(--ink)', marginTop: 6 }}>
-            {gameState.currentTurn === 'goat' ? t.turn.yours : t.turn.theirs}
-          </div>
-          <div className="rule-h-solid" style={{ margin: '14px 0' }} />
-          <div className="flex flex-col gap-3">
-            {gameState.phase === 'placement' && (
-              <div className="flex items-baseline justify-between">
-                <span style={{ fontSize: 12, color: 'var(--ink-mute)', letterSpacing: '0.04em' }}>
-                  {t.common.pool}
-                </span>
-                <span className="t-display" style={{ fontSize: 28, color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
-                  {gameState.goatsInPool}
-                </span>
-              </div>
-            )}
-            <div className="flex items-baseline justify-between">
-              <span style={{ fontSize: 12, color: 'var(--ink-mute)', letterSpacing: '0.04em' }}>
-                {t.common.captured}
-              </span>
-              <span
-                className="t-display"
-                style={{
-                  fontSize: 28,
-                  color: gameState.goatsCaptured > 0 ? 'var(--kumkum)' : 'var(--ink)',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {gameState.goatsCaptured}
-                <span style={{ color: 'var(--ink-mute)', fontSize: 18 }}> / {WIN_CAPTURES}</span>
-              </span>
-            </div>
-          </div>
-          <div style={{ marginTop: 'auto', fontSize: 12, color: 'var(--ink-mute)', fontStyle: 'italic' }}>
-            (rail · commit B fills this in)
-          </div>
-        </aside>
+        {/* Right rail — Goats: pool, on-board, move history accordion */}
+        <div className="hidden lg:block">
+          <SidePanel
+            side="goat"
+            isTurn={gameState.currentTurn === 'goat'}
+            isYou={humanRole === undefined ? undefined : humanRole === 'goat'}
+            testId="right-rail"
+            stats={[
+              ...(gameState.phase === 'placement'
+                ? [{
+                    label: t.common.pool,
+                    value: gameState.goatsInPool,
+                    testId: 'goat-pool-stat',
+                  }]
+                : []),
+              {
+                label: t.common.onBoard,
+                value: gameState.board.filter(p => p === 'goat').length,
+                testId: 'goat-onboard-stat',
+              },
+            ]}
+          >
+            <RailDetails summary={t.game.moveHistory}>
+              <MoveHistory moveHistory={gameState.moveHistory} />
+            </RailDetails>
+          </SidePanel>
+        </div>
       </main>
 
       {/* Footer */}
@@ -347,7 +345,15 @@ function AIGameScreen({
   onStartTutorial?: () => void;
 }) {
   const game = useAIGame(aiConfig);
-  return <GameBoard game={game} isAIThinking={game.isAIThinking} onBackToMenu={onBackToMenu} onStartTutorial={onStartTutorial} />;
+  return (
+    <GameBoard
+      game={game}
+      isAIThinking={game.isAIThinking}
+      humanRole={aiConfig.humanRole}
+      onBackToMenu={onBackToMenu}
+      onStartTutorial={onStartTutorial}
+    />
+  );
 }
 
 export function GameScreen({ aiConfig, onBackToMenu, onStartTutorial }: GameScreenProps) {

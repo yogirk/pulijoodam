@@ -1,6 +1,7 @@
 import { useRef, useEffect, useMemo } from 'react';
 import type { Move } from '../../engine/types';
 import { movesToTurnTokens } from '../../notation';
+import { useT } from '../../hooks/useSettings';
 
 interface MoveToken {
   num: number;
@@ -20,18 +21,15 @@ function pairTokens(tokens: string[]): MoveToken[] {
   return pairs;
 }
 
-const EVEN_ROW_STYLE = { backgroundColor: 'rgba(255,255,255,0.02)' };
-const ODD_ROW_STYLE = { backgroundColor: 'transparent' };
-
 interface MoveHistoryProps {
   moveHistory: Move[];
 }
 
 export function MoveHistory({ moveHistory }: MoveHistoryProps) {
+  const t = useT();
   const scrollRef = useRef<HTMLDivElement>(null);
   const tokens = useMemo(() => pairTokens(movesToTurnTokens(moveHistory)), [moveHistory]);
 
-  // Auto-scroll to bottom on new moves
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
@@ -40,10 +38,10 @@ export function MoveHistory({ moveHistory }: MoveHistoryProps) {
   if (tokens.length === 0) {
     return (
       <p
-        className="text-xs text-center opacity-50 italic mt-8"
-        style={{ color: 'var(--text-secondary)' }}
+        className="t-caption text-center"
+        style={{ fontSize: 13, color: 'var(--ink-mute)', marginTop: 12 }}
       >
-        No moves yet
+        {t.game.movesEmpty}
       </p>
     );
   }
@@ -51,28 +49,33 @@ export function MoveHistory({ moveHistory }: MoveHistoryProps) {
   return (
     <div
       ref={scrollRef}
-      className="flex flex-col gap-px overflow-y-auto scrollbar-hide max-h-full"
+      className="flex flex-col overflow-y-auto"
+      style={{ maxHeight: 220 }}
     >
-      {tokens.map((t) => (
+      {tokens.map((tok, idx) => (
         <div
-          key={t.num}
-          className="flex items-center gap-2 px-2 py-1 rounded text-sm font-mono"
-          style={t.num % 2 === 0 ? EVEN_ROW_STYLE : ODD_ROW_STYLE}
+          key={tok.num}
+          className="flex items-center gap-2 px-1 py-1"
+          style={{
+            fontSize: 13,
+            backgroundColor: idx % 2 === 0 ? 'transparent' : 'color-mix(in oklch, var(--paper-3) 30%, transparent)',
+            borderRadius: 4,
+          }}
         >
           <span
-            className="w-6 text-right text-xs shrink-0"
-            style={{ color: 'var(--text-secondary)', opacity: 0.5 }}
+            className="t-mono-ui shrink-0 text-right"
+            style={{ width: 22, color: 'var(--ink-faint)' }}
           >
-            {t.num}.
+            {tok.num}.
           </span>
-          <span className="flex-1 truncate" style={{ color: 'var(--text-primary)' }}>
-            {t.goat}
+          <span className="t-mono-ui flex-1 truncate" style={{ color: 'var(--ink)' }}>
+            {tok.goat}
           </span>
           <span
-            className="flex-1 truncate"
-            style={{ color: t.tiger ? 'var(--text-primary)' : 'transparent' }}
+            className="t-mono-ui flex-1 truncate"
+            style={{ color: tok.tiger ? 'var(--ink)' : 'transparent' }}
           >
-            {t.tiger ?? ''}
+            {tok.tiger ?? ''}
           </span>
         </div>
       ))}
