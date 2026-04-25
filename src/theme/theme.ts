@@ -1,4 +1,4 @@
-export type ThemeName = 'traditional' | 'modern';
+export type ThemeName = 'light' | 'dark';
 export type PieceStyle = 'classic' | 'character';
 
 export interface Settings {
@@ -8,9 +8,14 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  theme: 'traditional',
+  theme: 'light',
   soundEnabled: true,
   pieceStyle: 'character',
 };
 
 export const SETTINGS_KEY = 'pulijoodam_settings';
+
+export function normalizeThemeName(value: unknown): ThemeName {
+  if (value === 'dark') return 'dark';
+  return 'light';
+}

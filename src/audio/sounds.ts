@@ -19,8 +19,8 @@ export function playPlaceSound(ctx: AudioContext, theme: ThemeName): void {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
 
-  osc.type = theme === 'traditional' ? 'sine' : 'triangle';
-  osc.frequency.setValueAtTime(theme === 'traditional' ? 900 : 600, now);
+  osc.type = theme === 'light' ? 'sine' : 'triangle';
+  osc.frequency.setValueAtTime(theme === 'light' ? 900 : 600, now);
   osc.frequency.exponentialRampToValueAtTime(150, now + 0.06);
 
   gain.gain.setValueAtTime(0.25, now);
@@ -39,7 +39,7 @@ export function playPlaceSound(ctx: AudioContext, theme: ThemeName): void {
 
   const filter = ctx.createBiquadFilter();
   filter.type = 'bandpass';
-  filter.frequency.value = theme === 'traditional' ? 2000 : 1200;
+  filter.frequency.value = theme === 'light' ? 2000 : 1200;
   filter.Q.value = 1.5;
 
   noise.connect(filter).connect(noiseGain).connect(ctx.destination);
@@ -54,8 +54,8 @@ export function playSlideSound(ctx: AudioContext, theme: ThemeName): void {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
 
-  osc.type = theme === 'traditional' ? 'sawtooth' : 'sine';
-  osc.frequency.setValueAtTime(theme === 'traditional' ? 300 : 400, now);
+  osc.type = theme === 'light' ? 'sawtooth' : 'sine';
+  osc.frequency.setValueAtTime(theme === 'light' ? 300 : 400, now);
   osc.frequency.exponentialRampToValueAtTime(150, now + 0.15);
 
   gain.gain.setValueAtTime(0.12, now);
@@ -80,8 +80,8 @@ export function playCaptureSound(
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
 
-  const baseFreq = theme === 'traditional' ? 200 : 350;
-  osc.type = theme === 'traditional' ? 'sine' : 'square';
+  const baseFreq = theme === 'light' ? 200 : 350;
+  osc.type = theme === 'light' ? 'sine' : 'square';
   osc.frequency.setValueAtTime(baseFreq * pitchMultiplier, now);
   osc.frequency.exponentialRampToValueAtTime(80 * pitchMultiplier, now + 0.12);
 
@@ -108,7 +108,7 @@ export function playCaptureSound(
 export function playWinSound(ctx: AudioContext, theme: ThemeName): void {
   const now = ctx.currentTime;
 
-  if (theme === 'traditional') {
+  if (theme === 'light') {
     // FM synthesis bell/gong
     const carrier = ctx.createOscillator();
     const modulator = ctx.createOscillator();
@@ -155,7 +155,7 @@ export function playLossSound(ctx: AudioContext, theme: ThemeName): void {
   const gain = ctx.createGain();
 
   osc.type = 'sine';
-  osc.frequency.setValueAtTime(theme === 'traditional' ? 120 : 100, now);
+  osc.frequency.setValueAtTime(theme === 'light' ? 120 : 100, now);
   osc.frequency.exponentialRampToValueAtTime(40, now + 0.4);
 
   gain.gain.setValueAtTime(0.25, now);
@@ -188,7 +188,7 @@ export function playIllegalSound(ctx: AudioContext, theme: ThemeName): void {
   const gain = ctx.createGain();
 
   osc.type = 'square';
-  osc.frequency.setValueAtTime(theme === 'traditional' ? 180 : 220, now);
+  osc.frequency.setValueAtTime(theme === 'light' ? 180 : 220, now);
 
   gain.gain.setValueAtTime(0.15, now);
   gain.gain.setValueAtTime(0.15, now + 0.05);

@@ -1,14 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Pulijoodam</title>
+    <meta name="theme-color" content="#f3ead8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a140d" media="(prefers-color-scheme: dark)" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700;800&family=Google+Sans+Flex:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter+Tight:wght@400;500;600;700&family=Noto+Serif+Telugu:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script>
-      try{var s=JSON.parse(localStorage.getItem('pulijoodam_settings'));if(s&&s.theme)document.documentElement.dataset.theme=s.theme;}catch(e){}
+      (function(){
+        try {
+          var raw = localStorage.getItem('pulijoodam_settings');
+          var s = raw ? JSON.parse(raw) : null;
+          var t = s && s.theme;
+          // Migrate legacy theme names (traditional/modern) → light default
+          if (t !== 'light' && t !== 'dark') t = 'light';
+          document.documentElement.dataset.theme = t;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
     </script>
   </head>
   <body>

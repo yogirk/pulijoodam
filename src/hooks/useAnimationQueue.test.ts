@@ -44,7 +44,7 @@ describe('useAnimationQueue', () => {
 
   it('starts with isAnimating=false and empty state', () => {
     const { result } = renderHook(() =>
-      useAnimationQueue([], true, 'traditional')
+      useAnimationQueue([], true, 'light')
     );
     expect(result.current.isAnimating).toBe(false);
     expect(result.current.animatingPieces.size).toBe(0);
@@ -58,7 +58,7 @@ describe('useAnimationQueue', () => {
       { type: 'GOAT_PLACED', at: 5 },
     ];
     const { result } = renderHook(() =>
-      useAnimationQueue(events, true, 'traditional')
+      useAnimationQueue(events, true, 'light')
     );
     // Should be animating immediately
     expect(result.current.isAnimating).toBe(true);
@@ -69,12 +69,12 @@ describe('useAnimationQueue', () => {
       { type: 'GOAT_PLACED', at: 5 },
     ];
     const { result } = renderHook(() =>
-      useAnimationQueue(events, true, 'traditional')
+      useAnimationQueue(events, true, 'light')
     );
 
     expect(result.current.isAnimating).toBe(true);
     expect(result.current.placingGoat).toBe(5);
-    expect(audioEngine.playPlace).toHaveBeenCalledWith('traditional');
+    expect(audioEngine.playPlace).toHaveBeenCalledWith('light');
 
     // Advance past placement duration
     await act(async () => {
@@ -90,11 +90,11 @@ describe('useAnimationQueue', () => {
       { type: 'PIECE_MOVED', from: 0, to: 2, piece: 'tiger' },
     ];
     const { result } = renderHook(() =>
-      useAnimationQueue(events, true, 'traditional')
+      useAnimationQueue(events, true, 'light')
     );
 
     expect(result.current.isAnimating).toBe(true);
-    expect(audioEngine.playSlide).toHaveBeenCalledWith('traditional');
+    expect(audioEngine.playSlide).toHaveBeenCalledWith('light');
     expect(result.current.animatingPieces.size).toBeGreaterThan(0);
 
     await act(async () => {
@@ -112,7 +112,7 @@ describe('useAnimationQueue', () => {
       { type: 'GOAT_CAPTURED', over: 9, landedAt: 15 },
     ];
     const { result } = renderHook(() =>
-      useAnimationQueue(events, true, 'traditional')
+      useAnimationQueue(events, true, 'light')
     );
 
     expect(result.current.isAnimating).toBe(true);
@@ -142,17 +142,17 @@ describe('useAnimationQueue', () => {
       { type: 'GOAT_CAPTURED', over: 9, landedAt: 15 },
     ];
     renderHook(() =>
-      useAnimationQueue(events, true, 'traditional')
+      useAnimationQueue(events, true, 'light')
     );
 
     // First capture: chainIndex 0
     // Advance through PIECE_MOVED (350ms) to trigger GOAT_CAPTURED
     await advanceTimers(400);
-    expect(audioEngine.playCapture).toHaveBeenCalledWith('traditional', 0);
+    expect(audioEngine.playCapture).toHaveBeenCalledWith('light', 0);
 
     // Advance through first capture (400+200+150) + second PIECE_MOVED (350) to trigger second capture
     await advanceTimers(1200);
-    expect(audioEngine.playCapture).toHaveBeenCalledWith('traditional', 1);
+    expect(audioEngine.playCapture).toHaveBeenCalledWith('light', 1);
   });
 
   it('does not play sound when soundEnabled=false', () => {
@@ -160,7 +160,7 @@ describe('useAnimationQueue', () => {
       { type: 'GOAT_PLACED', at: 5 },
     ];
     renderHook(() =>
-      useAnimationQueue(events, false, 'traditional')
+      useAnimationQueue(events, false, 'light')
     );
 
     expect(audioEngine.playPlace).not.toHaveBeenCalled();
@@ -173,7 +173,7 @@ describe('useAnimationQueue', () => {
       { type: 'PIECE_MOVED', from: 0, to: 2, piece: 'tiger' },
     ];
     const { result, unmount } = renderHook(() =>
-      useAnimationQueue(events, true, 'traditional')
+      useAnimationQueue(events, true, 'light')
     );
 
     expect(result.current.isAnimating).toBe(true);
@@ -190,12 +190,12 @@ describe('useAnimationQueue', () => {
       { type: 'GAME_OVER', status: 'tiger-wins' },
     ];
     const { result } = renderHook(() =>
-      useAnimationQueue(events, true, 'traditional')
+      useAnimationQueue(events, true, 'light')
     );
 
     expect(result.current.isAnimating).toBe(true);
     expect(result.current.gameOverGlow).toBe('tiger-wins');
-    expect(audioEngine.playWin).toHaveBeenCalledWith('traditional');
+    expect(audioEngine.playWin).toHaveBeenCalledWith('light');
 
     await act(async () => {
       vi.advanceTimersByTime(600);
@@ -210,7 +210,7 @@ describe('useAnimationQueue', () => {
       { type: 'GOAT_PLACED', at: 5 },
     ];
     const { result, rerender } = renderHook(
-      ({ ev }) => useAnimationQueue(ev, true, 'traditional'),
+      ({ ev }) => useAnimationQueue(ev, true, 'light'),
       { initialProps: { ev: events } }
     );
 

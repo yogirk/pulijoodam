@@ -5,7 +5,7 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import { DEFAULT_SETTINGS, SETTINGS_KEY } from '../theme/theme';
+import { DEFAULT_SETTINGS, SETTINGS_KEY, normalizeThemeName } from '../theme/theme';
 import type { ThemeName, PieceStyle, Settings } from '../theme/theme';
 
 interface SettingsContextValue {
@@ -28,6 +28,8 @@ function loadSettings(): Settings {
         return {
           ...DEFAULT_SETTINGS,
           ...parsed,
+          // Migrate legacy theme names (traditional/modern) → light default
+          theme: normalizeThemeName(parsed.theme),
         };
       }
     }

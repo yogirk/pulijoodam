@@ -1,88 +1,131 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Google Sans Flex', 'Google Sans', sans-serif;
+  --font-sans: 'Inter Tight', -apple-system, system-ui, sans-serif;
+  --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --font-telugu: 'Noto Serif Telugu', serif;
 }
 
-/* ── Theme: Traditional (Heritage default) ──────────────────── */
+/* ============================================================
+   Temple Stone — Light (Sandstone, default)
+   ============================================================ */
 :root,
-[data-theme="traditional"] {
-  /* Board */
-  --board-bg: #1f2937;
-  /* Gray 800 */
-  --board-line: #4b5563;
-  /* Gray 600 */
-  --board-line-width: 3;
-  --node-fill: #374151;
-  /* Gray 700 */
-  --node-selected: #f59e0b;
-  /* Amber 500 */
-  --legal-move-stroke: #10b981;
-  /* Emerald 500 */
+[data-theme="light"] {
+  /* Surfaces */
+  --paper:        #f3ead8;
+  --paper-2:      #ece1c9;
+  --paper-3:      #e3d4b3;
+  --stone:        #c9b591;
+  --rule:         #6b5b3d;
+  --rule-soft:    rgba(107, 91, 61, 0.22);
+
+  /* Ink (text) */
+  --ink:          #2a2118;
+  --ink-soft:     #4a3e2c;
+  --ink-mute:     #7a6a4f;
+  --ink-faint:    #a08a64;
+
+  /* Warm accent family */
+  --ochre:        #b8842c;
+  --ochre-deep:   #8a5e1a;
+  --ochre-soft:   rgba(184, 132, 44, 0.14);
+  --kumkum:       #8b2a1f;
+  --kumkum-soft:  rgba(139, 42, 31, 0.12);
+  --jade:         #4f6b48;
+  --jade-soft:    rgba(79, 107, 72, 0.16);
 
   /* Pieces */
-  --tiger-fill: #f59e0b;
-  --tiger-stroke: #b45309;
-  --goat-fill: #e5e7eb;
-  --goat-stroke: #9ca3af;
-  --select-stroke: #fcd34d;
+  --tiger-fill:   #8b2a1f;
+  --tiger-stroke: #5a1810;
+  --tiger-mark:   #f3ead8;
+  --goat-fill:    #f8f1de;
+  --goat-stroke:  #7a6a4f;
+  --goat-mark:    #4a3e2c;
 
-  /* Shell */
-  --bg-primary: #111827;
-  --bg-secondary: #1f2937;
-  --text-primary: #f9fafb;
-  --text-secondary: #9ca3af;
-  --text-tertiary: #6b7280;
-  --accent: #f59e0b;
-  --accent-hover: #d97706;
-
-  /* Semantic status */
-  --status-success: #22c55e;
-  --status-warning: #eab308;
-  --status-error: #ef4444;
-}
-
-/* ── Theme: Modern (Cyber) ──────────────────────────────────── */
-[data-theme="modern"] {
   /* Board */
-  --board-bg: #0f172a;
-  /* Slate 900 */
-  --board-line: #334155;
-  /* Slate 700 */
-  --board-line-width: 2;
-  --node-fill: #1e293b;
-  /* Slate 800 */
-  --node-selected: #22d3ee;
-  /* Cyan 400 */
-  --legal-move-stroke: #a855f7;
-  /* Purple 500 */
+  --board-bg:           var(--paper);
+  --board-line:         var(--rule);
+  --board-line-width:   1.2;
+  --node-fill:          var(--paper-3);
+  --node-selected:      var(--ochre);
+  --legal-move-stroke:  var(--jade);
 
-  /* Pieces */
-  --tiger-fill: #a855f7;
-  --tiger-stroke: #7e22ce;
-  --goat-fill: #22d3ee;
-  --goat-stroke: #0891b2;
-  --select-stroke: #c084fc;
+  /* Selection ring on pieces */
+  --select-stroke:      var(--ochre);
 
-  /* Shell */
-  --bg-primary: #020617;
-  --bg-secondary: #0f172a;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-tertiary: #64748b;
-  --accent: #a855f7;
-  --accent-hover: #9333ea;
+  /* Shell aliases (bridge old names → new tokens during port) */
+  --bg-primary:    var(--paper);
+  --bg-secondary:  var(--paper-2);
+  --text-primary:  var(--ink);
+  --text-secondary: var(--ink-mute);
+  --text-tertiary: var(--ink-faint);
+  --accent:        var(--ochre);
+  --accent-hover:  var(--ochre-deep);
 
   /* Semantic status */
-  --status-success: #34d399;
-  --status-warning: #facc15;
-  --status-error: #f87171;
+  --status-success: var(--jade);
+  --status-warning: var(--ochre);
+  --status-error:   var(--kumkum);
+  --status-danger:  var(--kumkum);
+
+  /* Shadows — soft, paper-like */
+  --shadow-sm: 0 1px 0 rgba(74, 62, 44, 0.06), 0 2px 4px rgba(74, 62, 44, 0.06);
+  --shadow-md: 0 1px 0 rgba(74, 62, 44, 0.08), 0 8px 18px -8px rgba(74, 62, 44, 0.18);
+  --shadow-lg: 0 1px 0 rgba(74, 62, 44, 0.10), 0 24px 40px -20px rgba(74, 62, 44, 0.30);
+
+  /* Radii */
+  --r-sm:   4px;
+  --r-md:   8px;
+  --r-lg:  14px;
+  --r-pill: 999px;
 }
 
+/* ============================================================
+   Temple Stone — Dark (Lacquer)
+   ============================================================ */
+[data-theme="dark"] {
+  --paper:        #1a140d;
+  --paper-2:      #221a10;
+  --paper-3:      #2c2216;
+  --stone:        #3a2d1c;
+  --rule:         #c9b591;
+  --rule-soft:    rgba(201, 181, 145, 0.22);
+
+  --ink:          #f0e6cf;
+  --ink-soft:     #d8c9a4;
+  --ink-mute:     #a08a64;
+  --ink-faint:    #6b5b3d;
+
+  --ochre:        #d9a557;
+  --ochre-deep:   #b8842c;
+  --ochre-soft:   rgba(217, 165, 87, 0.14);
+  --kumkum:       #c44a3d;
+  --kumkum-soft:  rgba(196, 74, 61, 0.16);
+  --jade:         #8aa37e;
+  --jade-soft:    rgba(138, 163, 126, 0.18);
+
+  --tiger-fill:   #c44a3d;
+  --tiger-stroke: #ffd6a0;
+  --tiger-mark:   #1a140d;
+  --goat-fill:    #ece1c9;
+  --goat-stroke:  #6b5b3d;
+  --goat-mark:    #2a2118;
+
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 1px 0 rgba(0, 0, 0, 0.5), 0 8px 18px -8px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 1px 0 rgba(0, 0, 0, 0.6), 0 24px 40px -20px rgba(0, 0, 0, 0.8);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
 body {
-  font-family: 'Google Sans Flex', 'Google Sans', sans-serif;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  font-family: var(--font-sans);
+  background-color: var(--paper);
+  color: var(--ink);
+  font-feature-settings: "ss01", "ss02", "kern";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   /* Safe area insets for notched phones & PWA */
   padding:
     env(safe-area-inset-top)
@@ -91,15 +134,233 @@ body {
     env(safe-area-inset-left);
 }
 
-/* ── Responsive utilities ────────────────────────────────────── */
+/* ============================================================
+   Typography utilities
+   ============================================================ */
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+.t-display-italic {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+}
+.t-telugu {
+  font-family: var(--font-telugu);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.t-mono-ui {
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum", "ss01";
+  font-variant-numeric: tabular-nums;
+}
+.t-eyebrow {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-mute);
+}
+.t-caption {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--ink-soft);
+}
 
-/* Use dvh where supported for accurate mobile viewport height */
+/* ============================================================
+   Stone texture — subtle layered radial + grain
+   ============================================================ */
+.stone-bg {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(ellipse at 20% 10%, color-mix(in oklch, var(--paper-2) 60%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 90%, color-mix(in oklch, var(--paper-3) 40%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse at 60% 30%, color-mix(in oklch, var(--stone) 12%, transparent) 0%, transparent 70%);
+}
+
+.stone-texture { position: relative; }
+.stone-texture::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 25% 25%, var(--rule-soft) 0.5px, transparent 1px),
+    radial-gradient(circle at 75% 75%, var(--rule-soft) 0.5px, transparent 1px),
+    radial-gradient(circle at 50% 50%, color-mix(in oklch, var(--stone) 25%, transparent) 0.3px, transparent 0.8px);
+  background-size: 13px 13px, 17px 17px, 7px 7px;
+  background-position: 0 0, 5px 8px, 2px 3px;
+  opacity: 0.55;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  border-radius: inherit;
+}
+[data-theme="dark"] .stone-texture::before {
+  mix-blend-mode: screen;
+  opacity: 0.35;
+}
+
+/* ============================================================
+   Rules / dividers
+   ============================================================ */
+.rule-h {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--rule-soft) 20%, var(--rule-soft) 80%, transparent);
+  border: 0;
+}
+.rule-h-solid { height: 1px; background: var(--rule-soft); border: 0; }
+
+/* ============================================================
+   Buttons — base + variants
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  padding: 12px 20px;
+  min-height: 44px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+  user-select: none;
+  white-space: nowrap;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--ochre);
+  outline-offset: 3px;
+}
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.btn-primary:hover {
+  background: var(--ochre-deep);
+  border-color: var(--ochre-deep);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--rule-soft);
+}
+.btn-ghost:hover {
+  background: var(--paper-2);
+  border-color: var(--ink-mute);
+}
+.btn-quiet {
+  background: transparent;
+  color: var(--ink-soft);
+  border-color: transparent;
+}
+.btn-quiet:hover {
+  color: var(--ink);
+  background: var(--paper-2);
+}
+
+/* ============================================================
+   Cards
+   ============================================================ */
+.card {
+  background: var(--paper-2);
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+.card-elev {
+  background: var(--paper);
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================================
+   Pills / Badges
+   ============================================================ */
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--rule-soft);
+  background: var(--paper-2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  font-family: var(--font-sans);
+}
+.pill-ochre {
+  background: var(--ochre-soft);
+  border-color: color-mix(in oklch, var(--ochre) 30%, transparent);
+  color: var(--ochre-deep);
+}
+.pill-kumkum {
+  background: var(--kumkum-soft);
+  border-color: color-mix(in oklch, var(--kumkum) 30%, transparent);
+  color: var(--kumkum);
+}
+.pill-jade {
+  background: var(--jade-soft);
+  border-color: color-mix(in oklch, var(--jade) 30%, transparent);
+  color: var(--jade);
+}
+
+/* ============================================================
+   Segmented control
+   ============================================================ */
+.seg {
+  display: inline-flex;
+  padding: 3px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--r-md);
+  gap: 2px;
+}
+.seg-item {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--ink-mute);
+  border: none;
+  background: transparent;
+  transition: color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+  letter-spacing: 0.02em;
+}
+.seg-item:hover { color: var(--ink); }
+.seg-item.is-active {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================================
+   Premium utility (legacy alias) — kept for transition
+   ============================================================ */
+.glass-panel {
+  background: color-mix(in srgb, var(--paper-2) 88%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--rule-soft);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================================
+   Responsive utilities
+   ============================================================ */
 .min-h-screen-safe {
   min-height: 100vh;
   min-height: 100dvh;
 }
 
-/* Landscape game layout: board + sidebar side by side */
 @media (orientation: landscape) and (max-height: 500px) {
   .game-main {
     flex-direction: row !important;
@@ -108,7 +369,6 @@ body {
     gap: 1rem;
     padding: 0.25rem 1rem !important;
   }
-
   .game-main .game-board-wrap {
     flex: 0 1 auto;
     max-width: none;
@@ -116,78 +376,62 @@ body {
     height: calc(100dvh - 3.5rem);
     max-height: calc(100dvh - 3.5rem);
   }
-
   .game-main .game-board-wrap svg {
     height: 100%;
     width: auto;
   }
-
   .game-main .game-sidebar {
     flex: 0 0 auto;
     min-width: 120px;
   }
 }
 
-/* ── Global focus indicator ───────────────────────────────────── */
+/* ============================================================
+   Focus indicator
+   ============================================================ */
 :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--ochre);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+svg :focus-visible { outline: none; }
+
+/* ============================================================
+   Scrollbar (subtle)
+   ============================================================ */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--rule-soft);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-mute);
+  background-clip: padding-box;
+  border: 2px solid transparent;
 }
 
-/* SVG elements need a different approach (outline doesn't render) */
-svg :focus-visible {
-  outline: none;
+/* ============================================================
+   Animations — gameplay
+   ============================================================ */
+@keyframes ink-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.anim-fade-in { animation: ink-fade-in 320ms ease-out both; }
 
-/* ── Reduced motion ───────────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Premium Utilities */
-.glass-panel {
-  background: color-mix(in srgb, var(--bg-secondary) 85%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
-}
-
-/* ── Piece animations ──────────────────────────────────────────── */
 @keyframes goat-scale-in {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0%   { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes piece-glow {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.15);
-  }
-
-  100% {
-    transform: scale(1);
-  }
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
 }
-
-/* ── Delight: Impact & celebration ───────────────────────────── */
 
 @keyframes board-shake {
   0%, 100% { transform: translate(0, 0); }
@@ -198,32 +442,53 @@ svg :focus-visible {
 }
 
 @keyframes capture-flash {
-  0% { opacity: 0.8; transform: scale(1); }
-  100% { opacity: 0; transform: scale(3); }
+  0%   { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0;   transform: scale(3); }
 }
 
 @keyframes placement-ripple {
-  0% { opacity: 0.45; transform: scale(0.6); }
-  100% { opacity: 0; transform: scale(2.2); }
+  0%   { opacity: 0.45; transform: scale(0.6); }
+  100% { opacity: 0;    transform: scale(2.2); }
 }
 
 @keyframes victory-ring {
-  0% { opacity: 0.45; transform: scale(0); }
-  50% { opacity: 0.2; }
-  100% { opacity: 0; transform: scale(1); }
+  0%   { opacity: 0.45; transform: scale(0); }
+  50%  { opacity: 0.2; }
+  100% { opacity: 0;    transform: scale(1); }
 }
 
 @keyframes overlay-backdrop-enter {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 @keyframes overlay-card-enter {
-  from { opacity: 0; transform: scale(0.9) translateY(12px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+/* danger-pulse — uses kumkum (warm red on warm paper) */
 @keyframes danger-pulse {
-  0%, 100% { box-shadow: inset 0 0 0 0 transparent, 0 0 0 0 transparent; }
-  50% { box-shadow: inset 0 0 8px rgba(239, 68, 68, 0.15), 0 0 12px 2px rgba(239, 68, 68, 0.25); }
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 0 transparent,
+      0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow:
+      inset 0 0 8px color-mix(in srgb, var(--kumkum) 18%, transparent),
+      0 0 12px 2px color-mix(in srgb, var(--kumkum) 22%, transparent);
+  }
+}
+
+/* ============================================================
+   Reduced motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

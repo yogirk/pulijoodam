@@ -83,14 +83,14 @@ describe('AudioEngine', () => {
 
   it('creates AudioContext lazily on first sound call', async () => {
     const { audioEngine } = await import('./AudioEngine');
-    audioEngine.playPlace('traditional');
+    audioEngine.playPlace('light');
     expect(MockAudioContext).toHaveBeenCalledTimes(1);
   });
 
   it('reuses existing AudioContext on subsequent calls', async () => {
     const { audioEngine } = await import('./AudioEngine');
-    audioEngine.playPlace('traditional');
-    audioEngine.playPlace('modern');
+    audioEngine.playPlace('light');
+    audioEngine.playPlace('dark');
     expect(MockAudioContext).toHaveBeenCalledTimes(1);
   });
 
@@ -100,7 +100,7 @@ describe('AudioEngine', () => {
     MockAudioContext.mockReturnValueOnce(mockCtx);
 
     const { audioEngine } = await import('./AudioEngine');
-    audioEngine.playPlace('traditional');
+    audioEngine.playPlace('light');
     expect(mockCtx.resume).toHaveBeenCalled();
   });
 
@@ -110,7 +110,7 @@ describe('AudioEngine', () => {
       MockAudioContext.mockReturnValueOnce(mockCtx);
 
       const { audioEngine } = await import('./AudioEngine');
-      audioEngine.playPlace('traditional');
+      audioEngine.playPlace('light');
 
       expect(mockCtx.createOscillator).toHaveBeenCalled();
       expect(mockCtx.createGain).toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe('AudioEngine', () => {
       MockAudioContext.mockReturnValueOnce(mockCtx);
 
       const { audioEngine } = await import('./AudioEngine');
-      audioEngine.playSlide('traditional');
+      audioEngine.playSlide('light');
 
       expect(mockCtx.createOscillator).toHaveBeenCalled();
       expect(mockCtx.createGain).toHaveBeenCalled();
@@ -132,7 +132,7 @@ describe('AudioEngine', () => {
       MockAudioContext.mockReturnValueOnce(mockCtx);
 
       const { audioEngine } = await import('./AudioEngine');
-      audioEngine.playCapture('traditional');
+      audioEngine.playCapture('light');
 
       expect(mockCtx.createOscillator).toHaveBeenCalled();
       expect(mockCtx.createGain).toHaveBeenCalled();
@@ -143,7 +143,7 @@ describe('AudioEngine', () => {
       MockAudioContext.mockReturnValueOnce(mockCtx);
 
       const { audioEngine } = await import('./AudioEngine');
-      audioEngine.playWin('traditional');
+      audioEngine.playWin('light');
 
       expect(mockCtx.createOscillator).toHaveBeenCalled();
       expect(mockCtx.createGain).toHaveBeenCalled();
@@ -154,7 +154,7 @@ describe('AudioEngine', () => {
       MockAudioContext.mockReturnValueOnce(mockCtx);
 
       const { audioEngine } = await import('./AudioEngine');
-      audioEngine.playLoss('traditional');
+      audioEngine.playLoss('light');
 
       expect(mockCtx.createOscillator).toHaveBeenCalled();
       expect(mockCtx.createGain).toHaveBeenCalled();
@@ -165,7 +165,7 @@ describe('AudioEngine', () => {
       MockAudioContext.mockReturnValueOnce(mockCtx);
 
       const { audioEngine } = await import('./AudioEngine');
-      audioEngine.playIllegal('traditional');
+      audioEngine.playIllegal('light');
 
       expect(mockCtx.createOscillator).toHaveBeenCalled();
       expect(mockCtx.createGain).toHaveBeenCalled();
@@ -180,7 +180,7 @@ describe('AudioEngine', () => {
       MockAudioContext.mockReturnValueOnce(mockCtx);
 
       const { audioEngine } = await import('./AudioEngine');
-      audioEngine.playCapture('traditional', 0);
+      audioEngine.playCapture('light', 0);
 
       // First frequency.setValueAtTime call provides the base frequency
       const baseFreq = mockOsc.frequency.setValueAtTime.mock.calls[0]?.[0];
@@ -198,8 +198,8 @@ describe('AudioEngine', () => {
       MockAudioContext.mockReturnValueOnce(mockCtx);
 
       const { audioEngine } = await import('./AudioEngine');
-      audioEngine.playCapture('traditional', 0);
-      audioEngine.playCapture('traditional', 2);
+      audioEngine.playCapture('light', 0);
+      audioEngine.playCapture('light', 2);
 
       const freq0 = mockOsc0.frequency.setValueAtTime.mock.calls[0]?.[0] ?? 0;
       const freq2 = mockOsc2.frequency.setValueAtTime.mock.calls[0]?.[0] ?? 0;
@@ -215,7 +215,7 @@ describe('AudioEngine', () => {
       MockAudioContext.mockReturnValueOnce(mockCtx);
 
       const { audioEngine } = await import('./AudioEngine');
-      audioEngine.playPlace('traditional');
+      audioEngine.playPlace('light');
 
       expect(mockOsc.type).toBe('sine');
     });
@@ -227,7 +227,7 @@ describe('AudioEngine', () => {
       MockAudioContext.mockReturnValueOnce(mockCtx);
 
       const { audioEngine } = await import('./AudioEngine');
-      audioEngine.playPlace('modern');
+      audioEngine.playPlace('dark');
 
       expect(mockOsc.type).toBe('triangle');
     });
