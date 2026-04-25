@@ -60,9 +60,13 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
     <div ref={dropdownRef} className="relative" data-testid="settings-dropdown">
       <button
         onClick={() => setIsOpen(o => !o)}
-        className="p-2 rounded-lg transition-colors"
-        style={{ color: 'var(--text-secondary)' }}
-        aria-label="Settings"
+        className="rounded-lg transition-colors flex items-center justify-center"
+        style={{
+          color: 'var(--ink-mute)',
+          width: 44,
+          height: 44,
+        }}
+        aria-label={t.settings.title}
         aria-expanded={isOpen}
         aria-haspopup="true"
         data-testid="settings-gear-btn"
@@ -72,11 +76,8 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
 
       {isOpen && (
         <div
-          className="absolute right-0 top-full mt-1 rounded-lg shadow-xl p-3 min-w-[180px] z-50"
-          style={{
-            backgroundColor: 'var(--bg-secondary)',
-            border: '1px solid color-mix(in srgb, var(--text-secondary) 30%, transparent)',
-          }}
+          className="card-elev absolute right-0 top-full mt-2 p-4 min-w-[220px] z-50"
+          style={{ boxShadow: 'var(--shadow-lg)' }}
         >
           {/* Theme toggle */}
           <div className="flex items-center justify-between mb-3">

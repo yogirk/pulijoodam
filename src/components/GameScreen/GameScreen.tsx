@@ -1,15 +1,14 @@
-import { useState } from 'react';
 import { useGame } from '../../hooks/useGame';
 import { useAIGame } from '../../hooks/useAIGame';
 import { useAnimationQueue } from '../../hooks/useAnimationQueue';
 import { useSettings } from '../../hooks/useSettings';
 import { Board } from '../Board/Board';
 import { ScreenReaderAnnouncer } from '../Board/ScreenReaderAnnouncer';
-import { TurnIndicator } from './TurnIndicator';
 import { GameOverOverlay } from './GameOverOverlay';
 import { SettingsDropdown } from '../Settings/SettingsDropdown';
+import { Brand } from '../atoms/Brand';
+import { CornerOrnament } from '../atoms/CornerOrnament';
 import { WIN_CAPTURES, type Role } from '../../engine';
-import { MoveHistory } from './MoveHistory';
 import type { AIDifficulty } from '../../engine/ai/types';
 
 interface GameScreenProps {
@@ -18,7 +17,11 @@ interface GameScreenProps {
   onStartTutorial?: () => void;
 }
 
-/** Shared game board UI -- accepts the hook return values as props. */
+/**
+ * Shared game-board chrome. Rails are rendered as placeholder slots —
+ * commit B replaces them with full SidePanel atoms (identity ribbon,
+ * stats, "YOUR TURN •" indicator, accordions for rules and history).
+ */
 function GameBoard({
   game,
   isAIThinking,
@@ -30,10 +33,8 @@ function GameBoard({
   onBackToMenu?: () => void;
   onStartTutorial?: () => void;
 }) {
-  const { theme, soundEnabled } = useSettings();
+  const { theme, soundEnabled, t, lang } = useSettings();
   const animationState = useAnimationQueue(game.lastEvents, soundEnabled, theme);
-  const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(true);
 
   const {
     gameState,
@@ -49,108 +50,145 @@ function GameBoard({
     onNewGame,
   } = game;
 
-  // Both AI thinking and animations gate user input
   const inputDisabled = isAIThinking || animationState.isAnimating;
+
+  // Turn caption — italic action prompt that appears below the move counter.
+  // In commit B this becomes the "YOUR TURN •" ribbon on the active rail.
+  let turnCaption = '';
+  if (gameState.chainJumpInProgress !== null) {
+    turnCaption = t.game.chainPossible;
+  } else if (gameState.phase === 'placement' && gameState.currentTurn === 'goat') {
+    turnCaption = t.turn.placeAGoat;
+  } else {
+    turnCaption = t.turn.moveAPiece;
+  }
 
   return (
     <div
-      className="h-[100dvh] w-screen overflow-hidden flex flex-col font-sans"
-      style={{ backgroundColor: 'var(--bg-primary)' }}
+      className="h-[100dvh] w-screen overflow-hidden flex flex-col"
+      style={{ backgroundColor: 'var(--paper)', color: 'var(--ink)' }}
     >
-      {/* 1. Dedicated Top Header */}
-      <header className="h-14 lg:h-16 flex-none px-4 lg:px-6 flex items-center justify-between border-b shadow-sm z-10" style={{ borderColor: 'var(--board-line)', backgroundColor: 'var(--bg-secondary)' }}>
-        <div className="flex-1 flex items-center">
+      {/* Header */}
+      <header
+        className="flex-none flex items-center justify-between px-4 lg:px-6"
+        style={{
+          height: 56,
+          borderBottom: '1px solid var(--rule-soft)',
+          backgroundColor: 'var(--paper-2)',
+        }}
+      >
+        <div className="flex-1 flex items-center gap-3 min-w-0">
           {onBackToMenu && (
             <button
+              data-testid="back-to-menu-btn"
               onClick={onBackToMenu}
-              className="px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
-              style={{ color: 'var(--text-secondary)' }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+              className="btn btn-quiet"
+              style={{ minHeight: 44, padding: '6px 10px', fontSize: 13 }}
+              aria-label={t.common.back}
             >
-              <span>&larr;</span> Menu
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M 10 3 L 5 8 L 10 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className="hidden sm:inline" style={{ marginLeft: 4 }}>
+                {lang === 'te' ? 'మెను' : 'Menu'}
+              </span>
             </button>
           )}
         </div>
-        <div className="flex-1 flex items-center justify-center">
-          <h1 className="text-xl lg:text-2xl font-extrabold tracking-tight" style={{ color: 'var(--accent)' }}>Pulijoodam</h1>
+
+        <div className="flex-none flex items-center gap-3">
+          <Brand size="sm" />
+          <span className="pill" data-testid="phase-pill" style={{ marginLeft: 6 }}>
+            {gameState.phase === 'placement' ? t.phase.placement : t.phase.movement}
+          </span>
         </div>
+
         <div className="flex-1 flex items-center justify-end">
           <SettingsDropdown onStartTutorial={onStartTutorial} />
         </div>
       </header>
 
-      {/* Mobile match status bar — replaces sidebar info on small screens */}
+      {/* Mobile capture/pool strip — under header on small screens */}
       <div
-        className="flex lg:hidden items-center justify-center gap-3 px-4 py-1.5 border-b flex-none"
-        style={{ borderColor: 'var(--board-line)', backgroundColor: 'var(--bg-secondary)' }}
+        className="flex lg:hidden items-center justify-center gap-3 px-4 flex-none"
+        style={{
+          height: 40,
+          borderBottom: '1px solid var(--rule-soft)',
+          backgroundColor: 'var(--paper-2)',
+        }}
       >
         {gameState.phase === 'placement' && (
-          <div
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold"
-            style={{ backgroundColor: 'rgba(0,0,0,0.25)', color: 'var(--text-primary)' }}
-          >
-            <span className="uppercase tracking-wider text-[10px]" style={{ color: 'var(--text-secondary)' }}>Pool</span>
-            <span>{gameState.goatsInPool}</span>
-          </div>
+          <span className="pill">
+            <span style={{ color: 'var(--ink-mute)' }}>{t.common.pool}</span>
+            <span className="t-mono-ui" style={{ marginLeft: 6, color: 'var(--ink)', fontWeight: 600 }}>
+              {gameState.goatsInPool}
+            </span>
+          </span>
         )}
-        <div
-          className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold"
+        <span
+          className={`pill ${gameState.goatsCaptured > 0 ? 'pill-kumkum' : ''}`}
           style={{
-            backgroundColor: 'rgba(0,0,0,0.25)',
-            color: gameState.goatsCaptured > 0 ? 'var(--status-error)' : 'var(--text-primary)',
-            outline: gameState.goatsCaptured > 0 ? '1px solid rgba(255,100,100,0.3)' : 'none',
-            animation: gameState.goatsCaptured >= WIN_CAPTURES - 3 ? 'danger-pulse 2s ease-in-out infinite' : 'none',
+            animation:
+              gameState.goatsCaptured >= WIN_CAPTURES - 3
+                ? 'danger-pulse 2s ease-in-out infinite'
+                : 'none',
           }}
         >
-          <span className="uppercase tracking-wider text-[10px]" style={{ color: 'var(--text-secondary)' }}>Captured</span>
-          <span>{gameState.goatsCaptured} / {WIN_CAPTURES}</span>
-        </div>
-        {isAIThinking && (
-          <span className="text-xs font-bold tracking-wider animate-pulse" style={{ color: 'var(--accent)' }}>AI Thinking...</span>
-        )}
+          <span>{t.common.captured}</span>
+          <span className="t-mono-ui" style={{ marginLeft: 6, fontWeight: 700 }}>
+            {gameState.goatsCaptured} / {WIN_CAPTURES}
+          </span>
+        </span>
       </div>
 
-      {/* 2. Main Middle Section: Sidebars + Hero Board */}
-      <main className="flex-1 min-h-0 flex relative">
+      {/* Main — 280/1fr/280 grid on desktop, single column below */}
+      <main
+        className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-4 lg:gap-6 p-4 lg:px-8 lg:py-6"
+      >
 
-        {/* Left Sidebar (Collapsible) - Hidden on Mobile */}
+        {/* Left rail — placeholder (commit B: SidePanel for tigers) */}
         <aside
-          className="hidden lg:flex h-full border-r flex flex-col transition-all duration-300 ease-in-out shrink-0"
-          style={{ width: leftOpen ? '320px' : '48px', borderColor: 'var(--board-line)', backgroundColor: 'var(--bg-secondary)' }}
+          className="hidden lg:flex card flex-col"
+          data-testid="left-rail"
+          style={{ padding: 20, alignSelf: 'stretch' }}
+          aria-label={t.common.tigers}
         >
-          {leftOpen ? (
-            <div className="flex-1 flex flex-col overflow-y-auto scrollbar-hide w-[320px] p-6 slide-right">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--text-secondary)' }}>The Ancient Hunt</h2>
-                <button onClick={() => setLeftOpen(false)} className="px-2 py-1 rounded hover:bg-white/10 transition-colors cursor-pointer font-bold" style={{ color: 'var(--text-secondary)' }}>
-                  &#x25C0;
-                </button>
-              </div>
-              <div className="flex flex-col gap-6 text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-                <p><strong>Goal:</strong> The Tigers must hunt and capture {WIN_CAPTURES} Goats. The Goats must trap the Tigers so they cannot move.</p>
-                <div className="w-full h-px opacity-30" style={{ backgroundColor: 'var(--board-line)' }} />
-                <p><strong>Placement:</strong> Goats are placed one by one onto the board intersections. Tigers can move along the lines.</p>
-                <div className="w-full h-px opacity-30" style={{ backgroundColor: 'var(--board-line)' }} />
-                <p><strong>Capture:</strong> A Tiger captures a Goat by jumping over it into an empty space, exactly like Checkers.</p>
-              </div>
-            </div>
-          ) : (
-            <button className="flex-1 w-full flex flex-col items-center pt-6 hover:bg-white/5 transition-colors cursor-pointer" onClick={() => setLeftOpen(true)} style={{ color: 'var(--text-secondary)' }}>
-              <span className="font-bold">&#x25B6;</span>
-              <span className="mt-8 text-xs font-bold tracking-[0.2em] transform -rotate-90 origin-center whitespace-nowrap">RULES</span>
-            </button>
-          )}
+          <div className="t-eyebrow">{t.common.tigers}</div>
+          <div className="t-display" style={{ fontSize: 22, color: 'var(--ink)', marginTop: 6 }}>
+            {gameState.currentTurn === 'tiger' ? t.turn.yours : t.turn.theirs}
+          </div>
+          <div className="rule-h-solid" style={{ margin: '14px 0' }} />
+          <div style={{ fontSize: 12, color: 'var(--ink-mute)', fontStyle: 'italic' }}>
+            (rail · commit B fills this in)
+          </div>
         </aside>
 
-        {/* Center Hero Board */}
-        <section className="flex-1 h-full min-w-0 flex items-center justify-center p-2 lg:p-8 relative">
-          <div className="w-full h-full max-h-[85vh] flex items-center justify-center fade-in" style={{ animation: animationState.shaking ? 'board-shake 200ms ease-out' : 'none' }}>
+        {/* Board — card-elev with stipple texture and four corner ornaments */}
+        <section
+          className="card-elev stone-texture flex items-center justify-center min-w-0 relative"
+          style={{
+            padding: 16,
+            animation: animationState.shaking ? 'board-shake 200ms ease-out' : 'none',
+          }}
+        >
+          <div className="absolute" style={{ top: 12, left: 12 }}>
+            <CornerOrnament size={22} corner="tl" />
+          </div>
+          <div className="absolute" style={{ top: 12, right: 12 }}>
+            <CornerOrnament size={22} corner="tr" />
+          </div>
+          <div className="absolute" style={{ bottom: 12, left: 12 }}>
+            <CornerOrnament size={22} corner="bl" />
+          </div>
+          <div className="absolute" style={{ bottom: 12, right: 12 }}>
+            <CornerOrnament size={22} corner="br" />
+          </div>
+          <div className="w-full h-full flex items-center justify-center">
             <Board
               gameState={gameState}
               selectedNode={selectedNode}
               legalMoves={legalMoves}
-              onNodeTap={inputDisabled ? () => { } : onNodeTap}
+              onNodeTap={inputDisabled ? () => {} : onNodeTap}
               chainJumpInProgress={gameState.chainJumpInProgress}
               animationState={animationState}
               lastEvents={game.lastEvents}
@@ -158,73 +196,129 @@ function GameBoard({
           </div>
         </section>
 
-        {/* Right Sidebar (Collapsible) - Hidden on Mobile */}
+        {/* Right rail — placeholder (commit B: SidePanel for goats + move history) */}
         <aside
-          className="hidden lg:flex h-full border-l flex flex-col transition-all duration-300 ease-in-out shrink-0"
-          style={{ width: rightOpen ? '320px' : '48px', borderColor: 'var(--board-line)', backgroundColor: 'var(--bg-secondary)' }}
+          className="hidden lg:flex card flex-col"
+          data-testid="right-rail"
+          style={{ padding: 20, alignSelf: 'stretch' }}
+          aria-label={t.common.goats}
         >
-          {rightOpen ? (
-            <div className="flex-1 flex flex-col overflow-y-auto scrollbar-hide w-[320px] p-6 slide-left">
-              <div className="flex justify-between items-center mb-6">
-                <button onClick={() => setRightOpen(false)} className="px-2 py-1 rounded hover:bg-white/10 transition-colors cursor-pointer font-bold" style={{ color: 'var(--text-secondary)' }}>
-                  &#x25B6;
-                </button>
-                <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Match Status</h2>
+          <div className="t-eyebrow">{t.common.goats}</div>
+          <div className="t-display" style={{ fontSize: 22, color: 'var(--ink)', marginTop: 6 }}>
+            {gameState.currentTurn === 'goat' ? t.turn.yours : t.turn.theirs}
+          </div>
+          <div className="rule-h-solid" style={{ margin: '14px 0' }} />
+          <div className="flex flex-col gap-3">
+            {gameState.phase === 'placement' && (
+              <div className="flex items-baseline justify-between">
+                <span style={{ fontSize: 12, color: 'var(--ink-mute)', letterSpacing: '0.04em' }}>
+                  {t.common.pool}
+                </span>
+                <span className="t-display" style={{ fontSize: 28, color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
+                  {gameState.goatsInPool}
+                </span>
               </div>
-
-              <div className="flex flex-col gap-3 mb-8">
-                <div className="flex justify-between items-center p-4 rounded-xl shadow-inner" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
-                  <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Goats to Place</span>
-                  <span className="text-xl font-bold" style={{ color: '#ffffff' }}>{gameState.goatsInPool}</span>
-                </div>
-                <div className="flex justify-between items-center p-4 rounded-xl shadow-inner" style={{ backgroundColor: 'rgba(0,0,0,0.2)', outline: gameState.goatsCaptured > 0 ? '1px solid rgba(255,100,100,0.3)' : 'none', animation: gameState.goatsCaptured >= WIN_CAPTURES - 3 ? 'danger-pulse 2s ease-in-out infinite' : 'none' }}>
-                  <span className="text-sm font-semibold" style={{ color: 'var(--status-danger)' }}>Captured Goats</span>
-                  <span className="text-xl font-bold" style={{ color: gameState.goatsCaptured > 0 ? 'var(--status-danger)' : '#ffffff' }}>{gameState.goatsCaptured} / {WIN_CAPTURES}</span>
-                </div>
-              </div>
-
-              <div className="w-full h-px opacity-30 mb-8" style={{ backgroundColor: 'var(--board-line)' }} />
-
-              <h3 className="text-xs font-bold uppercase tracking-widest text-center mb-4" style={{ color: 'var(--text-secondary)' }}>Move History</h3>
-              <div className="flex-1 flex flex-col p-2 rounded-xl min-h-0" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
-                <MoveHistory moveHistory={gameState.moveHistory} />
-              </div>
+            )}
+            <div className="flex items-baseline justify-between">
+              <span style={{ fontSize: 12, color: 'var(--ink-mute)', letterSpacing: '0.04em' }}>
+                {t.common.captured}
+              </span>
+              <span
+                className="t-display"
+                style={{
+                  fontSize: 28,
+                  color: gameState.goatsCaptured > 0 ? 'var(--kumkum)' : 'var(--ink)',
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {gameState.goatsCaptured}
+                <span style={{ color: 'var(--ink-mute)', fontSize: 18 }}> / {WIN_CAPTURES}</span>
+              </span>
             </div>
-          ) : (
-            <button className="flex-1 w-full flex flex-col items-center pt-6 hover:bg-white/5 transition-colors cursor-pointer" onClick={() => setRightOpen(true)} style={{ color: 'var(--text-secondary)' }}>
-              <span className="font-bold">&#x25C0;</span>
-              <span className="mt-8 text-xs font-bold tracking-[0.2em] transform -rotate-90 origin-center whitespace-nowrap">STATUS</span>
-            </button>
-          )}
+          </div>
+          <div style={{ marginTop: 'auto', fontSize: 12, color: 'var(--ink-mute)', fontStyle: 'italic' }}>
+            (rail · commit B fills this in)
+          </div>
         </aside>
-
       </main>
 
-      {/* 3. Dedicated Bottom Dashboard */}
-      <footer className="h-20 lg:h-24 flex-none px-4 lg:px-8 flex items-center justify-between border-t shadow-[0_-4px_20px_rgba(0,0,0,0.2)] z-10" style={{ borderColor: 'var(--board-line)', backgroundColor: 'var(--bg-secondary)' }}>
-        <div className="flex-1 flex items-center justify-start min-w-0">
-          <TurnIndicator currentTurn={gameState.currentTurn} phase={gameState.phase} chainJumpInProgress={gameState.chainJumpInProgress !== null} />
+      {/* Footer */}
+      <footer
+        className="flex-none flex items-center justify-between gap-3 px-4 lg:px-8"
+        style={{
+          height: 72,
+          borderTop: '1px solid var(--rule-soft)',
+          backgroundColor: 'var(--paper-2)',
+        }}
+      >
+        <div className="flex-1 flex items-center gap-4 min-w-0">
+          <span className="t-mono-ui" style={{ fontSize: 13, color: 'var(--ink-mute)' }}>
+            {t.common.moves} · {gameState.moveHistory.length}
+          </span>
         </div>
 
-        <div className="hidden lg:flex flex-1 flex-col items-center justify-center gap-1 min-w-0">
-          {isAIThinking && <span className="text-sm font-bold tracking-wider animate-pulse" style={{ color: 'var(--accent)' }}>AI Thinking...</span>}
-        </div>
-
-        {/* Center slot: AI thinking on desktop (mobile shows it in status bar above) */}
-
-        <div className="flex-1 flex items-center justify-end gap-2 lg:gap-4 min-w-0">
-          {gameState.chainJumpInProgress !== null && !inputDisabled && (
-            <button onClick={onEndChain} className="px-3 lg:px-6 py-2 font-bold rounded-xl transition-transform hover:scale-[1.02] text-sm lg:text-base whitespace-nowrap animate-pulse" style={{ backgroundColor: 'var(--accent)', color: '#000000', boxShadow: '0 0 14px color-mix(in srgb, var(--accent) 50%, transparent)' }}>End Turn</button>
+        <div className="flex-1 hidden md:flex items-center justify-center min-w-0">
+          {isAIThinking ? (
+            <span
+              className="t-caption"
+              style={{ fontSize: 14, color: 'var(--ochre-deep)' }}
+              data-testid="ai-thinking"
+            >
+              {t.game.aiThinking}
+            </span>
+          ) : (
+            turnCaption && (
+              <span className="t-caption" style={{ fontSize: 14 }}>
+                {turnCaption}
+              </span>
+            )
           )}
-          <button onClick={onUndo} disabled={!canUndo || inputDisabled} className="px-4 lg:px-6 py-2 font-semibold rounded-xl transition-all hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent text-sm lg:text-base" style={{ backgroundColor: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)' }}>Undo</button>
-          <button onClick={onRedo} disabled={!canRedo || inputDisabled} className="px-4 lg:px-6 py-2 font-semibold rounded-xl transition-all hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent text-sm lg:text-base hidden sm:block" style={{ backgroundColor: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)' }}>Redo</button>
+        </div>
+
+        <div className="flex-1 flex items-center justify-end gap-2 min-w-0">
+          {gameState.chainJumpInProgress !== null && !inputDisabled && (
+            <button
+              data-testid="end-chain-btn"
+              onClick={onEndChain}
+              className="btn btn-primary"
+              style={{ padding: '10px 18px', fontSize: 13 }}
+            >
+              {t.game.endTurn}
+            </button>
+          )}
+          <button
+            data-testid="undo-btn"
+            onClick={onUndo}
+            disabled={!canUndo || inputDisabled}
+            className="btn btn-ghost"
+            style={{
+              padding: '10px 14px',
+              fontSize: 13,
+              opacity: !canUndo || inputDisabled ? 0.4 : 1,
+            }}
+          >
+            {t.game.undo}
+          </button>
+          <button
+            data-testid="redo-btn"
+            onClick={onRedo}
+            disabled={!canRedo || inputDisabled}
+            className="btn btn-ghost hidden sm:inline-flex"
+            style={{
+              padding: '10px 14px',
+              fontSize: 13,
+              opacity: !canRedo || inputDisabled ? 0.4 : 1,
+            }}
+          >
+            {t.game.redo}
+          </button>
         </div>
       </footer>
 
       {/* Screen reader announcements */}
       <ScreenReaderAnnouncer lastEvents={game.lastEvents} gameState={gameState} />
 
-      {/* Game over overlay -- only show after animation completes */}
+      {/* Game over overlay */}
       {status !== 'ongoing' && !animationState.isAnimating && (
         <GameOverOverlay status={status} onNewGame={onNewGame} />
       )}
@@ -232,13 +326,17 @@ function GameBoard({
   );
 }
 
-/** Local 2-player game screen. */
-function LocalGameScreen({ onBackToMenu, onStartTutorial }: { onBackToMenu?: () => void; onStartTutorial?: () => void }) {
+function LocalGameScreen({
+  onBackToMenu,
+  onStartTutorial,
+}: {
+  onBackToMenu?: () => void;
+  onStartTutorial?: () => void;
+}) {
   const game = useGame();
   return <GameBoard game={game} isAIThinking={false} onBackToMenu={onBackToMenu} onStartTutorial={onStartTutorial} />;
 }
 
-/** AI game screen -- spins up worker. */
 function AIGameScreen({
   aiConfig,
   onBackToMenu,
@@ -252,10 +350,6 @@ function AIGameScreen({
   return <GameBoard game={game} isAIThinking={game.isAIThinking} onBackToMenu={onBackToMenu} onStartTutorial={onStartTutorial} />;
 }
 
-/**
- * GameScreen -- renders either local or AI game depending on aiConfig.
- * Uses separate components so each hook is called unconditionally within its component.
- */
 export function GameScreen({ aiConfig, onBackToMenu, onStartTutorial }: GameScreenProps) {
   if (aiConfig) {
     return <AIGameScreen aiConfig={aiConfig} onBackToMenu={onBackToMenu} onStartTutorial={onStartTutorial} />;
