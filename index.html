@@ -18,8 +18,11 @@
           // Migrate legacy theme names (traditional/modern) → light default
           if (t !== 'light' && t !== 'dark') t = 'light';
           document.documentElement.dataset.theme = t;
+          var l = s && s.lang;
+          document.documentElement.lang = (l === 'te') ? 'te' : 'en';
         } catch (e) {
           document.documentElement.dataset.theme = 'light';
+          document.documentElement.lang = 'en';
         }
       })();
     </script>
