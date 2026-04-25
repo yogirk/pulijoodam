@@ -129,7 +129,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               {t.settings.pieces}
             </span>
             <button
-              onClick={() => setPieceStyle(pieceStyle === 'character' ? 'classic' : 'character')}
+              onClick={() => setPieceStyle(pieceStyle === 'stone' ? 'heads' : 'stone')}
               className="px-2 py-1 text-xs rounded font-medium transition-colors"
               style={{
                 backgroundColor: 'var(--accent)',
@@ -137,7 +137,7 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               }}
               data-testid="piece-style-toggle-btn"
             >
-              {pieceStyle === 'character' ? t.settings.pieceCharacter : t.settings.pieceClassic}
+              {pieceStyle === 'stone' ? t.settings.pieceStone : t.settings.pieceHeads}
             </button>
           </div>
 
