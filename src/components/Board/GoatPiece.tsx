@@ -126,8 +126,8 @@ export const GoatPiece = memo(function GoatPiece({
             : 'transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 200ms ease-out',
           opacity: isFading ? 0 : 1,
           transform: isBeingDragged
-            ? `translate(${x}px, ${y}px) scale(1.2)`
-            : `translate(${x}px, ${y}px)`,
+            ? `translate(${x}px, ${y}px) scale(1.5)`
+            : `translate(${x}px, ${y}px) scale(1.25)`,
           filter: isBeingDragged
             ? 'drop-shadow(0 4px 10px rgba(0,0,0,0.4))'
             : isGlowing

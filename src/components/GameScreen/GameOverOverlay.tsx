@@ -107,9 +107,8 @@ export function GameOverOverlay({
       data-testid="game-over-overlay"
     >
       <div
-        className="card-elev stone-texture relative w-full max-w-[540px] text-center"
+        className="card-elev stone-texture relative w-full max-w-[540px] text-center px-6 py-9 sm:px-10 sm:py-12"
         style={{
-          padding: '48px 40px',
           animation: 'overlay-card-enter 400ms cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
@@ -162,9 +161,8 @@ export function GameOverOverlay({
         )}
 
         <div
-          className="flex justify-center"
+          className="flex justify-center gap-5 sm:gap-8"
           style={{
-            gap: 32,
             padding: '18px 0',
             borderTop: '1px solid var(--rule-soft, var(--rule))',
             borderBottom: '1px solid var(--rule-soft, var(--rule))',
