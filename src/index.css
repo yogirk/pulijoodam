@@ -326,7 +326,8 @@ body {
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 500;
-  padding: 6px 14px;
+  padding: 0 16px;
+  min-height: 44px;
   border-radius: 6px;
   cursor: pointer;
   color: var(--ink-mute);

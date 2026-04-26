@@ -2,7 +2,7 @@ import { memo, useState } from 'react';
 import type { Piece } from '../../engine/types';
 
 interface BoardNodeProps {
-  node: { id: number; x: number; y: number };
+  node: { id: number; label: string; x: number; y: number };
   piece?: Piece | null;
   isSelected: boolean;
   isLegalMove: boolean;
@@ -10,27 +10,15 @@ interface BoardNodeProps {
 }
 
 function buildAriaLabel(
-  nodeId: number,
+  label: string,
   piece: Piece | null | undefined,
   isSelected: boolean,
   isLegalMove: boolean,
 ): string {
-  const parts: string[] = [`Node ${nodeId}`];
-
-  if (piece) {
-    parts.push(piece);
-  } else {
-    parts.push('empty');
-  }
-
-  if (isSelected) {
-    parts.push('selected');
-  }
-
-  if (isLegalMove) {
-    parts.push('legal move');
-  }
-
+  const parts: string[] = [label];
+  parts.push(piece ?? 'empty');
+  if (isSelected) parts.push('selected');
+  if (isLegalMove) parts.push('legal move');
   return parts.join(', ');
 }
 
@@ -39,9 +27,8 @@ function buildAriaLabel(
  *
  * Hit-testing is NOT done here. The SVG-level pointer handler in `useDrag`
  * resolves taps to the nearest node by Voronoi/Euclidean distance, so this
- * `<g>` is intentionally pointer-transparent (no overlapping rects, no
- * locked-out neighbors in dense rows). Keyboard activation still works:
- * tabbing focuses the `<g>`; Enter/Space invokes `onClick`.
+ * `<g>` is intentionally pointer-transparent. Keyboard activation still
+ * works: tabbing focuses the `<g>`; Enter/Space invokes `onClick`.
  */
 export const BoardNode = memo(function BoardNode({ node, piece, isSelected, isLegalMove, onClick }: BoardNodeProps) {
   const [isFocusVisible, setIsFocusVisible] = useState(false);
@@ -61,30 +48,58 @@ export const BoardNode = memo(function BoardNode({ node, piece, isSelected, isLe
       onBlur={() => setIsFocusVisible(false)}
       tabIndex={0}
       role="button"
-      aria-label={buildAriaLabel(node.id, piece, isSelected, isLegalMove)}
+      aria-label={buildAriaLabel(node.label, piece, isSelected, isLegalMove)}
       aria-pressed={isSelected}
       style={{ outline: 'none', pointerEvents: 'none' }}
     >
-      {/* Keyboard focus ring (SVG outline fallback) */}
+      {/* Keyboard focus ring — ochre dashed circle */}
       {isFocusVisible && (
-        <circle r={20} fill="none" stroke="var(--accent)" strokeWidth={2} opacity={0.9} />
+        <circle
+          r={18}
+          fill="none"
+          stroke="var(--ochre)"
+          strokeWidth={1.4}
+          strokeDasharray="2 3"
+          opacity={0.9}
+        />
       )}
-      {/* Visual node socket: Bevel / indent edge */}
-      <circle r={14} fill="rgba(255,255,255,0.03)" transform="translate(0, 1)" />
-      <circle r={13} fill="rgba(0,0,0,0.5)" />
 
-      {/* Deep pocket (inner shadow illusion) */}
-      <circle r={11} fill="var(--bg-primary)" stroke="rgba(0,0,0,0.8)" strokeWidth={2} />
+      {/* Legal-move halo — jade soft fill + dashed jade ring (under socket) */}
+      {isLegalMove && !isSelected && (
+        <>
+          <circle r={14} fill="var(--jade-soft)" />
+          <circle
+            r={14}
+            fill="none"
+            stroke="var(--jade)"
+            strokeWidth={1.2}
+            strokeDasharray="2 3"
+            opacity={0.85}
+          />
+        </>
+      )}
 
-      {/* Inner active/empty fill with subtle glow for legal moves */}
+      {/* Selected ring — ochre dashed (drawn behind socket so the piece reads on top) */}
+      {isSelected && (
+        <circle
+          r={20}
+          fill="none"
+          stroke="var(--ochre)"
+          strokeWidth={1.4}
+          strokeDasharray="2 3"
+          opacity={0.95}
+        />
+      )}
+
+      {/* Carved divot — paper-3 socket with rule outline + small ink dot */}
       <circle
-        r={8}
-        fill={isSelected ? 'var(--node-selected)' : isLegalMove ? 'rgba(0, 180, 160, 0.6)' : 'rgba(0,0,0,0.4)'}
-        className={isLegalMove && !isSelected ? 'animate-pulse' : ''}
-        style={{ transition: 'fill 300ms ease, opacity 300ms ease' }}
+        r={4.5}
+        fill="var(--paper-3)"
+        stroke="var(--rule)"
+        strokeWidth={0.7}
+        opacity={0.85}
       />
-      {/* Inner Highlight for Depth */}
-      <circle r={7} fill="transparent" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
+      <circle r={1.6} fill="var(--rule)" opacity={0.55} />
     </g>
   );
 });

@@ -175,31 +175,29 @@ export const Board = memo(function Board({
       data-testid="game-board"
       onPointerMove={handlers.onPointerMove}
       onPointerUp={handlers.onPointerUp}
-      className="drop-shadow-2xl"
     >
-      {/* Layer 0: Physical Board Arena Surface */}
+      {/* Layer 0: Stone slab surface */}
       <rect
         x="-30"
         y="-30"
         width="660"
         height="480"
-        rx="24"
-        fill="var(--bg-secondary)"
-        stroke="var(--board-line)"
-        strokeWidth="4"
-        opacity={0.9}
-        className="shadow-2xl"
-      />
-      {/* Inner decorative rim for the board base */}
-      <rect
-        x="-20"
-        y="-20"
-        width="640"
-        height="460"
         rx="20"
-        fill="transparent"
-        stroke="rgba(255, 255, 255, 0.05)"
-        strokeWidth="2"
+        fill="var(--paper-2)"
+        stroke="var(--rule-soft)"
+        strokeWidth="1"
+      />
+      {/* Inner inscribed border — hairline rule */}
+      <rect
+        x="-18"
+        y="-18"
+        width="636"
+        height="456"
+        rx="14"
+        fill="none"
+        stroke="var(--rule)"
+        strokeWidth="0.8"
+        opacity={0.32}
       />
 
       {/* Layer 1: edges */}
@@ -250,8 +248,9 @@ export const Board = memo(function Board({
                 key={`ripple-${animationState.placingGoat}`}
                 r={14}
                 fill="none"
-                stroke="rgba(255,255,255,0.6)"
+                stroke="var(--ochre)"
                 strokeWidth={1.5}
+                opacity={0.7}
                 style={{ animation: 'placement-ripple 300ms ease-out forwards' }}
               />
             </g>
