@@ -8,6 +8,7 @@ import { Board } from '../Board/Board';
 import { Brand } from '../atoms/Brand';
 import { CornerOrnament } from '../atoms/CornerOrnament';
 import { Eyebrow } from '../atoms/Eyebrow';
+import { MugguBorder } from '../atoms/MugguBorder';
 
 type Mode = 'ai' | 'local' | 'online';
 
@@ -73,16 +74,27 @@ export function SetupScreen({
   ];
 
   return (
+    <>
+      {/* Threshold framing: lotus-vine muggu strips along left + right edges.
+          Hoisted OUTSIDE the .anim-fade-in wrapper because that class applies
+          a `transform`, which would establish a containing block and break
+          `position: fixed`. As siblings, the strips stay fixed to the
+          viewport and continue past the fold during scroll. */}
+      <MugguBorder side="left" />
+      <MugguBorder side="right" />
+
     <div
       className="min-h-screen-safe stone-bg anim-fade-in"
       data-testid="setup-screen"
-      style={{ backgroundColor: 'var(--paper)', color: 'var(--ink)' }}
+      style={{ color: 'var(--ink)' }}
     >
       <div
         style={{
           maxWidth: 1180,
           margin: '0 auto',
           padding: 'clamp(24px, 4vw, 40px) clamp(16px, 4vw, 32px) 80px',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         {/* Top brand row — left: small ornament + established note. right: nothing. */}
@@ -406,5 +418,6 @@ export function SetupScreen({
         </div>
       </div>
     </div>
+    </>
   );
 }
