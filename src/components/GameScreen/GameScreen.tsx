@@ -318,7 +318,12 @@ function GameBoard({
 
       {/* Game over overlay */}
       {status !== 'ongoing' && !animationState.isAnimating && (
-        <GameOverOverlay status={status} onNewGame={onNewGame} />
+        <GameOverOverlay
+          status={status}
+          gameState={gameState}
+          onNewGame={onNewGame}
+          onBackToMenu={onBackToMenu}
+        />
       )}
     </div>
   );
