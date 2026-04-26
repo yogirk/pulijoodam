@@ -13,7 +13,7 @@ interface Stat {
 
 interface SidePanelProps {
   side: Role;
-  /** When true, render a "YOUR TURN •" ribbon and a thicker accent border. */
+  /** When true, render a "YOUR TURN" ribbon. */
   isTurn: boolean;
   /** When true, the panel labels itself "You". When false, "Opponent" or
    *  no label (local 2-player). When undefined → no relational label. */
@@ -24,6 +24,12 @@ interface SidePanelProps {
   testId?: string;
 }
 
+/**
+ * Side rail. Intentionally edgeless — no card, no border, no shadow —
+ * so the board (the only `card-elev` on the screen) carries the visual
+ * weight. Active turn signal lives in the ribbon and a single hairline
+ * ochre rule under the identity row, not in a panel border.
+ */
 export function SidePanel({ side, isTurn, isYou, stats, children, testId }: SidePanelProps) {
   const t = useT();
   const sideLabel = side === 'tiger' ? t.common.tigers : t.common.goats;
@@ -35,26 +41,21 @@ export function SidePanel({ side, isTurn, isYou, stats, children, testId }: Side
 
   return (
     <aside
-      className="card flex flex-col relative"
+      className="flex flex-col relative"
       data-testid={testId}
       aria-label={sideLabel}
       style={{
-        padding: 20,
-        borderColor: isTurn ? 'var(--ochre)' : 'var(--rule-soft)',
-        boxShadow: isTurn
-          ? '0 0 0 1px var(--ochre), var(--shadow-md)'
-          : 'var(--shadow-sm)',
-        transition: 'border-color 240ms ease, box-shadow 240ms ease',
+        padding: '20px 8px',
       }}
     >
-      {/* "YOUR TURN •" ribbon — appears at top-left when active */}
+      {/* "YOUR TURN" ribbon — appears at top-left when active */}
       {isTurn && (
         <div
           className="absolute"
           data-testid="turn-ribbon"
           style={{
-            top: -10,
-            left: 16,
+            top: 0,
+            left: 0,
             background: 'var(--ink)',
             color: 'var(--paper)',
             fontFamily: 'var(--font-sans)',
@@ -66,12 +67,12 @@ export function SidePanel({ side, isTurn, isYou, stats, children, testId }: Side
             borderRadius: 999,
           }}
         >
-          {t.turn.yours} •
+          {t.turn.yours}
         </div>
       )}
 
       {/* Identity row */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mt-4 mb-3">
         <PieceGlyph type={side} size={36} />
         <div>
           <div className="t-display" style={{ fontSize: 22, color: 'var(--ink)', lineHeight: 1.1 }}>
@@ -85,7 +86,18 @@ export function SidePanel({ side, isTurn, isYou, stats, children, testId }: Side
         </div>
       </div>
 
-      <hr className="rule-h-solid" style={{ marginBottom: 16 }} />
+      {/* Active-turn signal: hairline ochre rule under the identity row.
+          Inactive falls back to the standard rule-soft hairline. */}
+      <hr
+        style={{
+          height: 1,
+          border: 0,
+          background: isTurn ? 'var(--ochre)' : 'var(--rule-soft)',
+          opacity: isTurn ? 0.85 : 1,
+          marginBottom: 16,
+          transition: 'background-color 240ms ease, opacity 240ms ease',
+        }}
+      />
 
       {/* Stats — large display number paired with a quiet eyebrow label */}
       <div className="flex flex-col gap-3.5">
