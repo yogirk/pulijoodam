@@ -3,6 +3,7 @@ import { loadHistory } from './storage';
 import { useT } from '../hooks/useSettings';
 import { Eyebrow } from '../components/atoms/Eyebrow';
 import { CornerOrnament } from '../components/atoms/CornerOrnament';
+import { MugguBorder } from '../components/atoms/MugguBorder';
 
 interface HistoryScreenProps {
   onSelectGame: (record: GameRecord) => void;
@@ -56,10 +57,15 @@ export function HistoryScreen({ onSelectGame, onBackToMenu }: HistoryScreenProps
   const isEmpty = history.length === 0;
 
   return (
+    <>
+      {/* Threshold framing — same lotus-vine as the SetupScreen.
+          History is also a "doorway" the player crosses through. */}
+      <MugguBorder side="left" />
+      <MugguBorder side="right" />
+
     <div
       className="min-h-screen-safe stone-bg flex flex-col items-center"
       style={{
-        backgroundColor: 'var(--paper)',
         color: 'var(--ink)',
         padding: '32px 16px 64px',
       }}
@@ -173,6 +179,7 @@ export function HistoryScreen({ onSelectGame, onBackToMenu }: HistoryScreenProps
         </div>
       )}
     </div>
+    </>
   );
 }
 
