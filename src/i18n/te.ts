@@ -85,6 +85,8 @@ export const te: Dictionary = {
     endTurn: 'వంతు ముగించు',
     chainPossible: 'వరుస వేట — కొనసాగించు లేదా వంతు ముగించు',
     aiThinking: 'ఆలోచిస్తోంది…',
+    autoSaved: 'సేవ్ అయింది', // TODO: TE confirm
+    autoSavedHint: 'మీ ఆట సురక్షితం. మెను నుండి మళ్లీ కొనసాగించవచ్చు.', // TODO: TE confirm
   },
 
   gameOver: {

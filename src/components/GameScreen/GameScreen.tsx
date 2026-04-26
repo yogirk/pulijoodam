@@ -84,20 +84,37 @@ function GameBoard({
       >
         <div className="flex-1 flex items-center gap-3 min-w-0">
           {onBackToMenu && (
-            <button
-              data-testid="back-to-menu-btn"
-              onClick={onBackToMenu}
-              className="btn btn-quiet"
-              style={{ minHeight: 44, padding: '6px 10px', fontSize: 13 }}
-              aria-label={t.common.back}
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M 10 3 L 5 8 L 10 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <span className="hidden sm:inline" style={{ marginLeft: 4 }}>
-                {lang === 'te' ? 'మెను' : 'Menu'}
-              </span>
-            </button>
+            <>
+              <button
+                data-testid="back-to-menu-btn"
+                onClick={onBackToMenu}
+                className="btn btn-quiet"
+                style={{ minHeight: 44, padding: '6px 10px', fontSize: 13 }}
+                aria-label={t.common.back}
+                title={
+                  gameState.moveHistory.length > 0
+                    ? t.game.autoSavedHint
+                    : undefined
+                }
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M 10 3 L 5 8 L 10 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className="hidden sm:inline" style={{ marginLeft: 4 }}>
+                  {lang === 'te' ? 'మెను' : 'Menu'}
+                </span>
+              </button>
+              {gameState.moveHistory.length > 0 && (
+                <span
+                  data-testid="auto-saved-caption"
+                  className="hidden md:inline t-display-italic truncate"
+                  style={{ fontSize: 12, color: 'var(--ink-soft)' }}
+                  aria-hidden="true"
+                >
+                  {t.game.autoSaved}
+                </span>
+              )}
+            </>
           )}
         </div>
 

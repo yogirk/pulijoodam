@@ -82,6 +82,8 @@ export const en = {
     endTurn: 'End turn',
     chainPossible: 'Capture chain — keep going or end turn',
     aiThinking: 'Thinking…',
+    autoSaved: 'auto-saved',
+    autoSavedHint: 'Your hunt is saved. Resume from the menu.',
   },
 
   gameOver: {
