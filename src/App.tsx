@@ -140,7 +140,6 @@ export default function App() {
         <GameScreen
           aiConfig={aiConfig}
           onBackToMenu={handleBackToMenu}
-          onStartTutorial={() => setScreen('tutorial')}
         />
         <InstallPrompt />
       </>

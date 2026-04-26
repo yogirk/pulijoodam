@@ -36,12 +36,17 @@ export function MugguBorder({
   return (
     <svg
       aria-hidden="true"
-      className={`hidden md:block fixed top-0 ${side === 'left' ? 'left-0' : 'right-0'}`}
+      className="muggu-strip"
+      data-side={side}
       style={{
+        position: 'fixed',
+        top: 0,
+        [side]: 0,
         width,
         height: '100dvh',
         pointerEvents: 'none',
-        zIndex: 1,
+        zIndex: 5,
+        display: 'block',
       }}
       preserveAspectRatio="none"
     >

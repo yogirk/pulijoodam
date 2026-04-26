@@ -7,7 +7,12 @@ import { ScreenReaderAnnouncer } from '../Board/ScreenReaderAnnouncer';
 import { GameOverOverlay } from './GameOverOverlay';
 import { MoveHistory } from './MoveHistory';
 import { SidePanel, RailDetails } from './SidePanel';
-import { SettingsDropdown } from '../Settings/SettingsDropdown';
+import {
+  LanguageToggle,
+  PiecesToggle,
+  SoundToggle,
+  ThemeToggle,
+} from '../atoms/HeaderToggles';
 import { Brand } from '../atoms/Brand';
 import { CornerOrnament } from '../atoms/CornerOrnament';
 import { WIN_CAPTURES, type Role } from '../../engine';
@@ -16,7 +21,6 @@ import type { AIDifficulty } from '../../engine/ai/types';
 interface GameScreenProps {
   aiConfig?: { humanRole: Role; difficulty: AIDifficulty } | null;
   onBackToMenu?: () => void;
-  onStartTutorial?: () => void;
 }
 
 /**
@@ -29,14 +33,12 @@ function GameBoard({
   isAIThinking,
   humanRole,
   onBackToMenu,
-  onStartTutorial,
 }: {
   game: ReturnType<typeof useGame>;
   isAIThinking: boolean;
   /** When set, the rail for this role is labelled "You". Undefined for local 2P. */
   humanRole?: Role;
   onBackToMenu?: () => void;
-  onStartTutorial?: () => void;
 }) {
   const { theme, soundEnabled, t, lang } = useSettings();
   const animationState = useAnimationQueue(game.lastEvents, soundEnabled, theme);
@@ -125,8 +127,11 @@ function GameBoard({
           </span>
         </div>
 
-        <div className="flex-1 flex items-center justify-end">
-          <SettingsDropdown onStartTutorial={onStartTutorial} />
+        <div className="flex-1 flex items-center justify-end gap-2">
+          <SoundToggle />
+          <LanguageToggle />
+          <PiecesToggle />
+          <ThemeToggle />
         </div>
       </header>
 
@@ -348,23 +353,19 @@ function GameBoard({
 
 function LocalGameScreen({
   onBackToMenu,
-  onStartTutorial,
 }: {
   onBackToMenu?: () => void;
-  onStartTutorial?: () => void;
 }) {
   const game = useGame();
-  return <GameBoard game={game} isAIThinking={false} onBackToMenu={onBackToMenu} onStartTutorial={onStartTutorial} />;
+  return <GameBoard game={game} isAIThinking={false} onBackToMenu={onBackToMenu} />;
 }
 
 function AIGameScreen({
   aiConfig,
   onBackToMenu,
-  onStartTutorial,
 }: {
   aiConfig: { humanRole: Role; difficulty: AIDifficulty };
   onBackToMenu?: () => void;
-  onStartTutorial?: () => void;
 }) {
   const game = useAIGame(aiConfig);
   return (
@@ -373,14 +374,13 @@ function AIGameScreen({
       isAIThinking={game.isAIThinking}
       humanRole={aiConfig.humanRole}
       onBackToMenu={onBackToMenu}
-      onStartTutorial={onStartTutorial}
     />
   );
 }
 
-export function GameScreen({ aiConfig, onBackToMenu, onStartTutorial }: GameScreenProps) {
+export function GameScreen({ aiConfig, onBackToMenu }: GameScreenProps) {
   if (aiConfig) {
-    return <AIGameScreen aiConfig={aiConfig} onBackToMenu={onBackToMenu} onStartTutorial={onStartTutorial} />;
+    return <AIGameScreen aiConfig={aiConfig} onBackToMenu={onBackToMenu} />;
   }
-  return <LocalGameScreen onBackToMenu={onBackToMenu} onStartTutorial={onStartTutorial} />;
+  return <LocalGameScreen onBackToMenu={onBackToMenu} />;
 }

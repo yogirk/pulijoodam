@@ -361,6 +361,12 @@ body {
   min-height: 100dvh;
 }
 
+/* Muggu strip — hidden on mobile where horizontal space is scarce. */
+.muggu-strip { display: none !important; }
+@media (min-width: 768px) {
+  .muggu-strip { display: block !important; }
+}
+
 @media (orientation: landscape) and (max-height: 500px) {
   .game-main {
     flex-direction: row !important;
