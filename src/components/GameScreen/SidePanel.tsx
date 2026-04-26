@@ -41,21 +41,19 @@ export function SidePanel({ side, isTurn, isYou, stats, children, testId }: Side
 
   return (
     <aside
-      className="flex flex-col relative"
+      className="flex flex-col"
       data-testid={testId}
       aria-label={sideLabel}
       style={{
         padding: '20px 8px',
       }}
     >
-      {/* "YOUR TURN" ribbon — appears at top-left when active */}
+      {/* "YOUR TURN" ribbon — flows above the identity row when active */}
       {isTurn && (
         <div
-          className="absolute"
+          className="self-start"
           data-testid="turn-ribbon"
           style={{
-            top: 0,
-            left: 0,
             background: 'var(--ink)',
             color: 'var(--paper)',
             fontFamily: 'var(--font-sans)',
@@ -65,6 +63,7 @@ export function SidePanel({ side, isTurn, isYou, stats, children, testId }: Side
             textTransform: 'uppercase',
             padding: '4px 12px',
             borderRadius: 999,
+            marginBottom: 14,
           }}
         >
           {t.turn.yours}
@@ -72,7 +71,7 @@ export function SidePanel({ side, isTurn, isYou, stats, children, testId }: Side
       )}
 
       {/* Identity row */}
-      <div className="flex items-center gap-3 mt-4 mb-3">
+      <div className="flex items-center gap-3 mb-3">
         <PieceGlyph type={side} size={36} />
         <div>
           <div className="t-display" style={{ fontSize: 22, color: 'var(--ink)', lineHeight: 1.1 }}>

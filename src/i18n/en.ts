@@ -64,6 +64,10 @@ export const en = {
     begin: 'Begin the hunt',
     learnRules: 'Learn the rules',
     boardCaption: '23 nodes · 4 slants · 4 levels',
+    resumePrompt: 'Resume your game?',
+    resumeAiBody: '{n} moves into a vs-AI match.',
+    resumeLocalBody: '{n} moves into a local match.',
+    newGame: 'New game',
   },
 
   game: {

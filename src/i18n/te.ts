@@ -67,6 +67,10 @@ export const te: Dictionary = {
     begin: 'వేట మొదలెట్టు',
     learnRules: 'నియమాలు తెలుసుకో',
     boardCaption: '౨౩ స్థానాలు · ౪ రేఖలు · ౪ స్థాయిలు', // TODO: TE confirm numerals
+    resumePrompt: 'ఆట కొనసాగిద్దామా?',
+    resumeAiBody: '{n} ఎత్తులు పూర్తయిన కంప్యూటర్ ఆట.',
+    resumeLocalBody: '{n} ఎత్తులు పూర్తయిన ఇద్దరి ఆట.',
+    newGame: 'క్రొత్త ఆట',
   },
 
   game: {

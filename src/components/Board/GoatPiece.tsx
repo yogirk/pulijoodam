@@ -123,7 +123,7 @@ export const GoatPiece = memo(function GoatPiece({
           pointerEvents: 'none',
           transition: isBeingDragged
             ? 'none'
-            : 'transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 200ms ease-out',
+            : 'transform 350ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease-out',
           opacity: isFading ? 0 : 1,
           transform: isBeingDragged
             ? `translate(${x}px, ${y}px) scale(1.5)`
@@ -134,7 +134,7 @@ export const GoatPiece = memo(function GoatPiece({
               ? 'drop-shadow(0 0 10px var(--goat-fill))'
               : 'drop-shadow(0 2px 4px rgba(0,0,0,0.22))',
           animation: isPlacing
-            ? 'goat-scale-in 250ms cubic-bezier(0.34, 1.56, 0.64, 1)'
+            ? 'goat-scale-in 250ms cubic-bezier(0.16, 1, 0.3, 1)'
             : isGlowing
               ? 'piece-glow 500ms ease-in-out'
               : undefined,

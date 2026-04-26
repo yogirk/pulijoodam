@@ -43,9 +43,9 @@ export function MoveHistory({ moveHistory }: MoveHistoryProps) {
       >
         <p
           className="t-display-italic"
-          style={{ fontSize: 14, color: 'var(--ink-mute)', margin: 0 }}
+          style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}
         >
-          — {t.game.movesEmpty} —
+          {t.game.movesEmpty}
         </p>
       </div>
     );
