@@ -261,7 +261,11 @@ export function P2PGameScreen({
 
       {/* Game over overlay */}
       {status !== 'ongoing' && !animationState.isAnimating && (
-        <GameOverOverlay status={status} onNewGame={onNewGame} />
+        <GameOverOverlay
+          status={status}
+          gameState={gameState}
+          onNewGame={onNewGame}
+        />
       )}
 
       {/* Disconnect banner */}
