@@ -2,8 +2,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { HistoryScreen } from './HistoryScreen';
+import { SettingsProvider } from '../hooks/useSettings';
 import type { GameRecord } from './types';
 import * as storage from './storage';
+
+function renderWithSettings(ui: React.ReactElement) {
+  return render(<SettingsProvider>{ui}</SettingsProvider>);
+}
 
 function makeRecord(overrides: Partial<GameRecord> = {}): GameRecord {
   return {
@@ -31,7 +36,7 @@ describe('HistoryScreen', () => {
 
   it('renders "No games played yet" when history is empty', () => {
     vi.mocked(storage.loadHistory).mockReturnValue([]);
-    render(
+    renderWithSettings(
       <HistoryScreen onSelectGame={() => {}} onBackToMenu={() => {}} />
     );
     expect(screen.getByText(/no games played yet/i)).toBeTruthy();
@@ -42,7 +47,7 @@ describe('HistoryScreen', () => {
       makeRecord({ id: 'r1', opponent: 'ai', difficulty: 'hard', result: 'tiger-wins', humanRole: 'goat' }),
       makeRecord({ id: 'r2', opponent: 'local', result: 'goat-wins', humanRole: 'goat' }),
     ]);
-    render(
+    renderWithSettings(
       <HistoryScreen onSelectGame={() => {}} onBackToMenu={() => {}} />
     );
     // AI game with loss
@@ -57,7 +62,7 @@ describe('HistoryScreen', () => {
     const record = makeRecord({ id: 'clickable-1' });
     vi.mocked(storage.loadHistory).mockReturnValue([record]);
     const onSelectGame = vi.fn();
-    render(
+    renderWithSettings(
       <HistoryScreen onSelectGame={onSelectGame} onBackToMenu={() => {}} />
     );
     // Click the game entry

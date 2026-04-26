@@ -37,12 +37,17 @@ export function MoveHistory({ moveHistory }: MoveHistoryProps) {
 
   if (tokens.length === 0) {
     return (
-      <p
-        className="t-caption text-center"
-        style={{ fontSize: 13, color: 'var(--ink-mute)', marginTop: 12 }}
+      <div
+        className="text-center"
+        style={{ padding: '20px 12px' }}
       >
-        {t.game.movesEmpty}
-      </p>
+        <p
+          className="t-display-italic"
+          style={{ fontSize: 14, color: 'var(--ink-mute)', margin: 0 }}
+        >
+          — {t.game.movesEmpty} —
+        </p>
+      </div>
     );
   }
 
