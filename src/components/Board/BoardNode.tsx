@@ -34,6 +34,15 @@ function buildAriaLabel(
   return parts.join(', ');
 }
 
+/**
+ * Visual + a11y wrapper for a single intersection.
+ *
+ * Hit-testing is NOT done here. The SVG-level pointer handler in `useDrag`
+ * resolves taps to the nearest node by Voronoi/Euclidean distance, so this
+ * `<g>` is intentionally pointer-transparent (no overlapping rects, no
+ * locked-out neighbors in dense rows). Keyboard activation still works:
+ * tabbing focuses the `<g>`; Enter/Space invokes `onClick`.
+ */
 export const BoardNode = memo(function BoardNode({ node, piece, isSelected, isLegalMove, onClick }: BoardNodeProps) {
   const [isFocusVisible, setIsFocusVisible] = useState(false);
 
@@ -47,15 +56,14 @@ export const BoardNode = memo(function BoardNode({ node, piece, isSelected, isLe
   return (
     <g
       transform={`translate(${node.x}, ${node.y})`}
-      onClick={onClick}
       onKeyDown={handleKeyDown}
       onFocus={(e) => setIsFocusVisible(e.target === e.currentTarget && !e.currentTarget.matches?.(':focus:not(:focus-visible)'))}
       onBlur={() => setIsFocusVisible(false)}
       tabIndex={0}
-      style={{ cursor: 'pointer' }}
       role="button"
       aria-label={buildAriaLabel(node.id, piece, isSelected, isLegalMove)}
       aria-pressed={isSelected}
+      style={{ outline: 'none', pointerEvents: 'none' }}
     >
       {/* Keyboard focus ring (SVG outline fallback) */}
       {isFocusVisible && (
@@ -77,18 +85,6 @@ export const BoardNode = memo(function BoardNode({ node, piece, isSelected, isLe
       />
       {/* Inner Highlight for Depth */}
       <circle r={7} fill="transparent" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
-
-      {/* MANDATORY touch target -- 80x80 SVG units ≈ 44px on a 375px mobile screen
-         (viewBox 720 wide → scale ~0.52 → 80 × 0.52 ≈ 42px, meeting WCAG AA).
-         Desktop gets generous padding for comfort. */}
-      <rect
-        x={-40}
-        y={-40}
-        width={80}
-        height={80}
-        fill="transparent"
-        data-testid={`node-hitarea-${node.id}`}
-      />
     </g>
   );
 });

@@ -13,6 +13,28 @@ export const SNAP_RADIUS = 30;
 // ─── Pure helpers (exported for testing) ────────────────────────────────────
 
 /**
+ * Find the nearest node to (x, y) — Voronoi-style tap resolution.
+ * Used for empty-space taps on the SVG so every pixel maps to exactly
+ * one node, eliminating the overlap that earlier per-node hit rects had
+ * in dense rows. The engine validates the resulting tap (turn, phase,
+ * legal target); we just resolve which node the user *meant*.
+ */
+export function findNearestNode(x: number, y: number): number {
+  let bestId = 0;
+  let bestDist = Infinity;
+  for (const node of NODES) {
+    const dx = node.x - x;
+    const dy = node.y - y;
+    const dist = dx * dx + dy * dy;
+    if (dist < bestDist) {
+      bestDist = dist;
+      bestId = node.id;
+    }
+  }
+  return bestId;
+}
+
+/**
  * Find the nearest legal-move destination node within SNAP_RADIUS of (x, y).
  * Returns node id or null if none found.
  */
@@ -170,7 +192,17 @@ export function useDrag({
   const onPointerUp = useCallback(
     (e: React.PointerEvent) => {
       const nodeId = dragNodeRef.current;
-      if (nodeId === null) return;
+
+      // Empty-space tap: pointerdown didn't grab a piece. Resolve the
+      // tap to the nearest node by Euclidean distance (Voronoi).
+      if (nodeId === null) {
+        if (disabled) return;
+        const svg = svgRef.current;
+        if (!svg) return;
+        const svgPos = screenToSVG(svg, e.clientX, e.clientY);
+        onNodeTap(findNearestNode(svgPos.x, svgPos.y));
+        return;
+      }
 
       // Release pointer capture
       try {
@@ -208,7 +240,7 @@ export function useDrag({
       isDraggingRef.current = false;
       setDragState(INITIAL_STATE);
     },
-    [svgRef, legalMoves, onNodeTap],
+    [svgRef, legalMoves, onNodeTap, disabled],
   );
 
   return {
