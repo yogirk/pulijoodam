@@ -182,16 +182,13 @@ export function SetupScreen({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <div className="t-display" style={{ fontSize: 22, color: 'var(--ink)' }}>
-                  {lang === 'te' ? 'ఆట కొనసాగిద్దామా?' : 'Resume your game?'}
+                  {t.setup.resumePrompt}
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--ink-mute)', marginTop: 4 }}>
-                  {savedGame.opponent === 'ai'
-                    ? lang === 'te'
-                      ? `${savedGame.moves} ఎత్తులు పూర్తయిన కంప్యూటర్ ఆట.`
-                      : `${savedGame.moves} moves into a vs-AI match.`
-                    : lang === 'te'
-                      ? `${savedGame.moves} ఎత్తులు పూర్తయిన ఇద్దరి ఆట.`
-                      : `${savedGame.moves} moves into a local match.`}
+                  {(savedGame.opponent === 'ai'
+                    ? t.setup.resumeAiBody
+                    : t.setup.resumeLocalBody
+                  ).replace('{n}', String(savedGame.moves))}
                 </div>
               </div>
               <div className="flex gap-2">
@@ -209,7 +206,7 @@ export function SetupScreen({
                   className="btn btn-ghost"
                   style={{ fontSize: 14, padding: '10px 18px' }}
                 >
-                  {lang === 'te' ? 'క్రొత్త ఆట' : 'New game'}
+                  {t.setup.newGame}
                 </button>
               </div>
             </div>

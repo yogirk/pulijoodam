@@ -123,7 +123,7 @@ export const TigerPiece = memo(function TigerPiece({
           pointerEvents: 'none',
           transition: isBeingDragged
             ? 'none'
-            : 'transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+            : 'transform 350ms cubic-bezier(0.16, 1, 0.3, 1)',
           transform: isBeingDragged
             ? `translate(${x}px, ${y}px) scale(1.5)`
             : `translate(${x}px, ${y}px) scale(1.25)`,

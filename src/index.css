@@ -211,7 +211,6 @@ body {
   background: linear-gradient(to right, transparent, var(--rule-soft) 20%, var(--rule-soft) 80%, transparent);
   border: 0;
 }
-.rule-h-solid { height: 1px; background: var(--rule-soft); border: 0; }
 
 /* ============================================================
    Buttons — base + variants

@@ -164,8 +164,8 @@ export function GameOverOverlay({
           className="flex justify-center gap-5 sm:gap-8"
           style={{
             padding: '18px 0',
-            borderTop: '1px solid var(--rule-soft, var(--rule))',
-            borderBottom: '1px solid var(--rule-soft, var(--rule))',
+            borderTop: '1px solid var(--rule-soft)',
+            borderBottom: '1px solid var(--rule-soft)',
             margin: '28px 0 32px',
           }}
         >
@@ -174,13 +174,13 @@ export function GameOverOverlay({
             label={t.gameOver.captured}
             color={isTigerWin ? 'var(--kumkum)' : 'var(--ink-mute)'}
           />
-          <div style={{ width: 1, background: 'var(--rule-soft, var(--rule))' }} />
+          <div style={{ width: 1, background: 'var(--rule-soft)' }} />
           <Stat
             value={String(trapped)}
             label={t.gameOver.trapped}
             color={isGoatWin ? 'var(--jade)' : 'var(--ink-mute)'}
           />
-          <div style={{ width: 1, background: 'var(--rule-soft, var(--rule))' }} />
+          <div style={{ width: 1, background: 'var(--rule-soft)' }} />
           <Stat value={String(moves)} label={t.gameOver.moves} color="var(--ink)" />
         </div>
 

@@ -217,9 +217,13 @@ function EmptyState({ onStart }: { onStart: () => void }) {
           color: 'var(--ink-soft)',
           marginTop: 10,
           marginBottom: 28,
+          maxWidth: 380,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          lineHeight: 1.55,
         }}
       >
-        — {t.history.notationHint} —
+        {t.history.notationHint}
       </p>
       <button
         onClick={onStart}
