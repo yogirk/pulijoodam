@@ -8,16 +8,19 @@ interface BrandProps {
   showSubtitle?: boolean;
 }
 
-const ROMAN_SIZES: Record<BrandSize, { wordmark: number; subtitle: number }> = {
+type FontSize = number | string;
+
+const ROMAN_SIZES: Record<BrandSize, { wordmark: FontSize; subtitle: FontSize }> = {
   sm: { wordmark: 22, subtitle: 12 },
   md: { wordmark: 40, subtitle: 16 },
-  lg: { wordmark: 96, subtitle: 22 },
+  // Mobile (~360–640px) lands at the 48px floor; desktop (≥800px) hits the 96px ceiling.
+  lg: { wordmark: 'clamp(48px, 12vw, 96px)', subtitle: 22 },
 };
 
-const TELUGU_SIZES: Record<BrandSize, { wordmark: number; subtitle: number }> = {
+const TELUGU_SIZES: Record<BrandSize, { wordmark: FontSize; subtitle: FontSize }> = {
   sm: { wordmark: 20, subtitle: 12 },
   md: { wordmark: 36, subtitle: 16 },
-  lg: { wordmark: 84, subtitle: 22 },
+  lg: { wordmark: 'clamp(42px, 11vw, 84px)', subtitle: 22 },
 };
 
 /**

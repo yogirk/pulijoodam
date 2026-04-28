@@ -181,7 +181,8 @@ export function SetupScreen({
           style={{
             maxWidth: 1180,
             margin: '0 auto',
-            padding: 'clamp(28px, 4.5vw, 56px) clamp(48px, 6vw, 72px) clamp(40px, 5vw, 72px)',
+            padding:
+              'clamp(24px, 4.5vw, 56px) clamp(20px, 6vw, 72px) clamp(32px, 5vw, 72px)',
           }}
         >
           {/* Resume banner — full-width above the grid when a game is saved. */}
@@ -446,11 +447,11 @@ function FormRow({
 }) {
   return (
     <div
-      className="grid items-center"
-      style={{
-        gridTemplateColumns: '96px 1fr',
-        gap: 12,
-      }}
+      className="
+        grid items-start sm:items-center
+        gap-1 sm:gap-3
+        grid-cols-[1fr] sm:grid-cols-[96px_1fr]
+      "
     >
       <span
         style={{
