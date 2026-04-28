@@ -9,8 +9,8 @@ export const te: Dictionary = {
     name: 'పులిజూదం',
     subtitle: 'పులీ–మేకా వేట',
     tagline:
-      'మూడు పులులు, పదిహేను మేకలు — దక్షిణాది గుళ్ళ నేలల్లో చెక్కబడిన రెండువేల ఏళ్ళ ఆట.',
-    eyebrow: 'వేట ఆట · ఇద్దరు ఆటగాళ్ళు',
+      'మూడు పులులు, పదిహేను మేకలు — మన గుళ్ళ అరుగుల మీదా, రచ్చబండల మీదా ఆడిన ఆట.',
+    eyebrow: 'వేట, ఆట · ఇద్దరు ఆటగాళ్ళు',
     establishedNote: 'క్రీ.శ. ౧౫౦౦ సుమారు · ఆంధ్ర', // TODO: TE confirm numerals
   },
 
@@ -137,7 +137,7 @@ export const te: Dictionary = {
   },
 
   history: {
-    title: 'ఆటల చరిత్ర',
+    title: 'మునుపటి ఆటలు',
     empty: 'ఇంకా ఆటలు ఆడలేదు',
     emptyCta: 'మొదటి ఆట ప్రారంభించు',
     notationHint:
