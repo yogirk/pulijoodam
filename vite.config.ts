@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
-  base: '/pulijoodam/',
+  base: '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -21,8 +21,8 @@ export default defineConfig({
         theme_color: '#f3ead8',
         background_color: '#f3ead8',
         display: 'standalone',
-        start_url: '/pulijoodam/',
-        scope: '/pulijoodam/',
+        start_url: '/',
+        scope: '/',
         icons: [
           {
             src: 'pwa-192x192.svg',

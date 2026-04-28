@@ -2,7 +2,7 @@
 
 A modern web implementation of the traditional South Indian strategy board game **Puli Joodam** (పులిజూదం) — Tigers vs Goats. Three tigers hunt fifteen goats on a 23-node triangular board while goats try to immobilize them through strategic placement and movement.
 
-**[Play now](https://yogirk.github.io/pulijoodam/)**
+**[Play now](https://puli.yogirk.dev/)**
 
 ---
 
