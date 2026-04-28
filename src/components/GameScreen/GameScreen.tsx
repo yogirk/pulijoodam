@@ -9,7 +9,6 @@ import { MoveHistory } from './MoveHistory';
 import { SidePanel, RailDetails } from './SidePanel';
 import {
   LanguageToggle,
-  PiecesToggle,
   SoundToggle,
   ThemeToggle,
 } from '../atoms/HeaderToggles';
@@ -130,7 +129,6 @@ function GameBoard({
         <div className="flex-1 flex items-center justify-end gap-2">
           <SoundToggle />
           <LanguageToggle />
-          <PiecesToggle />
           <ThemeToggle />
         </div>
       </header>

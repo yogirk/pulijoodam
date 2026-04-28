@@ -66,7 +66,7 @@ function Seg<T extends string>({
 
 export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, soundEnabled, pieceStyle, lang, t, setTheme, setSoundEnabled, setPieceStyle, setLang } = useSettings();
+  const { theme, soundEnabled, lang, t, setTheme, setSoundEnabled, setLang } = useSettings();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -140,19 +140,6 @@ export function SettingsDropdown({ onStartTutorial }: SettingsDropdownProps = {}
               options={[
                 { id: 'en', label: t.settings.langEn, testId: 'lang-toggle-btn' },
                 { id: 'te', label: t.settings.langTe },
-              ]}
-            />
-          </Row>
-
-          <Row label={t.settings.pieces}>
-            <Seg
-              ariaLabel={t.settings.pieces}
-              testId="piece-style-seg"
-              value={pieceStyle}
-              onChange={setPieceStyle}
-              options={[
-                { id: 'stone', label: t.settings.pieceStone, testId: 'piece-style-toggle-btn' },
-                { id: 'heads', label: t.settings.pieceHeads },
               ]}
             />
           </Row>

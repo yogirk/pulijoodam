@@ -315,11 +315,13 @@ body {
    ============================================================ */
 .seg {
   display: inline-flex;
+  flex-wrap: wrap;
   padding: 3px;
   background: var(--paper-2);
   border: 1px solid var(--rule-soft);
   border-radius: var(--r-md);
   gap: 2px;
+  max-width: 100%;
 }
 .seg-item {
   font-family: var(--font-sans);
