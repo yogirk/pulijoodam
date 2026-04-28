@@ -182,7 +182,7 @@ export function SetupScreen({
             maxWidth: 1180,
             margin: '0 auto',
             padding:
-              'clamp(24px, 4.5vw, 56px) clamp(20px, 6vw, 72px) clamp(32px, 5vw, 72px)',
+              'clamp(20px, 3.5vw, 40px) clamp(20px, 6vw, 72px) clamp(28px, 3.5vw, 48px)',
           }}
         >
           {/* Resume banner — full-width above the grid when a game is saved. */}
@@ -191,8 +191,8 @@ export function SetupScreen({
               className="card"
               data-testid="resume-banner"
               style={{
-                marginBottom: 24,
-                padding: '14px 18px',
+                marginBottom: 16,
+                padding: '10px 16px',
                 borderColor: 'color-mix(in oklch, var(--kumkum) 30%, transparent)',
                 background: 'var(--kumkum-soft)',
               }}
@@ -320,11 +320,11 @@ export function SetupScreen({
                 style={{
                   border: 0,
                   borderTop: '1px solid var(--rule-soft)',
-                  margin: '0 0 22px',
+                  margin: '0 0 16px',
                 }}
               />
 
-              <div className="flex flex-col" style={{ gap: 14 }}>
+              <div className="flex flex-col" style={{ gap: 10 }}>
                 <FormRow label={t.setup.chooseMode}>
                   <Seg
                     ariaLabel={t.setup.chooseMode}
@@ -373,7 +373,7 @@ export function SetupScreen({
                     display: 'grid',
                     gridTemplateRows: showDifficulty ? '1fr' : '0fr',
                     opacity: showDifficulty ? 1 : 0,
-                    marginTop: showDifficulty ? 0 : -14,
+                    marginTop: showDifficulty ? 0 : -10,
                     transition:
                       'grid-template-rows 220ms ease, opacity 200ms ease, margin 200ms ease',
                     pointerEvents: showDifficulty ? 'auto' : 'none',
@@ -405,7 +405,7 @@ export function SetupScreen({
                 style={{
                   border: 0,
                   borderTop: '1px solid var(--rule-soft)',
-                  margin: '24px 0 0',
+                  margin: '18px 0 0',
                 }}
               />
             </section>
@@ -419,9 +419,9 @@ export function SetupScreen({
                 style={{
                   width: '100%',
                   fontSize: 16,
-                  padding: '16px 24px',
-                  minHeight: 56,
-                  marginTop: 24,
+                  padding: '14px 24px',
+                  minHeight: 52,
+                  marginTop: 14,
                 }}
               >
                 {t.setup.begin} →

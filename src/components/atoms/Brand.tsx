@@ -13,14 +13,15 @@ type FontSize = number | string;
 const ROMAN_SIZES: Record<BrandSize, { wordmark: FontSize; subtitle: FontSize }> = {
   sm: { wordmark: 22, subtitle: 12 },
   md: { wordmark: 40, subtitle: 16 },
-  // Mobile (~360–640px) lands at the 48px floor; desktop (≥800px) hits the 96px ceiling.
-  lg: { wordmark: 'clamp(48px, 12vw, 96px)', subtitle: 22 },
+  // Mobile (~360–640px) lands at the 44px floor; desktop (≥1100px) hits the 76px ceiling.
+  // Lower than the previous 96px so the hero block + form + CTA fit on a typical laptop fold.
+  lg: { wordmark: 'clamp(44px, 7vw, 76px)', subtitle: 22 },
 };
 
 const TELUGU_SIZES: Record<BrandSize, { wordmark: FontSize; subtitle: FontSize }> = {
   sm: { wordmark: 20, subtitle: 12 },
   md: { wordmark: 36, subtitle: 16 },
-  lg: { wordmark: 'clamp(42px, 11vw, 84px)', subtitle: 22 },
+  lg: { wordmark: 'clamp(40px, 6.5vw, 68px)', subtitle: 22 },
 };
 
 /**
